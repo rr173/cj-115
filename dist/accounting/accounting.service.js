@@ -121,9 +121,25 @@ let AccountingService = class AccountingService {
                 channel: { select: { id: true, code: true, name: true, level: true, length: true, parentId: true } },
             },
         });
-        const usages = await this.prisma.actualUsage.findMany({
-            where: { reportTime: { gte: dayStart.toDate(), lt: dayEnd.toDate() } },
-            include: { application: { include: { farmer: { include: { channel: true } } } } },
+        const allUsages = await this.prisma.actualUsage.findMany({
+            include: {
+                application: {
+                    include: {
+                        farmer: true,
+                    },
+                },
+            },
+        });
+        const farmerChannelMap = new Map();
+        const farmersWithChannel = await this.prisma.farmer.findMany({
+            select: { id: true, channelId: true, channel: { select: { parentId: true } } },
+        });
+        for (const f of farmersWithChannel) {
+            farmerChannelMap.set(f.id, { channelId: f.channelId, parentId: f.channel?.parentId || null });
+        }
+        const dayUsages = allUsages.filter((u) => {
+            const td = (0, dayjs_1.default)(u.application.targetDate).startOf('day');
+            return td.isSame(dayStart, 'day');
         });
         const channelVolumes = new Map();
         for (const alloc of allocs) {
@@ -142,12 +158,15 @@ let AccountingService = class AccountingService {
                 channelVolumes.get(parentId).distributed += volume;
             }
         }
-        for (const u of usages) {
-            const chId = u.application.farmer.channelId;
+        for (const u of dayUsages) {
+            const fc = farmerChannelMap.get(u.farmerId);
+            if (!fc)
+                continue;
+            const chId = fc.channelId;
             if (channelVolumes.has(chId)) {
                 channelVolumes.get(chId).actualUsed += u.actualVolume;
             }
-            let pid = u.application.farmer.channel.parentId;
+            let pid = fc.parentId;
             while (pid) {
                 if (channelVolumes.has(pid)) {
                     channelVolumes.get(pid).actualUsed += u.actualVolume;
@@ -162,14 +181,13 @@ let AccountingService = class AccountingService {
         const mainChannel = channels.find((c) => c.level === enums_1.ChannelLevel.MAIN);
         const mainData = channelVolumes.get(mainChannel?.id || '');
         const totalSupply = mainData?.supplied || 0;
-        const totalActualUsed = Array.from(channelVolumes.values()).reduce((sum, v) => sum + (v.actualUsed), 0) / 4;
+        const farmChannels = channels.filter((c) => c.level === enums_1.ChannelLevel.FARM);
+        const totalActualUsed = farmChannels.reduce((sum, fc) => sum + (channelVolumes.get(fc.id)?.actualUsed || 0), 0);
         return {
             date: dateStr,
             summary: {
                 totalInflow: +totalSupply.toFixed(2),
-                totalActualUsed: +(Array.from(channelVolumes.values()).filter((_, i) => {
-                    return i >= 0;
-                }).reduce((s, v) => s + v.actualUsed, 0)).toFixed(2),
+                totalActualUsed: +totalActualUsed.toFixed(2),
                 estimatedLeakageLoss: +(totalSupply * LEAKAGE_RATE).toFixed(2),
                 unaccountedDifference: +Math.max(0, totalSupply - totalActualUsed - totalSupply * LEAKAGE_RATE).toFixed(2),
                 leakageRateAssumption: LEAKAGE_RATE * 100 + '%',
@@ -177,13 +195,20 @@ let AccountingService = class AccountingService {
             channelDetails: channels.map((ch) => {
                 const data = channelVolumes.get(ch.id) || { supplied: 0, distributed: 0, actualUsed: 0 };
                 const estimatedLeakage = data.supplied * LEAKAGE_RATE;
+                let balance;
+                if (ch.level === enums_1.ChannelLevel.FARM) {
+                    balance = data.supplied - data.actualUsed - estimatedLeakage;
+                }
+                else {
+                    balance = data.supplied - data.distributed - estimatedLeakage;
+                }
                 return {
                     channel: { id: ch.id, code: ch.code, name: ch.name, level: ch.level, length: ch.length },
                     suppliedVolume: +data.supplied.toFixed(2),
                     distributedToChildren: +data.distributed.toFixed(2),
                     actualUsedByEnd: +data.actualUsed.toFixed(2),
                     estimatedLeakageLoss: +estimatedLeakage.toFixed(2),
-                    balance: +(data.supplied - data.distributed - data.actualUsed - estimatedLeakage).toFixed(2),
+                    balance: +balance.toFixed(2),
                 };
             }),
         };
