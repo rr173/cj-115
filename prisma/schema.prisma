@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Channel {
+  id            String   @id @default(uuid())
+  code          String   @unique
+  name          String
+  level         String
+  maxFlow       Float
+  length        Float
+  parentId      String?
+  parent        Channel? @relation("ChannelTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children      Channel[] @relation("ChannelTree")
+  propagationDelay Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now())
+
+  farmers       Farmer[]
+  allocations   WaterAllocation[]
+}
+
+model Farmer {
+  id          String   @id @default(uuid())
+  name        String
+  code        String   @unique
+  channelId   String
+  channel     Channel  @relation(fields: [channelId], references: [id])
+  area        Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+
+  quotas      Quota[]
+  applications WaterApplication[]
+  actualUsages ActualUsage[]
+}
+
+model Quota {
+  id        String  @id @default(uuid())
+  farmerId  String
+  farmer    Farmer  @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  quarter   String
+  year      Int
+  amount    Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@unique([farmerId, year, quarter])
+}
+
+model WaterApplication {
+  id              String   @id @default(uuid())
+  farmerId        String
+  farmer          Farmer   @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  expectedFlow    Float
+  expectedHours   Float
+  requestVolume   Float
+  submitTime      DateTime
+  targetDate      DateTime
+  status          String @default("PENDING")
+  failReason      String?
+  conflictChannelId String?
+  conflictStartTime DateTime?
+  conflictEndTime   DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @default(now())
+
+  allocations WaterAllocation[]
+  actualUsage ActualUsage?
+}
+
+model WaterAllocation {
+  id             String   @id @default(uuid())
+  applicationId  String
+  application    WaterApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  channelId      String
+  channel        Channel  @relation(fields: [channelId], references: [id])
+  startTime      DateTime
+  endTime        DateTime
+  flow           Float
+  createdAt      DateTime @default(now())
+
+  @@index([channelId, startTime, endTime])
+}
+
+model ActualUsage {
+  id            String   @id @default(uuid())
+  applicationId String   @unique
+  application   WaterApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  farmerId      String
+  farmer        Farmer   @relation(fields: [farmerId], references: [id])
+  actualVolume  Float
+  reportTime    DateTime
+  deviationRate Float
+  isOveruse     Boolean
+  isWaste       Boolean
+  createdAt     DateTime @default(now())
+}

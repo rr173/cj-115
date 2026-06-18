@@ -1,0 +1,1 @@
+{"version":3,"file":"dto.js","sourceRoot":"","sources":["../../src/accounting/dto.ts"],"names":[],"mappings":";;;;;;;;;;;;AAAA,6CAA8C;AAC9C,qDAAiE;AAEjE,MAAa,cAAc;CAS1B;AATD,wCASC;AANC;IAFC,IAAA,qBAAW,EAAC,EAAE,WAAW,EAAE,WAAW,EAAE,CAAC;IACzC,IAAA,0BAAQ,GAAE;;qDACW;AAKtB;IAHC,IAAA,qBAAW,EAAC,EAAE,WAAW,EAAE,UAAU,EAAE,CAAC;IACxC,IAAA,0BAAQ,GAAE;IACV,IAAA,4BAAU,GAAE;;oDACQ"}

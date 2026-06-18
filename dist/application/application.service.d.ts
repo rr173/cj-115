@@ -1,0 +1,231 @@
+import { PrismaService } from '../prisma/prisma.service';
+import { QuotaService } from '../quota/quota.service';
+import { CreateApplicationDto } from './dto';
+export declare class ApplicationService {
+    private prisma;
+    private quotaService;
+    constructor(prisma: PrismaService, quotaService: QuotaService);
+    create(dto: CreateApplicationDto): Promise<{
+        farmer: {
+            channel: {
+                name: string;
+                code: string;
+                level: string;
+                maxFlow: number;
+                length: number;
+                parentId: string | null;
+                id: string;
+                propagationDelay: number;
+                createdAt: Date;
+                updatedAt: Date;
+            };
+        } & {
+            name: string;
+            code: string;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            channelId: string;
+            area: number;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        submitTime: Date;
+        farmerId: string;
+        expectedFlow: number;
+        expectedHours: number;
+        requestVolume: number;
+        targetDate: Date;
+        status: string;
+        failReason: string | null;
+        conflictChannelId: string | null;
+        conflictStartTime: Date | null;
+        conflictEndTime: Date | null;
+    }>;
+    findAll(farmerId?: string, targetDate?: string, status?: string): Promise<({
+        farmer: {
+            channel: {
+                name: string;
+                code: string;
+                id: string;
+            };
+            name: string;
+            code: string;
+            id: string;
+        };
+        actualUsage: {
+            id: string;
+            createdAt: Date;
+            farmerId: string;
+            applicationId: string;
+            actualVolume: number;
+            reportTime: Date;
+            deviationRate: number;
+            isOveruse: boolean;
+            isWaste: boolean;
+        };
+        allocations: ({
+            channel: {
+                name: string;
+                code: string;
+                id: string;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            channelId: string;
+            applicationId: string;
+            startTime: Date;
+            endTime: Date;
+            flow: number;
+        })[];
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        submitTime: Date;
+        farmerId: string;
+        expectedFlow: number;
+        expectedHours: number;
+        requestVolume: number;
+        targetDate: Date;
+        status: string;
+        failReason: string | null;
+        conflictChannelId: string | null;
+        conflictStartTime: Date | null;
+        conflictEndTime: Date | null;
+    })[]>;
+    findOne(id: string): Promise<{
+        farmer: {
+            channel: {
+                name: string;
+                code: string;
+                level: string;
+                maxFlow: number;
+                length: number;
+                parentId: string | null;
+                id: string;
+                propagationDelay: number;
+                createdAt: Date;
+                updatedAt: Date;
+            };
+        } & {
+            name: string;
+            code: string;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            channelId: string;
+            area: number;
+        };
+        actualUsage: {
+            id: string;
+            createdAt: Date;
+            farmerId: string;
+            applicationId: string;
+            actualVolume: number;
+            reportTime: Date;
+            deviationRate: number;
+            isOveruse: boolean;
+            isWaste: boolean;
+        };
+        allocations: ({
+            channel: {
+                name: string;
+                code: string;
+                level: string;
+                maxFlow: number;
+                length: number;
+                parentId: string | null;
+                id: string;
+                propagationDelay: number;
+                createdAt: Date;
+                updatedAt: Date;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            channelId: string;
+            applicationId: string;
+            startTime: Date;
+            endTime: Date;
+            flow: number;
+        })[];
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        submitTime: Date;
+        farmerId: string;
+        expectedFlow: number;
+        expectedHours: number;
+        requestVolume: number;
+        targetDate: Date;
+        status: string;
+        failReason: string | null;
+        conflictChannelId: string | null;
+        conflictStartTime: Date | null;
+        conflictEndTime: Date | null;
+    }>;
+    getFarmerApplications(farmerId: string): Promise<({
+        actualUsage: {
+            id: string;
+            createdAt: Date;
+            farmerId: string;
+            applicationId: string;
+            actualVolume: number;
+            reportTime: Date;
+            deviationRate: number;
+            isOveruse: boolean;
+            isWaste: boolean;
+        };
+        allocations: ({
+            channel: {
+                name: string;
+                code: string;
+                id: string;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            channelId: string;
+            applicationId: string;
+            startTime: Date;
+            endTime: Date;
+            flow: number;
+        })[];
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        submitTime: Date;
+        farmerId: string;
+        expectedFlow: number;
+        expectedHours: number;
+        requestVolume: number;
+        targetDate: Date;
+        status: string;
+        failReason: string | null;
+        conflictChannelId: string | null;
+        conflictStartTime: Date | null;
+        conflictEndTime: Date | null;
+    })[]>;
+    cancel(id: string): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        submitTime: Date;
+        farmerId: string;
+        expectedFlow: number;
+        expectedHours: number;
+        requestVolume: number;
+        targetDate: Date;
+        status: string;
+        failReason: string | null;
+        conflictChannelId: string | null;
+        conflictStartTime: Date | null;
+        conflictEndTime: Date | null;
+    }>;
+}
