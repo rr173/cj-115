@@ -18,11 +18,15 @@ model Channel {
   parent        Channel? @relation("ChannelTree", fields: [parentId], references: [id], onDelete: Cascade)
   children      Channel[] @relation("ChannelTree")
   propagationDelay Int
+  inspectionStatus    String @default("NORMAL")
+  inspectionCycleDays Int    @default(30)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @default(now())
 
   farmers       Farmer[]
   allocations   WaterAllocation[]
+  inspections   InspectionRecord[]
+  maintenanceOrders MaintenanceOrder[]
 }
 
 model Farmer {
@@ -100,4 +104,38 @@ model ActualUsage {
   isOveruse     Boolean
   isWaste       Boolean
   createdAt     DateTime @default(now())
+}
+
+model InspectionRecord {
+  id                  String   @id @default(uuid())
+  channelId           String
+  channel             Channel  @relation(fields: [channelId], references: [id])
+  inspectorName       String
+  inspectionDate      DateTime
+  description         String
+  problemLevel        String
+  leakageRate         Float?
+  siltDepth           Float?
+  liningDamageLength  Float?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @default(now())
+}
+
+model MaintenanceOrder {
+  id                    String    @id @default(uuid())
+  channelId             String
+  channel               Channel   @relation(fields: [channelId], references: [id])
+  planStartDate         DateTime
+  estimatedDurationDays Int
+  crewCode              String
+  status                String    @default("PENDING_APPROVAL")
+  stopWaterStart        DateTime
+  stopWaterEnd          DateTime
+  approvedAt            DateTime?
+  startedAt             DateTime?
+  acceptedAt            DateTime?
+  closedAt              DateTime?
+  impactAnalysis        String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @default(now())
 }

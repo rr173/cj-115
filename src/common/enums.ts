@@ -17,6 +17,7 @@ export enum ApplicationStatus {
   SCHEDULED = 'SCHEDULED',
   FAILED = 'FAILED',
   CANCELLED_QUOTA = 'CANCELLED_QUOTA',
+  CANCELLED_MAINTENANCE = 'CANCELLED_MAINTENANCE',
   EXECUTED = 'EXECUTED',
 }
 
@@ -25,6 +26,7 @@ export const ApplicationStatusNames: Record<ApplicationStatus, string> = {
   [ApplicationStatus.SCHEDULED]: '已安排',
   [ApplicationStatus.FAILED]: '无法安排',
   [ApplicationStatus.CANCELLED_QUOTA]: '因定额调整取消',
+  [ApplicationStatus.CANCELLED_MAINTENANCE]: '因维护取消',
   [ApplicationStatus.EXECUTED]: '已执行',
 };
 
@@ -40,4 +42,46 @@ export const QuotaQuarterNames: Record<QuotaQuarter, string> = {
   [QuotaQuarter.Q2]: '第二季度',
   [QuotaQuarter.Q3]: '第三季度',
   [QuotaQuarter.Q4]: '第四季度',
+};
+
+export enum InspectionChannelStatus {
+  NORMAL = 'NORMAL',
+  PENDING_REPAIR = 'PENDING_REPAIR',
+  REPAIRING = 'REPAIRING',
+  COMPLETED = 'COMPLETED',
+}
+
+export const InspectionChannelStatusNames: Record<InspectionChannelStatus, string> = {
+  [InspectionChannelStatus.NORMAL]: '正常',
+  [InspectionChannelStatus.PENDING_REPAIR]: '待维修',
+  [InspectionChannelStatus.REPAIRING]: '维修中',
+  [InspectionChannelStatus.COMPLETED]: '已完工',
+};
+
+export enum ProblemLevel {
+  MINOR = 'MINOR',
+  SEVERE = 'SEVERE',
+  URGENT = 'URGENT',
+}
+
+export const ProblemLevelNames: Record<ProblemLevel, string> = {
+  [ProblemLevel.MINOR]: '一般',
+  [ProblemLevel.SEVERE]: '严重',
+  [ProblemLevel.URGENT]: '紧急',
+};
+
+export enum MaintenanceOrderStatus {
+  PENDING_APPROVAL = 'PENDING_APPROVAL',
+  APPROVED = 'APPROVED',
+  IN_CONSTRUCTION = 'IN_CONSTRUCTION',
+  ACCEPTED = 'ACCEPTED',
+  CLOSED = 'CLOSED',
+}
+
+export const MaintenanceOrderStatusNames: Record<MaintenanceOrderStatus, string> = {
+  [MaintenanceOrderStatus.PENDING_APPROVAL]: '待审批',
+  [MaintenanceOrderStatus.APPROVED]: '已审批',
+  [MaintenanceOrderStatus.IN_CONSTRUCTION]: '施工中',
+  [MaintenanceOrderStatus.ACCEPTED]: '已验收',
+  [MaintenanceOrderStatus.CLOSED]: '关闭',
 };

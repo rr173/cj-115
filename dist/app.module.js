@@ -14,6 +14,7 @@ const quota_module_1 = require("./quota/quota.module");
 const application_module_1 = require("./application/application.module");
 const scheduling_module_1 = require("./scheduling/scheduling.module");
 const accounting_module_1 = require("./accounting/accounting.module");
+const inspection_module_1 = require("./inspection/inspection.module");
 const prisma_service_1 = require("./prisma/prisma.service");
 let AppModule = class AppModule {
 };
@@ -27,6 +28,7 @@ exports.AppModule = AppModule = __decorate([
             application_module_1.ApplicationModule,
             scheduling_module_1.SchedulingModule,
             accounting_module_1.AccountingModule,
+            inspection_module_1.InspectionModule,
         ],
         providers: [prisma_service_1.PrismaService],
     })

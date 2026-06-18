@@ -10,6 +10,7 @@ export declare enum ApplicationStatus {
     SCHEDULED = "SCHEDULED",
     FAILED = "FAILED",
     CANCELLED_QUOTA = "CANCELLED_QUOTA",
+    CANCELLED_MAINTENANCE = "CANCELLED_MAINTENANCE",
     EXECUTED = "EXECUTED"
 }
 export declare const ApplicationStatusNames: Record<ApplicationStatus, string>;
@@ -20,3 +21,24 @@ export declare enum QuotaQuarter {
     Q4 = "Q4"
 }
 export declare const QuotaQuarterNames: Record<QuotaQuarter, string>;
+export declare enum InspectionChannelStatus {
+    NORMAL = "NORMAL",
+    PENDING_REPAIR = "PENDING_REPAIR",
+    REPAIRING = "REPAIRING",
+    COMPLETED = "COMPLETED"
+}
+export declare const InspectionChannelStatusNames: Record<InspectionChannelStatus, string>;
+export declare enum ProblemLevel {
+    MINOR = "MINOR",
+    SEVERE = "SEVERE",
+    URGENT = "URGENT"
+}
+export declare const ProblemLevelNames: Record<ProblemLevel, string>;
+export declare enum MaintenanceOrderStatus {
+    PENDING_APPROVAL = "PENDING_APPROVAL",
+    APPROVED = "APPROVED",
+    IN_CONSTRUCTION = "IN_CONSTRUCTION",
+    ACCEPTED = "ACCEPTED",
+    CLOSED = "CLOSED"
+}
+export declare const MaintenanceOrderStatusNames: Record<MaintenanceOrderStatus, string>;

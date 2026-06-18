@@ -5,6 +5,7 @@ import { QuotaModule } from './quota/quota.module';
 import { ApplicationModule } from './application/application.module';
 import { SchedulingModule } from './scheduling/scheduling.module';
 import { AccountingModule } from './accounting/accounting.module';
+import { InspectionModule } from './inspection/inspection.module';
 import { PrismaService } from './prisma/prisma.service';
 
 @Module({
@@ -15,6 +16,7 @@ import { PrismaService } from './prisma/prisma.service';
     ApplicationModule,
     SchedulingModule,
     AccountingModule,
+    InspectionModule,
   ],
   providers: [PrismaService],
 })

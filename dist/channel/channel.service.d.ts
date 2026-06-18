@@ -15,6 +15,8 @@ export declare class ChannelService {
         parentId: string | null;
         id: string;
         propagationDelay: number;
+        inspectionStatus: string;
+        inspectionCycleDays: number;
         createdAt: Date;
         updatedAt: Date;
     }>;
@@ -33,6 +35,8 @@ export declare class ChannelService {
             parentId: string | null;
             id: string;
             propagationDelay: number;
+            inspectionStatus: string;
+            inspectionCycleDays: number;
             createdAt: Date;
             updatedAt: Date;
         }[];
@@ -45,6 +49,8 @@ export declare class ChannelService {
         parentId: string | null;
         id: string;
         propagationDelay: number;
+        inspectionStatus: string;
+        inspectionCycleDays: number;
         createdAt: Date;
         updatedAt: Date;
     })[]>;
@@ -58,6 +64,8 @@ export declare class ChannelService {
             parentId: string | null;
             id: string;
             propagationDelay: number;
+            inspectionStatus: string;
+            inspectionCycleDays: number;
             createdAt: Date;
             updatedAt: Date;
         };
@@ -70,6 +78,8 @@ export declare class ChannelService {
             parentId: string | null;
             id: string;
             propagationDelay: number;
+            inspectionStatus: string;
+            inspectionCycleDays: number;
             createdAt: Date;
             updatedAt: Date;
         }[];
@@ -91,6 +101,8 @@ export declare class ChannelService {
         parentId: string | null;
         id: string;
         propagationDelay: number;
+        inspectionStatus: string;
+        inspectionCycleDays: number;
         createdAt: Date;
         updatedAt: Date;
     }>;
@@ -104,6 +116,8 @@ export declare class ChannelService {
             parentId: string | null;
             id: string;
             propagationDelay: number;
+            inspectionStatus: string;
+            inspectionCycleDays: number;
             createdAt: Date;
             updatedAt: Date;
         };
@@ -116,6 +130,8 @@ export declare class ChannelService {
         parentId: string | null;
         id: string;
         propagationDelay: number;
+        inspectionStatus: string;
+        inspectionCycleDays: number;
         createdAt: Date;
         updatedAt: Date;
     }>;
@@ -128,6 +144,8 @@ export declare class ChannelService {
         parentId: string | null;
         id: string;
         propagationDelay: number;
+        inspectionStatus: string;
+        inspectionCycleDays: number;
         createdAt: Date;
         updatedAt: Date;
     }>;
@@ -140,6 +158,8 @@ export declare class ChannelService {
         parentId: string | null;
         id: string;
         propagationDelay: number;
+        inspectionStatus: string;
+        inspectionCycleDays: number;
         createdAt: Date;
         updatedAt: Date;
     }>;
