@@ -15,6 +15,8 @@ async function main() {
   await prisma.actualUsage.deleteMany({});
   await prisma.waterAllocation.deleteMany({});
   await prisma.waterApplication.deleteMany({});
+  await prisma.maintenanceOrder.deleteMany({});
+  await prisma.inspectionRecord.deleteMany({});
   await prisma.quota.deleteMany({});
   await prisma.farmer.deleteMany({});
   await prisma.channel.deleteMany({});

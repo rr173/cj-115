@@ -190,33 +190,19 @@ let InspectionService = class InspectionService {
         for (const ch of channels) {
             const cycle = ch.inspectionCycleDays;
             const lastInspection = ch.inspections.length > 0 ? ch.inspections[0] : null;
-            if (!lastInspection) {
+            const referenceDate = lastInspection ? (0, dayjs_1.default)(lastInspection.inspectionDate) : (0, dayjs_1.default)(ch.createdAt);
+            const diffDays = now.diff(referenceDate, 'day');
+            if (diffDays > cycle) {
                 overdue.push({
                     channelId: ch.id,
                     channelCode: ch.code,
                     channelName: ch.name,
                     channelLevel: ch.level,
                     inspectionCycleDays: cycle,
-                    lastInspectionDate: null,
-                    overdueDays: null,
-                    message: '从未巡检',
+                    lastInspectionDate: lastInspection ? lastInspection.inspectionDate : null,
+                    overdueDays: diffDays - cycle,
+                    message: lastInspection ? `已超期${diffDays - cycle}天` : `从未巡检,已超期${diffDays - cycle}天`,
                 });
-            }
-            else {
-                const lastDate = (0, dayjs_1.default)(lastInspection.inspectionDate);
-                const diffDays = now.diff(lastDate, 'day');
-                if (diffDays > cycle) {
-                    overdue.push({
-                        channelId: ch.id,
-                        channelCode: ch.code,
-                        channelName: ch.name,
-                        channelLevel: ch.level,
-                        inspectionCycleDays: cycle,
-                        lastInspectionDate: lastInspection.inspectionDate,
-                        overdueDays: diffDays - cycle,
-                        message: `已超期${diffDays - cycle}天`,
-                    });
-                }
             }
         }
         return overdue;
@@ -292,7 +278,7 @@ let InspectionService = class InspectionService {
                 farmerId: { in: affectedFarmerIds },
                 targetDate: {
                     gte: stopStart.startOf('day').toDate(),
-                    lt: stopEnd.endOf('day').toDate(),
+                    lt: stopEnd.toDate(),
                 },
                 status: { in: [enums_1.ApplicationStatus.PENDING, enums_1.ApplicationStatus.SCHEDULED] },
             },
@@ -328,7 +314,7 @@ let InspectionService = class InspectionService {
                     where: { id: app.id },
                     data: {
                         status: enums_1.ApplicationStatus.CANCELLED_MAINTENANCE,
-                        failReason: `因渠道"${order.channel.name}"维护停水(${stopStart.format('YYYY-MM-DD')}~${stopEnd.format('YYYY-MM-DD')})取消`,
+                        failReason: `因渠道"${order.channel.name}"维护停水(${stopStart.format('YYYY-MM-DD')}~${stopEnd.subtract(1, 'day').format('YYYY-MM-DD')})取消`,
                     },
                 });
             }
@@ -470,11 +456,13 @@ let InspectionService = class InspectionService {
             current = current.add(1, 'day');
         }
         for (const order of orders) {
-            const oStart = (0, dayjs_1.default)(order.stopWaterStart);
-            const oEnd = (0, dayjs_1.default)(order.stopWaterEnd);
-            let d = oStart.isAfter((0, dayjs_1.default)(startDate).startOf('day')) ? oStart : (0, dayjs_1.default)(startDate).startOf('day');
-            const boundary = oEnd.isBefore((0, dayjs_1.default)(endDate).endOf('day')) ? oEnd : (0, dayjs_1.default)(endDate).endOf('day');
-            while (d.isBefore(boundary) || d.isSame(boundary, 'day')) {
+            const oStart = (0, dayjs_1.default)(order.stopWaterStart).startOf('day');
+            const oEnd = (0, dayjs_1.default)(order.stopWaterEnd).startOf('day');
+            const rangeStart = (0, dayjs_1.default)(startDate).startOf('day');
+            const rangeEnd = (0, dayjs_1.default)(endDate).add(1, 'day').startOf('day');
+            let d = oStart.isAfter(rangeStart) ? oStart : rangeStart;
+            const boundary = oEnd.isBefore(rangeEnd) ? oEnd : rangeEnd;
+            while (d.isBefore(boundary)) {
                 const dateKey = d.format('YYYY-MM-DD');
                 if (byDate[dateKey]) {
                     byDate[dateKey].push({

@@ -206,32 +206,20 @@ export class InspectionService {
       const cycle = ch.inspectionCycleDays;
       const lastInspection = ch.inspections.length > 0 ? ch.inspections[0] : null;
 
-      if (!lastInspection) {
+      const referenceDate = lastInspection ? dayjs(lastInspection.inspectionDate) : dayjs(ch.createdAt);
+      const diffDays = now.diff(referenceDate, 'day');
+
+      if (diffDays > cycle) {
         overdue.push({
           channelId: ch.id,
           channelCode: ch.code,
           channelName: ch.name,
           channelLevel: ch.level,
           inspectionCycleDays: cycle,
-          lastInspectionDate: null,
-          overdueDays: null,
-          message: '从未巡检',
+          lastInspectionDate: lastInspection ? lastInspection.inspectionDate : null,
+          overdueDays: diffDays - cycle,
+          message: lastInspection ? `已超期${diffDays - cycle}天` : `从未巡检,已超期${diffDays - cycle}天`,
         });
-      } else {
-        const lastDate = dayjs(lastInspection.inspectionDate);
-        const diffDays = now.diff(lastDate, 'day');
-        if (diffDays > cycle) {
-          overdue.push({
-            channelId: ch.id,
-            channelCode: ch.code,
-            channelName: ch.name,
-            channelLevel: ch.level,
-            inspectionCycleDays: cycle,
-            lastInspectionDate: lastInspection.inspectionDate,
-            overdueDays: diffDays - cycle,
-            message: `已超期${diffDays - cycle}天`,
-          });
-        }
       }
     }
 
@@ -318,7 +306,7 @@ export class InspectionService {
         farmerId: { in: affectedFarmerIds },
         targetDate: {
           gte: stopStart.startOf('day').toDate(),
-          lt: stopEnd.endOf('day').toDate(),
+          lt: stopEnd.toDate(),
         },
         status: { in: [ApplicationStatus.PENDING, ApplicationStatus.SCHEDULED] },
       },
@@ -356,7 +344,7 @@ export class InspectionService {
           where: { id: app.id },
           data: {
             status: ApplicationStatus.CANCELLED_MAINTENANCE,
-            failReason: `因渠道"${order.channel.name}"维护停水(${stopStart.format('YYYY-MM-DD')}~${stopEnd.format('YYYY-MM-DD')})取消`,
+            failReason: `因渠道"${order.channel.name}"维护停水(${stopStart.format('YYYY-MM-DD')}~${stopEnd.subtract(1, 'day').format('YYYY-MM-DD')})取消`,
           },
         });
       }
@@ -517,12 +505,15 @@ export class InspectionService {
     }
 
     for (const order of orders) {
-      const oStart = dayjs(order.stopWaterStart);
-      const oEnd = dayjs(order.stopWaterEnd);
-      let d = oStart.isAfter(dayjs(startDate).startOf('day')) ? oStart : dayjs(startDate).startOf('day');
-      const boundary = oEnd.isBefore(dayjs(endDate).endOf('day')) ? oEnd : dayjs(endDate).endOf('day');
+      const oStart = dayjs(order.stopWaterStart).startOf('day');
+      const oEnd = dayjs(order.stopWaterEnd).startOf('day');
+      const rangeStart = dayjs(startDate).startOf('day');
+      const rangeEnd = dayjs(endDate).add(1, 'day').startOf('day');
 
-      while (d.isBefore(boundary) || d.isSame(boundary, 'day')) {
+      let d = oStart.isAfter(rangeStart) ? oStart : rangeStart;
+      const boundary = oEnd.isBefore(rangeEnd) ? oEnd : rangeEnd;
+
+      while (d.isBefore(boundary)) {
         const dateKey = d.format('YYYY-MM-DD');
         if (byDate[dateKey]) {
           byDate[dateKey].push({
