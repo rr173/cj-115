@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNumber, IsPositive, IsInt, IsOptional, IsEnum, IsBoolean, Min, Max } from 'class-validator';
+import { Type } from 'class-transformer';
 import { PaymentMethod } from '../common/enums';
 
 export class CreateWaterPriceSchemeDto {
@@ -110,10 +111,12 @@ export class BindChannelPriceSchemeDto {
 
 export class GenerateBillsDto {
   @ApiProperty({ description: '账单年份' })
+  @Type(() => Number)
   @IsInt()
   year: number;
 
   @ApiProperty({ description: '账单月份 1-12' })
+  @Type(() => Number)
   @IsInt()
   @Min(1)
   @Max(12)
@@ -127,11 +130,13 @@ export class GetFarmerBillDto {
 
   @ApiProperty({ description: '年份', required: false })
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   year?: number;
 
   @ApiProperty({ description: '月份 1-12', required: false })
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(1)
   @Max(12)
@@ -140,10 +145,12 @@ export class GetFarmerBillDto {
 
 export class ChannelBillSummaryDto {
   @ApiProperty({ description: '年份' })
+  @Type(() => Number)
   @IsInt()
   year: number;
 
   @ApiProperty({ description: '月份 1-12' })
+  @Type(() => Number)
   @IsInt()
   @Min(1)
   @Max(12)

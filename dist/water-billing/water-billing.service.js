@@ -773,39 +773,39 @@ let WaterBillingService = class WaterBillingService {
             return;
         const now = (0, dayjs_1.default)();
         const dueDate = (0, dayjs_1.default)(bill.dueDate);
-        if (now.isAfter(dueDate) && bill.status !== enums_1.WaterBillStatus.OVERDUE) {
-            const daysOverdue = now.diff(dueDate, 'day');
-            if (daysOverdue > 0) {
-                const lastCalc = bill.lastLateFeeCalc ? (0, dayjs_1.default)(bill.lastLateFeeCalc) : dueDate;
-                const daysToCalc = now.diff(lastCalc, 'day');
-                if (daysToCalc > 0 && bill.remainingAmount > 0) {
-                    const newLateFee = +(bill.remainingAmount * LATE_FEE_RATE * daysToCalc).toFixed(2);
-                    const newTotalLateFee = +(bill.lateFeeAmount + newLateFee).toFixed(2);
-                    const newTotalAmount = +(bill.totalAmount + newLateFee).toFixed(2);
-                    const newRemaining = +(bill.remainingAmount + newLateFee).toFixed(2);
-                    await this.prisma.waterBill.update({
-                        where: { id: bill.id },
-                        data: {
-                            lateFeeAmount: newTotalLateFee,
-                            totalAmount: newTotalAmount,
-                            remainingAmount: newRemaining,
-                            status: enums_1.WaterBillStatus.OVERDUE,
-                            lastLateFeeCalc: now.toDate(),
-                            updatedAt: now.toDate(),
-                        },
-                    });
-                }
-                else {
-                    await this.prisma.waterBill.update({
-                        where: { id: bill.id },
-                        data: {
-                            status: enums_1.WaterBillStatus.OVERDUE,
-                            lastLateFeeCalc: now.toDate(),
-                            updatedAt: now.toDate(),
-                        },
-                    });
-                }
-            }
+        if (!now.isAfter(dueDate))
+            return;
+        const daysOverdue = now.diff(dueDate, 'day');
+        if (daysOverdue <= 0)
+            return;
+        const lastCalc = bill.lastLateFeeCalc ? (0, dayjs_1.default)(bill.lastLateFeeCalc) : dueDate;
+        const daysToCalc = now.diff(lastCalc, 'day');
+        if (daysToCalc > 0 && bill.remainingAmount > 0) {
+            const newLateFee = +(bill.remainingAmount * LATE_FEE_RATE * daysToCalc).toFixed(2);
+            const newTotalLateFee = +(bill.lateFeeAmount + newLateFee).toFixed(2);
+            const newTotalAmount = +(bill.totalAmount + newLateFee).toFixed(2);
+            const newRemaining = +(bill.remainingAmount + newLateFee).toFixed(2);
+            await this.prisma.waterBill.update({
+                where: { id: bill.id },
+                data: {
+                    lateFeeAmount: newTotalLateFee,
+                    totalAmount: newTotalAmount,
+                    remainingAmount: newRemaining,
+                    status: enums_1.WaterBillStatus.OVERDUE,
+                    lastLateFeeCalc: now.toDate(),
+                    updatedAt: now.toDate(),
+                },
+            });
+        }
+        else if (bill.status !== enums_1.WaterBillStatus.OVERDUE) {
+            await this.prisma.waterBill.update({
+                where: { id: bill.id },
+                data: {
+                    status: enums_1.WaterBillStatus.OVERDUE,
+                    lastLateFeeCalc: now.toDate(),
+                    updatedAt: now.toDate(),
+                },
+            });
         }
     }
     async updateBillOverdueStatus(farmerId) {

@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.GetFarmerPaymentHistoryDto = exports.PayWaterBillDto = exports.ChannelBillSummaryDto = exports.GetFarmerBillDto = exports.GenerateBillsDto = exports.BindChannelPriceSchemeDto = exports.UpdateWaterPriceSchemeDto = exports.CreateWaterPriceSchemeDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
 const enums_1 = require("../common/enums");
 class CreateWaterPriceSchemeDto {
 }
@@ -146,11 +147,13 @@ class GenerateBillsDto {
 exports.GenerateBillsDto = GenerateBillsDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ description: '账单年份' }),
+    (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsInt)(),
     __metadata("design:type", Number)
 ], GenerateBillsDto.prototype, "year", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: '账单月份 1-12' }),
+    (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsInt)(),
     (0, class_validator_1.Min)(1),
     (0, class_validator_1.Max)(12),
@@ -167,12 +170,14 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)({ description: '年份', required: false }),
     (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsInt)(),
     __metadata("design:type", Number)
 ], GetFarmerBillDto.prototype, "year", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: '月份 1-12', required: false }),
     (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsInt)(),
     (0, class_validator_1.Min)(1),
     (0, class_validator_1.Max)(12),
@@ -183,11 +188,13 @@ class ChannelBillSummaryDto {
 exports.ChannelBillSummaryDto = ChannelBillSummaryDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ description: '年份' }),
+    (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsInt)(),
     __metadata("design:type", Number)
 ], ChannelBillSummaryDto.prototype, "year", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: '月份 1-12' }),
+    (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsInt)(),
     (0, class_validator_1.Min)(1),
     (0, class_validator_1.Max)(12),
