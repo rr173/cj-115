@@ -505,7 +505,7 @@ let WaterBillingService = class WaterBillingService {
                 billingMonth: month,
                 farmerId: { in: targetFarmerIds },
             },
-            include: { farmer: true },
+            include: { farmer: { include: { channel: true } } },
         });
         const channelBills = new Map();
         for (const bill of bills) {

@@ -400,6 +400,9 @@ export class RotationalIrrigationService {
     });
 
     const byChannel = new Map<string, { planned: number; actual: number; appCount: number }>();
+    const seenApplicationIds = new Set<string>();
+    let totalPlannedVolume = 0;
+    let totalActualVolume = 0;
 
     for (const alloc of allocations) {
       const durationHours = (new Date(alloc.endTime).getTime() - new Date(alloc.startTime).getTime()) / 3600000;
@@ -415,6 +418,12 @@ export class RotationalIrrigationService {
       stat.planned += planned;
       stat.actual += actual;
       stat.appCount += 1;
+
+      if (!seenApplicationIds.has(alloc.applicationId)) {
+        seenApplicationIds.add(alloc.applicationId);
+        totalPlannedVolume += alloc.application.requestVolume;
+        totalActualVolume += alloc.application.actualUsage?.actualVolume || 0;
+      }
     }
 
     const channelStats = round.channels.map((rc) => {
@@ -429,8 +438,8 @@ export class RotationalIrrigationService {
       };
     });
 
-    const totalPlanned = channelStats.reduce((s, c) => s + c.plannedVolume, 0);
-    const totalActual = channelStats.reduce((s, c) => s + c.actualVolume, 0);
+    const totalPlanned = +totalPlannedVolume.toFixed(2);
+    const totalActual = +totalActualVolume.toFixed(2);
     const isOverLimit = totalPlanned > round.waterLimit;
 
     return {
