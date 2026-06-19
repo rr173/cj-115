@@ -1,13 +1,17 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { QuotaService } from '../quota/quota.service';
 import { WaterBillingService } from '../water-billing/water-billing.service';
+import { RotationalIrrigationService } from '../rotational-irrigation/rotational-irrigation.service';
 import { CreateApplicationDto } from './dto';
 export declare class ApplicationService {
     private prisma;
     private quotaService;
     private waterBillingService;
-    constructor(prisma: PrismaService, quotaService: QuotaService, waterBillingService: WaterBillingService);
+    private rotationalIrrigationService;
+    constructor(prisma: PrismaService, quotaService: QuotaService, waterBillingService: WaterBillingService, rotationalIrrigationService: RotationalIrrigationService);
     create(dto: CreateApplicationDto): Promise<{
+        warnings: string[];
+        roundName: string;
         farmer: {
             channel: {
                 name: string;
@@ -32,7 +36,6 @@ export declare class ApplicationService {
             channelId: string;
             area: number;
         };
-    } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -49,6 +52,7 @@ export declare class ApplicationService {
         conflictStartTime: Date | null;
         conflictEndTime: Date | null;
         postponeCount: number;
+        roundId: string | null;
     }>;
     findAll(farmerId?: string, targetDate?: string, status?: string): Promise<({
         farmer: {
@@ -104,6 +108,7 @@ export declare class ApplicationService {
         conflictStartTime: Date | null;
         conflictEndTime: Date | null;
         postponeCount: number;
+        roundId: string | null;
     })[]>;
     findOne(id: string): Promise<{
         farmer: {
@@ -182,6 +187,7 @@ export declare class ApplicationService {
         conflictStartTime: Date | null;
         conflictEndTime: Date | null;
         postponeCount: number;
+        roundId: string | null;
     }>;
     getFarmerApplications(farmerId: string): Promise<({
         actualUsage: {
@@ -227,6 +233,7 @@ export declare class ApplicationService {
         conflictStartTime: Date | null;
         conflictEndTime: Date | null;
         postponeCount: number;
+        roundId: string | null;
     })[]>;
     cancel(id: string): Promise<{
         id: string;
@@ -245,5 +252,6 @@ export declare class ApplicationService {
         conflictStartTime: Date | null;
         conflictEndTime: Date | null;
         postponeCount: number;
+        roundId: string | null;
     }>;
 }

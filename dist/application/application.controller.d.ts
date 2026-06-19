@@ -4,6 +4,8 @@ export declare class ApplicationController {
     private readonly service;
     constructor(service: ApplicationService);
     create(dto: CreateApplicationDto): Promise<{
+        warnings: string[];
+        roundName: string;
         farmer: {
             channel: {
                 name: string;
@@ -28,7 +30,6 @@ export declare class ApplicationController {
             channelId: string;
             area: number;
         };
-    } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -45,6 +46,7 @@ export declare class ApplicationController {
         conflictStartTime: Date | null;
         conflictEndTime: Date | null;
         postponeCount: number;
+        roundId: string | null;
     }>;
     findAll(farmerId?: string, targetDate?: string, status?: string): Promise<({
         farmer: {
@@ -100,6 +102,7 @@ export declare class ApplicationController {
         conflictStartTime: Date | null;
         conflictEndTime: Date | null;
         postponeCount: number;
+        roundId: string | null;
     })[]>;
     findOne(id: string): Promise<{
         farmer: {
@@ -178,6 +181,7 @@ export declare class ApplicationController {
         conflictStartTime: Date | null;
         conflictEndTime: Date | null;
         postponeCount: number;
+        roundId: string | null;
     }>;
     getFarmerApplications(farmerId: string): Promise<({
         actualUsage: {
@@ -223,6 +227,7 @@ export declare class ApplicationController {
         conflictStartTime: Date | null;
         conflictEndTime: Date | null;
         postponeCount: number;
+        roundId: string | null;
     })[]>;
     cancel(id: string): Promise<{
         id: string;
@@ -241,5 +246,6 @@ export declare class ApplicationController {
         conflictStartTime: Date | null;
         conflictEndTime: Date | null;
         postponeCount: number;
+        roundId: string | null;
     }>;
 }

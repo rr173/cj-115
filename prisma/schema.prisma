@@ -28,6 +28,7 @@ model Channel {
   inspections   InspectionRecord[]
   maintenanceOrders MaintenanceOrder[]
   priceBinding  ChannelPriceBinding?
+  roundChannels IrrigationRoundChannel[]
 }
 
 model Farmer {
@@ -77,6 +78,8 @@ model WaterApplication {
   conflictStartTime DateTime?
   conflictEndTime   DateTime?
   postponeCount   Int @default(0)
+  roundId         String?
+  round           IrrigationRound? @relation(fields: [roundId], references: [id])
   createdAt       DateTime @default(now())
   updatedAt       DateTime @default(now())
 
@@ -285,4 +288,46 @@ model FarmerAccount {
   lastOverdueMonths Int      @default(0)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @default(now())
+}
+
+model IrrigationSeason {
+  id          String   @id @default(uuid())
+  name        String
+  startDate   DateTime
+  endDate     DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+
+  rounds      IrrigationRound[]
+
+  @@index([startDate, endDate])
+}
+
+model IrrigationRound {
+  id             String   @id @default(uuid())
+  seasonId       String
+  season         IrrigationSeason @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  name           String
+  startDate      DateTime
+  endDate        DateTime
+  waterLimit     Float
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now())
+
+  channels       IrrigationRoundChannel[]
+  applications   WaterApplication[]
+
+  @@index([seasonId])
+  @@index([startDate, endDate])
+}
+
+model IrrigationRoundChannel {
+  id        String   @id @default(uuid())
+  roundId   String
+  round     IrrigationRound @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  channelId String
+  channel   Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  @@unique([roundId, channelId])
+  @@index([channelId])
 }

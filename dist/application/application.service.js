@@ -20,6 +20,7 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const quota_service_1 = require("../quota/quota.service");
 const water_billing_service_1 = require("../water-billing/water-billing.service");
+const rotational_irrigation_service_1 = require("../rotational-irrigation/rotational-irrigation.service");
 const dayjs_1 = __importDefault(require("dayjs"));
 const enums_1 = require("../common/enums");
 function monthToQuarter(month) {
@@ -32,10 +33,11 @@ function monthToQuarter(month) {
     return enums_1.QuotaQuarter.Q4;
 }
 let ApplicationService = class ApplicationService {
-    constructor(prisma, quotaService, waterBillingService) {
+    constructor(prisma, quotaService, waterBillingService, rotationalIrrigationService) {
         this.prisma = prisma;
         this.quotaService = quotaService;
         this.waterBillingService = waterBillingService;
+        this.rotationalIrrigationService = rotationalIrrigationService;
     }
     async create(dto) {
         const farmer = await this.prisma.farmer.findUnique({ where: { id: dto.farmerId } });
@@ -65,7 +67,8 @@ let ApplicationService = class ApplicationService {
         if (dto.expectedFlow > channel.maxFlow) {
             throw new common_1.BadRequestException(`申请流量(${dto.expectedFlow}m³/s)超过农渠(${channel.code})最大设计流量(${channel.maxFlow}m³/s)`);
         }
-        return this.prisma.waterApplication.create({
+        const rotationalCheck = await this.rotationalIrrigationService.validateApplication(dto.farmerId, dto.targetDate, dto.expectedHours, requestVolume);
+        const created = await this.prisma.waterApplication.create({
             data: {
                 farmerId: dto.farmerId,
                 expectedFlow: dto.expectedFlow,
@@ -75,9 +78,15 @@ let ApplicationService = class ApplicationService {
                 targetDate: target.startOf('day').toDate(),
                 originalTargetDate: target.startOf('day').toDate(),
                 status: enums_1.ApplicationStatus.PENDING,
+                roundId: rotationalCheck.roundId,
             },
             include: { farmer: { include: { channel: true } } },
         });
+        return {
+            ...created,
+            warnings: rotationalCheck.warnings,
+            roundName: rotationalCheck.roundName,
+        };
     }
     async findAll(farmerId, targetDate, status) {
         const where = {};
@@ -147,6 +156,7 @@ exports.ApplicationService = ApplicationService = __decorate([
     __param(2, (0, common_1.Inject)((0, common_1.forwardRef)(() => water_billing_service_1.WaterBillingService))),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         quota_service_1.QuotaService,
-        water_billing_service_1.WaterBillingService])
+        water_billing_service_1.WaterBillingService,
+        rotational_irrigation_service_1.RotationalIrrigationService])
 ], ApplicationService);
 //# sourceMappingURL=application.service.js.map

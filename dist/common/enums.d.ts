@@ -62,3 +62,9 @@ export declare enum PaymentMethod {
     PARTIAL = "PARTIAL"
 }
 export declare const PaymentMethodNames: Record<PaymentMethod, string>;
+export declare enum IrrigationRoundStatus {
+    NOT_STARTED = "NOT_STARTED",
+    IN_PROGRESS = "IN_PROGRESS",
+    ENDED = "ENDED"
+}
+export declare const IrrigationRoundStatusNames: Record<IrrigationRoundStatus, string>;

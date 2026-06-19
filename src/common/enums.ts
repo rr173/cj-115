@@ -125,3 +125,15 @@ export const PaymentMethodNames: Record<PaymentMethod, string> = {
   [PaymentMethod.FULL]: '全额缴纳',
   [PaymentMethod.PARTIAL]: '部分缴纳',
 };
+
+export enum IrrigationRoundStatus {
+  NOT_STARTED = 'NOT_STARTED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  ENDED = 'ENDED',
+}
+
+export const IrrigationRoundStatusNames: Record<IrrigationRoundStatus, string> = {
+  [IrrigationRoundStatus.NOT_STARTED]: '未开始',
+  [IrrigationRoundStatus.IN_PROGRESS]: '进行中',
+  [IrrigationRoundStatus.ENDED]: '已结束',
+};

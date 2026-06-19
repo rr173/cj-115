@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PaymentMethodNames = exports.PaymentMethod = exports.WaterBillStatusNames = exports.WaterBillStatus = exports.MaintenanceOrderStatusNames = exports.MaintenanceOrderStatus = exports.ProblemLevelNames = exports.ProblemLevel = exports.InspectionChannelStatusNames = exports.InspectionChannelStatus = exports.QuotaQuarterNames = exports.QuotaQuarter = exports.NotificationTypeNames = exports.NotificationType = exports.ApplicationStatusNames = exports.ApplicationStatus = exports.ChannelLevelNames = exports.ChannelLevel = void 0;
+exports.IrrigationRoundStatusNames = exports.IrrigationRoundStatus = exports.PaymentMethodNames = exports.PaymentMethod = exports.WaterBillStatusNames = exports.WaterBillStatus = exports.MaintenanceOrderStatusNames = exports.MaintenanceOrderStatus = exports.ProblemLevelNames = exports.ProblemLevel = exports.InspectionChannelStatusNames = exports.InspectionChannelStatus = exports.QuotaQuarterNames = exports.QuotaQuarter = exports.NotificationTypeNames = exports.NotificationType = exports.ApplicationStatusNames = exports.ApplicationStatus = exports.ChannelLevelNames = exports.ChannelLevel = void 0;
 var ChannelLevel;
 (function (ChannelLevel) {
     ChannelLevel["MAIN"] = "MAIN";
@@ -119,5 +119,16 @@ var PaymentMethod;
 exports.PaymentMethodNames = {
     [PaymentMethod.FULL]: '全额缴纳',
     [PaymentMethod.PARTIAL]: '部分缴纳',
+};
+var IrrigationRoundStatus;
+(function (IrrigationRoundStatus) {
+    IrrigationRoundStatus["NOT_STARTED"] = "NOT_STARTED";
+    IrrigationRoundStatus["IN_PROGRESS"] = "IN_PROGRESS";
+    IrrigationRoundStatus["ENDED"] = "ENDED";
+})(IrrigationRoundStatus || (exports.IrrigationRoundStatus = IrrigationRoundStatus = {}));
+exports.IrrigationRoundStatusNames = {
+    [IrrigationRoundStatus.NOT_STARTED]: '未开始',
+    [IrrigationRoundStatus.IN_PROGRESS]: '进行中',
+    [IrrigationRoundStatus.ENDED]: '已结束',
 };
 //# sourceMappingURL=enums.js.map

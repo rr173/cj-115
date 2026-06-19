@@ -94,6 +94,7 @@ export declare class FarmerService {
             conflictStartTime: Date | null;
             conflictEndTime: Date | null;
             postponeCount: number;
+            roundId: string | null;
         }[];
     } & {
         name: string;

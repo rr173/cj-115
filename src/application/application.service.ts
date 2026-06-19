@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException, Inject, forwardRef 
 import { PrismaService } from '../prisma/prisma.service';
 import { QuotaService } from '../quota/quota.service';
 import { WaterBillingService } from '../water-billing/water-billing.service';
+import { RotationalIrrigationService } from '../rotational-irrigation/rotational-irrigation.service';
 import { CreateApplicationDto } from './dto';
 import dayjs from 'dayjs';
 import { ApplicationStatus, QuotaQuarter } from '../common/enums';
@@ -20,6 +21,7 @@ export class ApplicationService {
     private quotaService: QuotaService,
     @Inject(forwardRef(() => WaterBillingService))
     private waterBillingService: WaterBillingService,
+    private rotationalIrrigationService: RotationalIrrigationService,
   ) {}
 
   async create(dto: CreateApplicationDto) {
@@ -61,7 +63,14 @@ export class ApplicationService {
       );
     }
 
-    return this.prisma.waterApplication.create({
+    const rotationalCheck = await this.rotationalIrrigationService.validateApplication(
+      dto.farmerId,
+      dto.targetDate,
+      dto.expectedHours,
+      requestVolume,
+    );
+
+    const created = await this.prisma.waterApplication.create({
       data: {
         farmerId: dto.farmerId,
         expectedFlow: dto.expectedFlow,
@@ -71,9 +80,16 @@ export class ApplicationService {
         targetDate: target.startOf('day').toDate(),
         originalTargetDate: target.startOf('day').toDate(),
         status: ApplicationStatus.PENDING,
+        roundId: rotationalCheck.roundId,
       },
       include: { farmer: { include: { channel: true } } },
     });
+
+    return {
+      ...created,
+      warnings: rotationalCheck.warnings,
+      roundName: rotationalCheck.roundName,
+    };
   }
 
   async findAll(farmerId?: string, targetDate?: string, status?: string) {
