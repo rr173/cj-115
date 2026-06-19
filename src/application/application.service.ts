@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { QuotaService } from '../quota/quota.service';
+import { WaterBillingService } from '../water-billing/water-billing.service';
 import { CreateApplicationDto } from './dto';
 import dayjs from 'dayjs';
 import { ApplicationStatus, QuotaQuarter } from '../common/enums';
@@ -17,11 +18,18 @@ export class ApplicationService {
   constructor(
     private prisma: PrismaService,
     private quotaService: QuotaService,
+    @Inject(forwardRef(() => WaterBillingService))
+    private waterBillingService: WaterBillingService,
   ) {}
 
   async create(dto: CreateApplicationDto) {
     const farmer = await this.prisma.farmer.findUnique({ where: { id: dto.farmerId } });
     if (!farmer) throw new NotFoundException('用水户不存在');
+
+    const checkResult = await this.waterBillingService.checkFarmerCanApply(dto.farmerId);
+    if (!checkResult.canApply) {
+      throw new BadRequestException(`提交申请被拒绝: ${checkResult.reason}`);
+    }
 
     const target = dayjs(dto.targetDate);
     if (!target.isValid()) throw new BadRequestException('目标日期格式错误');

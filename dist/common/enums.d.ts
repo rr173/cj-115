@@ -50,3 +50,15 @@ export declare enum MaintenanceOrderStatus {
     CLOSED = "CLOSED"
 }
 export declare const MaintenanceOrderStatusNames: Record<MaintenanceOrderStatus, string>;
+export declare enum WaterBillStatus {
+    UNPAID = "UNPAID",
+    PARTIAL = "PARTIAL",
+    PAID = "PAID",
+    OVERDUE = "OVERDUE"
+}
+export declare const WaterBillStatusNames: Record<WaterBillStatus, string>;
+export declare enum PaymentMethod {
+    FULL = "FULL",
+    PARTIAL = "PARTIAL"
+}
+export declare const PaymentMethodNames: Record<PaymentMethod, string>;

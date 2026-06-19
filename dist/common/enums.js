@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MaintenanceOrderStatusNames = exports.MaintenanceOrderStatus = exports.ProblemLevelNames = exports.ProblemLevel = exports.InspectionChannelStatusNames = exports.InspectionChannelStatus = exports.QuotaQuarterNames = exports.QuotaQuarter = exports.NotificationTypeNames = exports.NotificationType = exports.ApplicationStatusNames = exports.ApplicationStatus = exports.ChannelLevelNames = exports.ChannelLevel = void 0;
+exports.PaymentMethodNames = exports.PaymentMethod = exports.WaterBillStatusNames = exports.WaterBillStatus = exports.MaintenanceOrderStatusNames = exports.MaintenanceOrderStatus = exports.ProblemLevelNames = exports.ProblemLevel = exports.InspectionChannelStatusNames = exports.InspectionChannelStatus = exports.QuotaQuarterNames = exports.QuotaQuarter = exports.NotificationTypeNames = exports.NotificationType = exports.ApplicationStatusNames = exports.ApplicationStatus = exports.ChannelLevelNames = exports.ChannelLevel = void 0;
 var ChannelLevel;
 (function (ChannelLevel) {
     ChannelLevel["MAIN"] = "MAIN";
@@ -97,5 +97,27 @@ exports.MaintenanceOrderStatusNames = {
     [MaintenanceOrderStatus.IN_CONSTRUCTION]: '施工中',
     [MaintenanceOrderStatus.ACCEPTED]: '已验收',
     [MaintenanceOrderStatus.CLOSED]: '关闭',
+};
+var WaterBillStatus;
+(function (WaterBillStatus) {
+    WaterBillStatus["UNPAID"] = "UNPAID";
+    WaterBillStatus["PARTIAL"] = "PARTIAL";
+    WaterBillStatus["PAID"] = "PAID";
+    WaterBillStatus["OVERDUE"] = "OVERDUE";
+})(WaterBillStatus || (exports.WaterBillStatus = WaterBillStatus = {}));
+exports.WaterBillStatusNames = {
+    [WaterBillStatus.UNPAID]: '未缴费',
+    [WaterBillStatus.PARTIAL]: '部分缴费',
+    [WaterBillStatus.PAID]: '已缴清',
+    [WaterBillStatus.OVERDUE]: '已欠费',
+};
+var PaymentMethod;
+(function (PaymentMethod) {
+    PaymentMethod["FULL"] = "FULL";
+    PaymentMethod["PARTIAL"] = "PARTIAL";
+})(PaymentMethod || (exports.PaymentMethod = PaymentMethod = {}));
+exports.PaymentMethodNames = {
+    [PaymentMethod.FULL]: '全额缴纳',
+    [PaymentMethod.PARTIAL]: '部分缴纳',
 };
 //# sourceMappingURL=enums.js.map

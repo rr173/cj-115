@@ -8,6 +8,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -16,6 +19,7 @@ exports.ApplicationService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const quota_service_1 = require("../quota/quota.service");
+const water_billing_service_1 = require("../water-billing/water-billing.service");
 const dayjs_1 = __importDefault(require("dayjs"));
 const enums_1 = require("../common/enums");
 function monthToQuarter(month) {
@@ -28,14 +32,19 @@ function monthToQuarter(month) {
     return enums_1.QuotaQuarter.Q4;
 }
 let ApplicationService = class ApplicationService {
-    constructor(prisma, quotaService) {
+    constructor(prisma, quotaService, waterBillingService) {
         this.prisma = prisma;
         this.quotaService = quotaService;
+        this.waterBillingService = waterBillingService;
     }
     async create(dto) {
         const farmer = await this.prisma.farmer.findUnique({ where: { id: dto.farmerId } });
         if (!farmer)
             throw new common_1.NotFoundException('用水户不存在');
+        const checkResult = await this.waterBillingService.checkFarmerCanApply(dto.farmerId);
+        if (!checkResult.canApply) {
+            throw new common_1.BadRequestException(`提交申请被拒绝: ${checkResult.reason}`);
+        }
         const target = (0, dayjs_1.default)(dto.targetDate);
         if (!target.isValid())
             throw new common_1.BadRequestException('目标日期格式错误');
@@ -135,7 +144,9 @@ let ApplicationService = class ApplicationService {
 exports.ApplicationService = ApplicationService;
 exports.ApplicationService = ApplicationService = __decorate([
     (0, common_1.Injectable)(),
+    __param(2, (0, common_1.Inject)((0, common_1.forwardRef)(() => water_billing_service_1.WaterBillingService))),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        quota_service_1.QuotaService])
+        quota_service_1.QuotaService,
+        water_billing_service_1.WaterBillingService])
 ], ApplicationService);
 //# sourceMappingURL=application.service.js.map

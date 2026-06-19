@@ -16,6 +16,7 @@ const application_module_1 = require("./application/application.module");
 const scheduling_module_1 = require("./scheduling/scheduling.module");
 const accounting_module_1 = require("./accounting/accounting.module");
 const inspection_module_1 = require("./inspection/inspection.module");
+const water_billing_module_1 = require("./water-billing/water-billing.module");
 const prisma_service_1 = require("./prisma/prisma.service");
 let AppModule = class AppModule {
 };
@@ -31,6 +32,7 @@ exports.AppModule = AppModule = __decorate([
             scheduling_module_1.SchedulingModule,
             accounting_module_1.AccountingModule,
             inspection_module_1.InspectionModule,
+            water_billing_module_1.WaterBillingModule,
         ],
         providers: [prisma_service_1.PrismaService],
     })

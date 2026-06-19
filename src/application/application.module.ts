@@ -1,13 +1,14 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { ApplicationController } from './application.controller';
 import { ApplicationService } from './application.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { FarmerModule } from '../farmer/farmer.module';
 import { QuotaModule } from '../quota/quota.module';
 import { ChannelModule } from '../channel/channel.module';
+import { WaterBillingModule } from '../water-billing/water-billing.module';
 
 @Module({
-  imports: [FarmerModule, QuotaModule, ChannelModule],
+  imports: [FarmerModule, QuotaModule, ChannelModule, forwardRef(() => WaterBillingModule)],
   controllers: [ApplicationController],
   providers: [ApplicationService, PrismaService],
   exports: [ApplicationService],

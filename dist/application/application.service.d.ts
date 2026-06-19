@@ -1,10 +1,12 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { QuotaService } from '../quota/quota.service';
+import { WaterBillingService } from '../water-billing/water-billing.service';
 import { CreateApplicationDto } from './dto';
 export declare class ApplicationService {
     private prisma;
     private quotaService;
-    constructor(prisma: PrismaService, quotaService: QuotaService);
+    private waterBillingService;
+    constructor(prisma: PrismaService, quotaService: QuotaService, waterBillingService: WaterBillingService);
     create(dto: CreateApplicationDto): Promise<{
         farmer: {
             channel: {

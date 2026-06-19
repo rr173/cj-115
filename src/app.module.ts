@@ -7,6 +7,7 @@ import { ApplicationModule } from './application/application.module';
 import { SchedulingModule } from './scheduling/scheduling.module';
 import { AccountingModule } from './accounting/accounting.module';
 import { InspectionModule } from './inspection/inspection.module';
+import { WaterBillingModule } from './water-billing/water-billing.module';
 import { PrismaService } from './prisma/prisma.service';
 
 @Module({
@@ -19,6 +20,7 @@ import { PrismaService } from './prisma/prisma.service';
     SchedulingModule,
     AccountingModule,
     InspectionModule,
+    WaterBillingModule,
   ],
   providers: [PrismaService],
 })

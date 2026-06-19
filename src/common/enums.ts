@@ -101,3 +101,27 @@ export const MaintenanceOrderStatusNames: Record<MaintenanceOrderStatus, string>
   [MaintenanceOrderStatus.ACCEPTED]: '已验收',
   [MaintenanceOrderStatus.CLOSED]: '关闭',
 };
+
+export enum WaterBillStatus {
+  UNPAID = 'UNPAID',
+  PARTIAL = 'PARTIAL',
+  PAID = 'PAID',
+  OVERDUE = 'OVERDUE',
+}
+
+export const WaterBillStatusNames: Record<WaterBillStatus, string> = {
+  [WaterBillStatus.UNPAID]: '未缴费',
+  [WaterBillStatus.PARTIAL]: '部分缴费',
+  [WaterBillStatus.PAID]: '已缴清',
+  [WaterBillStatus.OVERDUE]: '已欠费',
+};
+
+export enum PaymentMethod {
+  FULL = 'FULL',
+  PARTIAL = 'PARTIAL',
+}
+
+export const PaymentMethodNames: Record<PaymentMethod, string> = {
+  [PaymentMethod.FULL]: '全额缴纳',
+  [PaymentMethod.PARTIAL]: '部分缴纳',
+};
