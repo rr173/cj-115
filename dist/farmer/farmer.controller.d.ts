@@ -85,11 +85,13 @@ export declare class FarmerController {
             expectedHours: number;
             requestVolume: number;
             targetDate: Date;
+            originalTargetDate: Date;
             status: string;
             failReason: string | null;
             conflictChannelId: string | null;
             conflictStartTime: Date | null;
             conflictEndTime: Date | null;
+            postponeCount: number;
         }[];
     } & {
         name: string;

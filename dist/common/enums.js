@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MaintenanceOrderStatusNames = exports.MaintenanceOrderStatus = exports.ProblemLevelNames = exports.ProblemLevel = exports.InspectionChannelStatusNames = exports.InspectionChannelStatus = exports.QuotaQuarterNames = exports.QuotaQuarter = exports.ApplicationStatusNames = exports.ApplicationStatus = exports.ChannelLevelNames = exports.ChannelLevel = void 0;
+exports.MaintenanceOrderStatusNames = exports.MaintenanceOrderStatus = exports.ProblemLevelNames = exports.ProblemLevel = exports.InspectionChannelStatusNames = exports.InspectionChannelStatus = exports.QuotaQuarterNames = exports.QuotaQuarter = exports.NotificationTypeNames = exports.NotificationType = exports.ApplicationStatusNames = exports.ApplicationStatus = exports.ChannelLevelNames = exports.ChannelLevel = void 0;
 var ChannelLevel;
 (function (ChannelLevel) {
     ChannelLevel["MAIN"] = "MAIN";
@@ -19,6 +19,8 @@ var ApplicationStatus;
     ApplicationStatus["PENDING"] = "PENDING";
     ApplicationStatus["SCHEDULED"] = "SCHEDULED";
     ApplicationStatus["FAILED"] = "FAILED";
+    ApplicationStatus["POSTPONED"] = "POSTPONED";
+    ApplicationStatus["FAILED_FINAL"] = "FAILED_FINAL";
     ApplicationStatus["CANCELLED_QUOTA"] = "CANCELLED_QUOTA";
     ApplicationStatus["CANCELLED_MAINTENANCE"] = "CANCELLED_MAINTENANCE";
     ApplicationStatus["EXECUTED"] = "EXECUTED";
@@ -27,9 +29,22 @@ exports.ApplicationStatusNames = {
     [ApplicationStatus.PENDING]: '待编排',
     [ApplicationStatus.SCHEDULED]: '已安排',
     [ApplicationStatus.FAILED]: '无法安排',
+    [ApplicationStatus.POSTPONED]: '已顺延',
+    [ApplicationStatus.FAILED_FINAL]: '最终失败',
     [ApplicationStatus.CANCELLED_QUOTA]: '因定额调整取消',
     [ApplicationStatus.CANCELLED_MAINTENANCE]: '因维护取消',
     [ApplicationStatus.EXECUTED]: '已执行',
+};
+var NotificationType;
+(function (NotificationType) {
+    NotificationType["POSTPONE"] = "POSTPONE";
+    NotificationType["FINAL_FAILURE"] = "FINAL_FAILURE";
+    NotificationType["MAINTENANCE_CANCEL"] = "MAINTENANCE_CANCEL";
+})(NotificationType || (exports.NotificationType = NotificationType = {}));
+exports.NotificationTypeNames = {
+    [NotificationType.POSTPONE]: '申请顺延通知',
+    [NotificationType.FINAL_FAILURE]: '申请最终失败通知',
+    [NotificationType.MAINTENANCE_CANCEL]: '维护取消通知',
 };
 var QuotaQuarter;
 (function (QuotaQuarter) {

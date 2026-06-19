@@ -61,6 +61,7 @@ export class ApplicationService {
         requestVolume,
         submitTime: new Date(),
         targetDate: target.startOf('day').toDate(),
+        originalTargetDate: target.startOf('day').toDate(),
         status: ApplicationStatus.PENDING,
       },
       include: { farmer: { include: { channel: true } } },

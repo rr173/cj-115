@@ -167,6 +167,7 @@ async function main() {
         requestVolume: (0.5 + (i % 3) * 0.15) * (2 + (i % 4) * 0.5) * 3600,
         submitTime: dayjs().subtract(i * 10, 'minute').toDate(),
         targetDate: dayjs(tomorrow).toDate(),
+        originalTargetDate: dayjs(tomorrow).toDate(),
       },
     });
     apps.push(app);

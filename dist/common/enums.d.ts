@@ -9,11 +9,19 @@ export declare enum ApplicationStatus {
     PENDING = "PENDING",
     SCHEDULED = "SCHEDULED",
     FAILED = "FAILED",
+    POSTPONED = "POSTPONED",
+    FAILED_FINAL = "FAILED_FINAL",
     CANCELLED_QUOTA = "CANCELLED_QUOTA",
     CANCELLED_MAINTENANCE = "CANCELLED_MAINTENANCE",
     EXECUTED = "EXECUTED"
 }
 export declare const ApplicationStatusNames: Record<ApplicationStatus, string>;
+export declare enum NotificationType {
+    POSTPONE = "POSTPONE",
+    FINAL_FAILURE = "FINAL_FAILURE",
+    MAINTENANCE_CANCEL = "MAINTENANCE_CANCEL"
+}
+export declare const NotificationTypeNames: Record<NotificationType, string>;
 export declare enum QuotaQuarter {
     Q1 = "Q1",
     Q2 = "Q2",

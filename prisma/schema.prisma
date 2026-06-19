@@ -66,16 +66,20 @@ model WaterApplication {
   requestVolume   Float
   submitTime      DateTime
   targetDate      DateTime
+  originalTargetDate DateTime
   status          String @default("PENDING")
   failReason      String?
   conflictChannelId String?
   conflictStartTime DateTime?
   conflictEndTime   DateTime?
+  postponeCount   Int @default(0)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @default(now())
 
   allocations WaterAllocation[]
   actualUsage ActualUsage?
+  postponeHistories ApplicationPostponeHistory[]
+  notifications Notification[]
 }
 
 model WaterAllocation {
@@ -138,4 +142,33 @@ model MaintenanceOrder {
   impactAnalysis        String?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @default(now())
+}
+
+model ApplicationPostponeHistory {
+  id              String   @id @default(uuid())
+  applicationId   String
+  application     WaterApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  farmerId        String
+  originalDate    DateTime
+  targetDate      DateTime
+  reason          String
+  createdAt       DateTime @default(now())
+
+  @@index([applicationId])
+  @@index([farmerId])
+}
+
+model Notification {
+  id              String   @id @default(uuid())
+  farmerId        String
+  applicationId   String
+  application     WaterApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  type            String
+  title           String
+  content         String
+  isRead          Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  @@index([farmerId])
+  @@index([applicationId])
 }

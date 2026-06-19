@@ -16,6 +16,8 @@ export enum ApplicationStatus {
   PENDING = 'PENDING',
   SCHEDULED = 'SCHEDULED',
   FAILED = 'FAILED',
+  POSTPONED = 'POSTPONED',
+  FAILED_FINAL = 'FAILED_FINAL',
   CANCELLED_QUOTA = 'CANCELLED_QUOTA',
   CANCELLED_MAINTENANCE = 'CANCELLED_MAINTENANCE',
   EXECUTED = 'EXECUTED',
@@ -25,9 +27,23 @@ export const ApplicationStatusNames: Record<ApplicationStatus, string> = {
   [ApplicationStatus.PENDING]: '待编排',
   [ApplicationStatus.SCHEDULED]: '已安排',
   [ApplicationStatus.FAILED]: '无法安排',
+  [ApplicationStatus.POSTPONED]: '已顺延',
+  [ApplicationStatus.FAILED_FINAL]: '最终失败',
   [ApplicationStatus.CANCELLED_QUOTA]: '因定额调整取消',
   [ApplicationStatus.CANCELLED_MAINTENANCE]: '因维护取消',
   [ApplicationStatus.EXECUTED]: '已执行',
+};
+
+export enum NotificationType {
+  POSTPONE = 'POSTPONE',
+  FINAL_FAILURE = 'FINAL_FAILURE',
+  MAINTENANCE_CANCEL = 'MAINTENANCE_CANCEL',
+}
+
+export const NotificationTypeNames: Record<NotificationType, string> = {
+  [NotificationType.POSTPONE]: '申请顺延通知',
+  [NotificationType.FINAL_FAILURE]: '申请最终失败通知',
+  [NotificationType.MAINTENANCE_CANCEL]: '维护取消通知',
 };
 
 export enum QuotaQuarter {

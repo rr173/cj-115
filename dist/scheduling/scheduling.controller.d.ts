@@ -1,8 +1,17 @@
 import { SchedulingService } from './scheduling.service';
+import { AutoSchedulingService } from './auto-scheduling.service';
 export declare class SchedulingController {
     private readonly service;
-    constructor(service: SchedulingService);
+    private readonly autoService;
+    constructor(service: SchedulingService, autoService: AutoSchedulingService);
     runScheduling(date: string): Promise<{
+        targetDate: string;
+        totalProcessed: number;
+        scheduled: number;
+        failed: number;
+        details: any[];
+    }>;
+    triggerAutoScheduling(date?: string): Promise<{
         targetDate: string;
         totalProcessed: number;
         scheduled: number;
@@ -64,5 +73,40 @@ export declare class SchedulingController {
                 farmerName: string;
             };
         }[];
+    }>;
+    getFarmerPostponeHistory(farmerId: string): Promise<{
+        id: string;
+        applicationId: string;
+        originalDate: string;
+        targetDate: string;
+        reason: string;
+        createdAt: Date;
+        application: {
+            id: string;
+            expectedFlow: number;
+            expectedHours: number;
+            requestVolume: number;
+            status: string;
+        };
+    }[]>;
+    getFarmerNotifications(farmerId: string, unreadOnly?: string): Promise<{
+        type: string;
+        title: string;
+        id: string;
+        createdAt: Date;
+        content: string;
+        farmerId: string;
+        applicationId: string;
+        isRead: boolean;
+    }[]>;
+    markNotificationAsRead(farmerId: string, notificationId: string): Promise<{
+        type: string;
+        title: string;
+        id: string;
+        createdAt: Date;
+        content: string;
+        farmerId: string;
+        applicationId: string;
+        isRead: boolean;
     }>;
 }

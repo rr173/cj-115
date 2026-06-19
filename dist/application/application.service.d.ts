@@ -40,11 +40,13 @@ export declare class ApplicationService {
         expectedHours: number;
         requestVolume: number;
         targetDate: Date;
+        originalTargetDate: Date;
         status: string;
         failReason: string | null;
         conflictChannelId: string | null;
         conflictStartTime: Date | null;
         conflictEndTime: Date | null;
+        postponeCount: number;
     }>;
     findAll(farmerId?: string, targetDate?: string, status?: string): Promise<({
         farmer: {
@@ -93,11 +95,13 @@ export declare class ApplicationService {
         expectedHours: number;
         requestVolume: number;
         targetDate: Date;
+        originalTargetDate: Date;
         status: string;
         failReason: string | null;
         conflictChannelId: string | null;
         conflictStartTime: Date | null;
         conflictEndTime: Date | null;
+        postponeCount: number;
     })[]>;
     findOne(id: string): Promise<{
         farmer: {
@@ -169,11 +173,13 @@ export declare class ApplicationService {
         expectedHours: number;
         requestVolume: number;
         targetDate: Date;
+        originalTargetDate: Date;
         status: string;
         failReason: string | null;
         conflictChannelId: string | null;
         conflictStartTime: Date | null;
         conflictEndTime: Date | null;
+        postponeCount: number;
     }>;
     getFarmerApplications(farmerId: string): Promise<({
         actualUsage: {
@@ -212,11 +218,13 @@ export declare class ApplicationService {
         expectedHours: number;
         requestVolume: number;
         targetDate: Date;
+        originalTargetDate: Date;
         status: string;
         failReason: string | null;
         conflictChannelId: string | null;
         conflictStartTime: Date | null;
         conflictEndTime: Date | null;
+        postponeCount: number;
     })[]>;
     cancel(id: string): Promise<{
         id: string;
@@ -228,10 +236,12 @@ export declare class ApplicationService {
         expectedHours: number;
         requestVolume: number;
         targetDate: Date;
+        originalTargetDate: Date;
         status: string;
         failReason: string | null;
         conflictChannelId: string | null;
         conflictStartTime: Date | null;
         conflictEndTime: Date | null;
+        postponeCount: number;
     }>;
 }

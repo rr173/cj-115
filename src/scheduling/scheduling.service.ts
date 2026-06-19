@@ -109,7 +109,7 @@ export class SchedulingService {
     const pendingApps = await this.prisma.waterApplication.findMany({
       where: {
         targetDate: { gte: dayStart.toDate(), lt: dayEnd.toDate() },
-        status: { in: [ApplicationStatus.PENDING, ApplicationStatus.FAILED] },
+        status: { in: [ApplicationStatus.PENDING, ApplicationStatus.FAILED, ApplicationStatus.POSTPONED] },
       },
       include: { farmer: { include: { channel: true } } },
       orderBy: { submitTime: 'asc' },

@@ -64,6 +64,7 @@ let ApplicationService = class ApplicationService {
                 requestVolume,
                 submitTime: new Date(),
                 targetDate: target.startOf('day').toDate(),
+                originalTargetDate: target.startOf('day').toDate(),
                 status: enums_1.ApplicationStatus.PENDING,
             },
             include: { farmer: { include: { channel: true } } },

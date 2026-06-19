@@ -16,18 +16,48 @@ exports.SchedulingController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const scheduling_service_1 = require("./scheduling.service");
+const auto_scheduling_service_1 = require("./auto-scheduling.service");
 let SchedulingController = class SchedulingController {
-    constructor(service) {
+    constructor(service, autoService) {
         this.service = service;
+        this.autoService = autoService;
     }
     runScheduling(date) {
         return this.service.runScheduling(date);
+    }
+    triggerAutoScheduling(date) {
+        return this.autoService.triggerManualScheduling(date);
     }
     getDaySchedule(date) {
         return this.service.getDaySchedule(date);
     }
     getChannelSchedule(channelId, date) {
         return this.service.getChannelSchedule(channelId, date);
+    }
+    async getFarmerPostponeHistory(farmerId) {
+        try {
+            return await this.autoService.getFarmerPostponeHistory(farmerId);
+        }
+        catch (e) {
+            if (e.message === '用水户不存在') {
+                throw new common_1.NotFoundException(e.message);
+            }
+            throw new common_1.BadRequestException(e.message);
+        }
+    }
+    getFarmerNotifications(farmerId, unreadOnly) {
+        return this.autoService.getFarmerNotifications(farmerId, unreadOnly === 'true');
+    }
+    async markNotificationAsRead(farmerId, notificationId) {
+        try {
+            return await this.autoService.markNotificationAsRead(notificationId, farmerId);
+        }
+        catch (e) {
+            if (e.message === '通知不存在或无权访问') {
+                throw new common_1.NotFoundException(e.message);
+            }
+            throw new common_1.BadRequestException(e.message);
+        }
     }
 };
 exports.SchedulingController = SchedulingController;
@@ -40,6 +70,15 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], SchedulingController.prototype, "runScheduling", null);
+__decorate([
+    (0, common_1.Post)('auto-run'),
+    (0, swagger_1.ApiOperation)({ summary: '手动触发自动编排流程（包含顺延处理）' }),
+    (0, swagger_1.ApiQuery)({ name: 'date', description: '目标日期 YYYY-MM-DD，默认今天', required: false }),
+    __param(0, (0, common_1.Query)('date')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], SchedulingController.prototype, "triggerAutoScheduling", null);
 __decorate([
     (0, common_1.Get)('day'),
     (0, swagger_1.ApiOperation)({ summary: '查询某一天全渠网配水计划总表' }),
@@ -60,9 +99,41 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], SchedulingController.prototype, "getChannelSchedule", null);
+__decorate([
+    (0, common_1.Get)('farmer/:farmerId/postpone-history'),
+    (0, swagger_1.ApiOperation)({ summary: '查询某用水户的申请顺延历史' }),
+    (0, swagger_1.ApiParam)({ name: 'farmerId', description: '用水户ID' }),
+    __param(0, (0, common_1.Param)('farmerId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], SchedulingController.prototype, "getFarmerPostponeHistory", null);
+__decorate([
+    (0, common_1.Get)('farmer/:farmerId/notifications'),
+    (0, swagger_1.ApiOperation)({ summary: '查询某用水户的通知列表' }),
+    (0, swagger_1.ApiParam)({ name: 'farmerId', description: '用水户ID' }),
+    (0, swagger_1.ApiQuery)({ name: 'unreadOnly', description: '仅显示未读', required: false, type: Boolean }),
+    __param(0, (0, common_1.Param)('farmerId')),
+    __param(1, (0, common_1.Query)('unreadOnly')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], SchedulingController.prototype, "getFarmerNotifications", null);
+__decorate([
+    (0, common_1.Post)('farmer/:farmerId/notifications/:notificationId/read'),
+    (0, swagger_1.ApiOperation)({ summary: '标记通知为已读' }),
+    (0, swagger_1.ApiParam)({ name: 'farmerId', description: '用水户ID' }),
+    (0, swagger_1.ApiParam)({ name: 'notificationId', description: '通知ID' }),
+    __param(0, (0, common_1.Param)('farmerId')),
+    __param(1, (0, common_1.Param)('notificationId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], SchedulingController.prototype, "markNotificationAsRead", null);
 exports.SchedulingController = SchedulingController = __decorate([
     (0, swagger_1.ApiTags)('配水编排'),
     (0, common_1.Controller)('scheduling'),
-    __metadata("design:paramtypes", [scheduling_service_1.SchedulingService])
+    __metadata("design:paramtypes", [scheduling_service_1.SchedulingService,
+        auto_scheduling_service_1.AutoSchedulingService])
 ], SchedulingController);
 //# sourceMappingURL=scheduling.controller.js.map
