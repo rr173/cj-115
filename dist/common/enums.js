@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.IrrigationRoundStatusNames = exports.IrrigationRoundStatus = exports.PaymentMethodNames = exports.PaymentMethod = exports.WaterBillStatusNames = exports.WaterBillStatus = exports.MaintenanceOrderStatusNames = exports.MaintenanceOrderStatus = exports.ProblemLevelNames = exports.ProblemLevel = exports.InspectionChannelStatusNames = exports.InspectionChannelStatus = exports.QuotaQuarterNames = exports.QuotaQuarter = exports.NotificationTypeNames = exports.NotificationType = exports.ApplicationStatusNames = exports.ApplicationStatus = exports.ChannelLevelNames = exports.ChannelLevel = void 0;
+exports.SellOrderStatusNames = exports.SellOrderStatus = exports.IrrigationRoundStatusNames = exports.IrrigationRoundStatus = exports.PaymentMethodNames = exports.PaymentMethod = exports.WaterBillStatusNames = exports.WaterBillStatus = exports.MaintenanceOrderStatusNames = exports.MaintenanceOrderStatus = exports.ProblemLevelNames = exports.ProblemLevel = exports.InspectionChannelStatusNames = exports.InspectionChannelStatus = exports.QuotaQuarterNames = exports.QuotaQuarter = exports.NotificationTypeNames = exports.NotificationType = exports.ApplicationStatusNames = exports.ApplicationStatus = exports.ChannelLevelNames = exports.ChannelLevel = void 0;
 var ChannelLevel;
 (function (ChannelLevel) {
     ChannelLevel["MAIN"] = "MAIN";
@@ -130,5 +130,20 @@ exports.IrrigationRoundStatusNames = {
     [IrrigationRoundStatus.NOT_STARTED]: '未开始',
     [IrrigationRoundStatus.IN_PROGRESS]: '进行中',
     [IrrigationRoundStatus.ENDED]: '已结束',
+};
+var SellOrderStatus;
+(function (SellOrderStatus) {
+    SellOrderStatus["ACTIVE"] = "ACTIVE";
+    SellOrderStatus["PARTIAL"] = "PARTIAL";
+    SellOrderStatus["COMPLETED"] = "COMPLETED";
+    SellOrderStatus["CANCELLED"] = "CANCELLED";
+    SellOrderStatus["EXPIRED"] = "EXPIRED";
+})(SellOrderStatus || (exports.SellOrderStatus = SellOrderStatus = {}));
+exports.SellOrderStatusNames = {
+    [SellOrderStatus.ACTIVE]: '挂牌中',
+    [SellOrderStatus.PARTIAL]: '部分成交',
+    [SellOrderStatus.COMPLETED]: '全部成交',
+    [SellOrderStatus.CANCELLED]: '已撤单',
+    [SellOrderStatus.EXPIRED]: '已过期',
 };
 //# sourceMappingURL=enums.js.map

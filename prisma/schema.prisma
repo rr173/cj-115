@@ -47,6 +47,10 @@ model Farmer {
   bills       WaterBill[]
   account     FarmerAccount?
   payments    PaymentRecord[]
+  waterRightsAccounts WaterRightsAccount[]
+  waterRightsSellOrders WaterRightsSellOrder[]
+  waterRightsBuyTrades WaterRightsTradeRecord[] @relation("BuyTrades")
+  waterRightsSellTrades WaterRightsTradeRecord[] @relation("SellTrades")
 }
 
 model Quota {
@@ -330,4 +334,62 @@ model IrrigationRoundChannel {
 
   @@unique([roundId, channelId])
   @@index([channelId])
+}
+
+model WaterRightsAccount {
+  id                String   @id @default(uuid())
+  farmerId          String
+  farmer            Farmer   @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  year              Int
+  quarter           String
+  initialQuota      Float
+  boughtVolume      Float    @default(0)
+  soldVolume        Float    @default(0)
+  usedVolume        Float    @default(0)
+  frozenVolume      Float    @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @default(now())
+
+  @@unique([farmerId, year, quarter])
+  @@index([farmerId])
+}
+
+model WaterRightsSellOrder {
+  id                String   @id @default(uuid())
+  sellerId          String
+  seller            Farmer   @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  year              Int
+  quarter           String
+  sellVolume        Float
+  remainingVolume   Float
+  unitPrice         Float
+  status            String   @default("ACTIVE")
+  createdAt         DateTime @default(now())
+  expiresAt         DateTime
+  updatedAt         DateTime @default(now())
+
+  trades            WaterRightsTradeRecord[]
+  @@index([sellerId])
+  @@index([status])
+  @@index([expiresAt])
+}
+
+model WaterRightsTradeRecord {
+  id                String   @id @default(uuid())
+  sellOrderId       String
+  sellOrder         WaterRightsSellOrder @relation(fields: [sellOrderId], references: [id], onDelete: Cascade)
+  buyerId           String
+  buyer             Farmer   @relation("BuyTrades", fields: [buyerId], references: [id], onDelete: Cascade)
+  sellerId          String
+  seller            Farmer   @relation("SellTrades", fields: [sellerId], references: [id], onDelete: Cascade)
+  year              Int
+  quarter           String
+  volume            Float
+  unitPrice         Float
+  totalAmount       Float
+  createdAt         DateTime @default(now())
+
+  @@index([buyerId])
+  @@index([sellerId])
+  @@index([sellOrderId])
 }

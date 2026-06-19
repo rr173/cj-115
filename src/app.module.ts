@@ -9,6 +9,7 @@ import { AccountingModule } from './accounting/accounting.module';
 import { InspectionModule } from './inspection/inspection.module';
 import { WaterBillingModule } from './water-billing/water-billing.module';
 import { RotationalIrrigationModule } from './rotational-irrigation/rotational-irrigation.module';
+import { WaterRightsTradingModule } from './water-rights-trading/water-rights-trading.module';
 import { PrismaService } from './prisma/prisma.service';
 
 @Module({
@@ -23,6 +24,7 @@ import { PrismaService } from './prisma/prisma.service';
     InspectionModule,
     WaterBillingModule,
     RotationalIrrigationModule,
+    WaterRightsTradingModule,
   ],
   providers: [PrismaService],
 })

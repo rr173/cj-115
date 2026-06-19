@@ -68,3 +68,11 @@ export declare enum IrrigationRoundStatus {
     ENDED = "ENDED"
 }
 export declare const IrrigationRoundStatusNames: Record<IrrigationRoundStatus, string>;
+export declare enum SellOrderStatus {
+    ACTIVE = "ACTIVE",
+    PARTIAL = "PARTIAL",
+    COMPLETED = "COMPLETED",
+    CANCELLED = "CANCELLED",
+    EXPIRED = "EXPIRED"
+}
+export declare const SellOrderStatusNames: Record<SellOrderStatus, string>;

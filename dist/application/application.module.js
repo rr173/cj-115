@@ -16,12 +16,13 @@ const quota_module_1 = require("../quota/quota.module");
 const channel_module_1 = require("../channel/channel.module");
 const water_billing_module_1 = require("../water-billing/water-billing.module");
 const rotational_irrigation_module_1 = require("../rotational-irrigation/rotational-irrigation.module");
+const water_rights_trading_module_1 = require("../water-rights-trading/water-rights-trading.module");
 let ApplicationModule = class ApplicationModule {
 };
 exports.ApplicationModule = ApplicationModule;
 exports.ApplicationModule = ApplicationModule = __decorate([
     (0, common_1.Module)({
-        imports: [farmer_module_1.FarmerModule, quota_module_1.QuotaModule, channel_module_1.ChannelModule, (0, common_1.forwardRef)(() => water_billing_module_1.WaterBillingModule), rotational_irrigation_module_1.RotationalIrrigationModule],
+        imports: [farmer_module_1.FarmerModule, quota_module_1.QuotaModule, channel_module_1.ChannelModule, (0, common_1.forwardRef)(() => water_billing_module_1.WaterBillingModule), rotational_irrigation_module_1.RotationalIrrigationModule, (0, common_1.forwardRef)(() => water_rights_trading_module_1.WaterRightsTradingModule)],
         controllers: [application_controller_1.ApplicationController],
         providers: [application_service_1.ApplicationService, prisma_service_1.PrismaService],
         exports: [application_service_1.ApplicationService],

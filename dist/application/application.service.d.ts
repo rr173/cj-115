@@ -2,13 +2,15 @@ import { PrismaService } from '../prisma/prisma.service';
 import { QuotaService } from '../quota/quota.service';
 import { WaterBillingService } from '../water-billing/water-billing.service';
 import { RotationalIrrigationService } from '../rotational-irrigation/rotational-irrigation.service';
+import { WaterRightsTradingService } from '../water-rights-trading/water-rights-trading.service';
 import { CreateApplicationDto } from './dto';
 export declare class ApplicationService {
     private prisma;
     private quotaService;
     private waterBillingService;
     private rotationalIrrigationService;
-    constructor(prisma: PrismaService, quotaService: QuotaService, waterBillingService: WaterBillingService, rotationalIrrigationService: RotationalIrrigationService);
+    private waterRightsTradingService;
+    constructor(prisma: PrismaService, quotaService: QuotaService, waterBillingService: WaterBillingService, rotationalIrrigationService: RotationalIrrigationService, waterRightsTradingService: WaterRightsTradingService);
     create(dto: CreateApplicationDto): Promise<{
         warnings: string[];
         roundName: string;

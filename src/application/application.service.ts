@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { QuotaService } from '../quota/quota.service';
 import { WaterBillingService } from '../water-billing/water-billing.service';
 import { RotationalIrrigationService } from '../rotational-irrigation/rotational-irrigation.service';
+import { WaterRightsTradingService } from '../water-rights-trading/water-rights-trading.service';
 import { CreateApplicationDto } from './dto';
 import dayjs from 'dayjs';
 import { ApplicationStatus, QuotaQuarter } from '../common/enums';
@@ -22,6 +23,8 @@ export class ApplicationService {
     @Inject(forwardRef(() => WaterBillingService))
     private waterBillingService: WaterBillingService,
     private rotationalIrrigationService: RotationalIrrigationService,
+    @Inject(forwardRef(() => WaterRightsTradingService))
+    private waterRightsTradingService: WaterRightsTradingService,
   ) {}
 
   async create(dto: CreateApplicationDto) {
@@ -46,13 +49,11 @@ export class ApplicationService {
 
     const requestVolume = dto.expectedFlow * dto.expectedHours * 3600;
 
-    const appliedAmount = await this.quotaService.getFarmerAppliedAmount(farmer.id);
-    const totalAvailable = farmer.area * quota.amount;
-    const remaining = totalAvailable - appliedAmount;
+    const availableQuota = await this.waterRightsTradingService.getAvailableQuota(farmer.id, year, quarter);
 
-    if (requestVolume > remaining) {
+    if (requestVolume > availableQuota) {
       throw new BadRequestException(
-        `申请量(${requestVolume.toFixed(2)}m³)超过剩余可用量(${remaining.toFixed(2)}m³),总额度:${totalAvailable.toFixed(2)}m³,已申请:${appliedAmount.toFixed(2)}m³`,
+        `申请量(${requestVolume.toFixed(2)}m³)超过当前可用额度(${availableQuota.toFixed(2)}m³),额度不足可前往水权交易市场购买`,
       );
     }
 

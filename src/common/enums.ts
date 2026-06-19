@@ -137,3 +137,19 @@ export const IrrigationRoundStatusNames: Record<IrrigationRoundStatus, string> =
   [IrrigationRoundStatus.IN_PROGRESS]: '进行中',
   [IrrigationRoundStatus.ENDED]: '已结束',
 };
+
+export enum SellOrderStatus {
+  ACTIVE = 'ACTIVE',
+  PARTIAL = 'PARTIAL',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
+  EXPIRED = 'EXPIRED',
+}
+
+export const SellOrderStatusNames: Record<SellOrderStatus, string> = {
+  [SellOrderStatus.ACTIVE]: '挂牌中',
+  [SellOrderStatus.PARTIAL]: '部分成交',
+  [SellOrderStatus.COMPLETED]: '全部成交',
+  [SellOrderStatus.CANCELLED]: '已撤单',
+  [SellOrderStatus.EXPIRED]: '已过期',
+};
