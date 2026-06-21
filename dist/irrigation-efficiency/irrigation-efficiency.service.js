@@ -258,8 +258,25 @@ let IrrigationEfficiencyService = class IrrigationEfficiencyService {
         }
         const existingReport = await this.prisma.quarterlyAssessmentReport.findUnique({
             where: { year_quarter: { year, quarter } },
+            include: {
+                farmerAssessments: true,
+            },
         });
         if (existingReport) {
+            for (const fa of existingReport.farmerAssessments) {
+                if (fa.creditScoreDeducted) {
+                    try {
+                        await this.creditRatingService.adjustCreditScore(fa.farmerId, {
+                            adjustScore: -CREDIT_DEDUCTION_SCORE,
+                            reason: `${year}年${quarter}季度节水考核重算,回滚上次扣减的5分`,
+                            operator: 'irrigation-efficiency-reassess',
+                        });
+                    }
+                    catch (e) {
+                        console.error(`[考核重算] 回滚用水户${fa.farmerId}信用分失败:`, e.message);
+                    }
+                }
+            }
             await this.prisma.channelQuarterlyAssessment.deleteMany({ where: { reportId: existingReport.id } });
             await this.prisma.farmerQuarterlyAssessment.deleteMany({ where: { reportId: existingReport.id } });
             await this.prisma.quarterlyAssessmentReport.delete({ where: { id: existingReport.id } });
@@ -285,54 +302,75 @@ let IrrigationEfficiencyService = class IrrigationEfficiencyService {
         const months = quarterToMonths(quarter);
         const quarterStart = (0, dayjs_1.default)(`${year}-${String(months[0]).padStart(2, '0')}-01`).startOf('day');
         const quarterEnd = quarterStart.add(3, 'month');
-        const channels = await this.prisma.channel.findMany({
-            orderBy: [{ level: 'asc' }, { code: 'asc' }],
+        const efficiencyRecords = await this.prisma.irrigationEfficiencyRecord.findMany({
+            where: {
+                createdAt: { gte: quarterStart.toDate(), lt: quarterEnd.toDate() },
+                actualUsageVolume: { not: null },
+            },
+            include: {
+                channel: { select: { id: true, code: true, level: true, waterUtilizationCoefficient: true } },
+            },
         });
-        const results = [];
-        for (const channel of channels) {
-            const allocs = await this.prisma.waterAllocation.findMany({
-                where: {
-                    channelId: channel.id,
-                    startTime: { gte: quarterStart.toDate(), lt: quarterEnd.toDate() },
-                },
-                include: {
-                    application: {
-                        include: {
-                            actualUsage: true,
-                            farmer: { include: { channel: true } },
-                        },
-                    },
-                },
-            });
-            if (allocs.length === 0)
-                continue;
-            let totalSupplied = 0;
-            let totalReceived = 0;
-            for (const alloc of allocs) {
-                const durationSec = (new Date(alloc.endTime).getTime() - new Date(alloc.startTime).getTime()) / 1000;
-                const suppliedVolume = alloc.flow * durationSec;
-                totalSupplied += suppliedVolume;
-                if (alloc.application.actualUsage) {
-                    const path = await this.channelService.getPathToRoot(alloc.application.farmer.channelId);
-                    const isOnPath = path.some((ch) => ch.id === channel.id);
-                    if (isOnPath) {
-                        totalReceived += alloc.application.actualUsage.actualVolume;
-                    }
+        if (efficiencyRecords.length === 0)
+            return [];
+        const channelStats = new Map();
+        for (const record of efficiencyRecords) {
+            const path = await this.channelService.getPathToRoot(record.channelId);
+            const pathReversed = [...path].reverse();
+            let cumulativeInCoeff = 1;
+            for (let i = 0; i < pathReversed.length; i++) {
+                const ch = pathReversed[i];
+                const chOutCoeff = cumulativeInCoeff * ch.waterUtilizationCoefficient;
+                const entryVolume = record.plannedVolume * cumulativeInCoeff;
+                const theoreticalFieldFromChannel = record.theoreticalFieldVolume / cumulativeInCoeff;
+                const actualFieldFromChannel = (record.actualUsageVolume || 0) / cumulativeInCoeff;
+                if (!channelStats.has(ch.id)) {
+                    channelStats.set(ch.id, {
+                        channelId: ch.id,
+                        channelCode: ch.code,
+                        channelLevel: ch.level,
+                        configuredCoefficient: ch.waterUtilizationCoefficient,
+                        totalPlannedVolume: 0,
+                        totalTheoreticalFieldVolume: 0,
+                        totalActualFieldVolume: 0,
+                        recordCount: 0,
+                    });
                 }
+                const stat = channelStats.get(ch.id);
+                stat.totalPlannedVolume += entryVolume;
+                stat.totalTheoreticalFieldVolume += theoreticalFieldFromChannel;
+                stat.totalActualFieldVolume += actualFieldFromChannel;
+                stat.recordCount += 1;
+                cumulativeInCoeff = chOutCoeff;
             }
-            const actualLossRate = totalSupplied > 0 ? 1 - (totalReceived / totalSupplied) : 0;
-            const configuredLossRate = 1 - channel.waterUtilizationCoefficient;
-            const deviation = actualLossRate - configuredLossRate;
-            const assessmentStatus = Math.abs(deviation) > CHANNEL_ASSESSMENT_THRESHOLD ? 'UNQUALIFIED' : 'QUALIFIED';
+        }
+        const results = [];
+        const sortedChannels = Array.from(channelStats.values()).sort((a, b) => {
+            const levelOrder = ['MAIN', 'BRANCH', 'LATERAL', 'FARM'];
+            const la = levelOrder.indexOf(a.channelLevel);
+            const lb = levelOrder.indexOf(b.channelLevel);
+            if (la !== lb)
+                return la - lb;
+            return a.channelCode.localeCompare(b.channelCode);
+        });
+        for (const stat of sortedChannels) {
+            const theoreticalComposite = stat.totalPlannedVolume > 0
+                ? stat.totalTheoreticalFieldVolume / stat.totalPlannedVolume
+                : 0;
+            const actualComposite = stat.totalPlannedVolume > 0
+                ? stat.totalActualFieldVolume / stat.totalPlannedVolume
+                : 0;
+            const deviation = actualComposite - theoreticalComposite;
+            const assessmentStatus = deviation < -CHANNEL_ASSESSMENT_THRESHOLD ? 'UNQUALIFIED' : 'QUALIFIED';
             const suggestion = assessmentStatus === 'UNQUALIFIED'
-                ? `实际损耗率(${(actualLossRate * 100).toFixed(2)}%)与配置系数偏差超过5个百分点,建议巡检维修`
+                ? `实际综合利用系数(${(actualComposite * 100).toFixed(2)}%)比理论综合利用系数(${(theoreticalComposite * 100).toFixed(2)}%)低${Math.abs(deviation * 100).toFixed(2)}个百分点,建议巡检维修`
                 : null;
             const saved = await this.prisma.channelQuarterlyAssessment.create({
                 data: {
                     reportId,
-                    channelId: channel.id,
-                    configuredCoefficient: channel.waterUtilizationCoefficient,
-                    actualLossRate,
+                    channelId: stat.channelId,
+                    configuredCoefficient: stat.configuredCoefficient,
+                    actualLossRate: 1 - actualComposite,
                     deviation,
                     assessmentStatus,
                     suggestion,
@@ -342,8 +380,11 @@ let IrrigationEfficiencyService = class IrrigationEfficiencyService {
             results.push({
                 channel: { id: saved.channel.id, code: saved.channel.code, name: saved.channel.name, level: saved.channel.level },
                 configuredCoefficient: saved.configuredCoefficient,
-                actualLossRate: +(saved.actualLossRate * 100).toFixed(2),
-                deviation: +(saved.deviation * 100).toFixed(2),
+                theoreticalCompositeCoefficient: +theoreticalComposite.toFixed(6),
+                actualCompositeCoefficient: +actualComposite.toFixed(6),
+                actualLossRate: +((1 - actualComposite) * 100).toFixed(2),
+                deviation: +(deviation * 100).toFixed(2),
+                recordCount: stat.recordCount,
                 assessmentStatus: saved.assessmentStatus,
                 assessmentStatusName: saved.assessmentStatus === 'QUALIFIED' ? '达标' : '效率不达标',
                 suggestion: saved.suggestion,
