@@ -32,6 +32,9 @@ model Channel {
   monitors      WaterLevelMonitor[]
   gate          Gate?
   alerts        WaterLevelAlert[]
+  sourceReports WaterSourceReport[]
+  transfersFrom ChannelTransfer[] @relation("TransferSource")
+  transfersTo   ChannelTransfer[] @relation("TransferTarget")
 }
 
 model Farmer {
@@ -110,6 +113,9 @@ model WaterAllocation {
   createdAt      DateTime @default(now())
 
   @@index([channelId, startTime, endTime])
+
+  droughtStatus  String  @default("NORMAL")
+  originalFlow   Float?
 }
 
 model ActualUsage {
@@ -527,4 +533,60 @@ model CreditScoreHistory {
 
   @@index([farmerId])
   @@index([createdAt])
+}
+
+model WaterSourceReport {
+  id         String   @id @default(uuid())
+  channelId  String
+  channel    Channel  @relation(fields: [channelId], references: [id])
+  flow       Float
+  reportedAt DateTime
+  createdAt  DateTime @default(now())
+
+  @@index([channelId])
+  @@index([reportedAt])
+}
+
+model DroughtAlertEvent {
+  id                String   @id @default(uuid())
+  level             String
+  previousLevel     String?
+  supplyDemandRatio Float
+  actualFlow        Float
+  demandFlow        Float
+  emergencyLevel    String?
+  message           String
+  createdAt         DateTime @default(now())
+
+  @@index([level])
+  @@index([createdAt])
+}
+
+model ChannelTransfer {
+  id                  String    @id @default(uuid())
+  sourceChannelId     String
+  sourceChannel       Channel   @relation("TransferSource", fields: [sourceChannelId], references: [id])
+  targetChannelId     String
+  targetChannel       Channel   @relation("TransferTarget", fields: [targetChannelId], references: [id])
+  transferredCapacity Float
+  status              String    @default("ACTIVE")
+  createdAt           DateTime  @default(now())
+  releasedAt          DateTime?
+
+  @@index([sourceChannelId])
+  @@index([targetChannelId])
+  @@index([status])
+}
+
+model SupplyDemandSnapshot {
+  id                String   @id @default(uuid())
+  hour              DateTime
+  actualFlow        Float
+  demandFlow        Float
+  supplyDemandRatio Float
+  droughtStatus     String
+  createdAt         DateTime @default(now())
+
+  @@unique([hour])
+  @@index([hour])
 }

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreditHistoryTypeNames = exports.CreditHistoryType = exports.CreditLevelSortOrder = exports.CreditQuotaMultiplier = exports.CreditLevelNames = exports.CreditLevel = exports.GateAdjustmentReasonNames = exports.GateAdjustmentReason = exports.WaterLevelAlertTypeNames = exports.WaterLevelAlertType = exports.MonitorStatusNames = exports.MonitorStatus = exports.GateControlModeNames = exports.GateControlMode = exports.SellOrderStatusNames = exports.SellOrderStatus = exports.IrrigationRoundStatusNames = exports.IrrigationRoundStatus = exports.PaymentMethodNames = exports.PaymentMethod = exports.WaterBillStatusNames = exports.WaterBillStatus = exports.MaintenanceOrderStatusNames = exports.MaintenanceOrderStatus = exports.ProblemLevelNames = exports.ProblemLevel = exports.InspectionChannelStatusNames = exports.InspectionChannelStatus = exports.QuotaQuarterNames = exports.QuotaQuarter = exports.NotificationTypeNames = exports.NotificationType = exports.ApplicationStatusNames = exports.ApplicationStatus = exports.ChannelLevelNames = exports.ChannelLevel = void 0;
+exports.CreditHistoryTypeNames = exports.CreditHistoryType = exports.ChannelTransferStatusNames = exports.ChannelTransferStatus = exports.AllocationDroughtStatusNames = exports.AllocationDroughtStatus = exports.EmergencyLevelNames = exports.EmergencyLevel = exports.DroughtStatusNames = exports.DroughtStatus = exports.CreditLevelSortOrder = exports.CreditQuotaMultiplier = exports.CreditLevelNames = exports.CreditLevel = exports.GateAdjustmentReasonNames = exports.GateAdjustmentReason = exports.WaterLevelAlertTypeNames = exports.WaterLevelAlertType = exports.MonitorStatusNames = exports.MonitorStatus = exports.GateControlModeNames = exports.GateControlMode = exports.SellOrderStatusNames = exports.SellOrderStatus = exports.IrrigationRoundStatusNames = exports.IrrigationRoundStatus = exports.PaymentMethodNames = exports.PaymentMethod = exports.WaterBillStatusNames = exports.WaterBillStatus = exports.MaintenanceOrderStatusNames = exports.MaintenanceOrderStatus = exports.ProblemLevelNames = exports.ProblemLevel = exports.InspectionChannelStatusNames = exports.InspectionChannelStatus = exports.QuotaQuarterNames = exports.QuotaQuarter = exports.NotificationTypeNames = exports.NotificationType = exports.ApplicationStatusNames = exports.ApplicationStatus = exports.ChannelLevelNames = exports.ChannelLevel = void 0;
 var ChannelLevel;
 (function (ChannelLevel) {
     ChannelLevel["MAIN"] = "MAIN";
@@ -214,6 +214,48 @@ exports.CreditLevelSortOrder = {
     [CreditLevel.B]: 1,
     [CreditLevel.C]: 2,
     [CreditLevel.D]: 2,
+};
+var DroughtStatus;
+(function (DroughtStatus) {
+    DroughtStatus["ABUNDANT"] = "ABUNDANT";
+    DroughtStatus["NORMAL"] = "NORMAL";
+    DroughtStatus["TENSE"] = "TENSE";
+    DroughtStatus["SEVERE"] = "SEVERE";
+})(DroughtStatus || (exports.DroughtStatus = DroughtStatus = {}));
+exports.DroughtStatusNames = {
+    [DroughtStatus.ABUNDANT]: '充裕',
+    [DroughtStatus.NORMAL]: '正常',
+    [DroughtStatus.TENSE]: '紧张',
+    [DroughtStatus.SEVERE]: '严重缺水',
+};
+var EmergencyLevel;
+(function (EmergencyLevel) {
+    EmergencyLevel["LEVEL_1"] = "LEVEL_1";
+    EmergencyLevel["LEVEL_2"] = "LEVEL_2";
+})(EmergencyLevel || (exports.EmergencyLevel = EmergencyLevel = {}));
+exports.EmergencyLevelNames = {
+    [EmergencyLevel.LEVEL_1]: '一级响应',
+    [EmergencyLevel.LEVEL_2]: '二级响应',
+};
+var AllocationDroughtStatus;
+(function (AllocationDroughtStatus) {
+    AllocationDroughtStatus["NORMAL"] = "NORMAL";
+    AllocationDroughtStatus["SUSPENDED"] = "SUSPENDED";
+    AllocationDroughtStatus["REDUCED"] = "REDUCED";
+})(AllocationDroughtStatus || (exports.AllocationDroughtStatus = AllocationDroughtStatus = {}));
+exports.AllocationDroughtStatusNames = {
+    [AllocationDroughtStatus.NORMAL]: '正常',
+    [AllocationDroughtStatus.SUSPENDED]: '因旱情暂停',
+    [AllocationDroughtStatus.REDUCED]: '已削减',
+};
+var ChannelTransferStatus;
+(function (ChannelTransferStatus) {
+    ChannelTransferStatus["ACTIVE"] = "ACTIVE";
+    ChannelTransferStatus["RELEASED"] = "RELEASED";
+})(ChannelTransferStatus || (exports.ChannelTransferStatus = ChannelTransferStatus = {}));
+exports.ChannelTransferStatusNames = {
+    [ChannelTransferStatus.ACTIVE]: '借调中',
+    [ChannelTransferStatus.RELEASED]: '已解除',
 };
 var CreditHistoryType;
 (function (CreditHistoryType) {

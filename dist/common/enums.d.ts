@@ -109,6 +109,29 @@ export declare enum CreditLevel {
 export declare const CreditLevelNames: Record<CreditLevel, string>;
 export declare const CreditQuotaMultiplier: Record<CreditLevel, number>;
 export declare const CreditLevelSortOrder: Record<CreditLevel, number>;
+export declare enum DroughtStatus {
+    ABUNDANT = "ABUNDANT",
+    NORMAL = "NORMAL",
+    TENSE = "TENSE",
+    SEVERE = "SEVERE"
+}
+export declare const DroughtStatusNames: Record<DroughtStatus, string>;
+export declare enum EmergencyLevel {
+    LEVEL_1 = "LEVEL_1",
+    LEVEL_2 = "LEVEL_2"
+}
+export declare const EmergencyLevelNames: Record<EmergencyLevel, string>;
+export declare enum AllocationDroughtStatus {
+    NORMAL = "NORMAL",
+    SUSPENDED = "SUSPENDED",
+    REDUCED = "REDUCED"
+}
+export declare const AllocationDroughtStatusNames: Record<AllocationDroughtStatus, string>;
+export declare enum ChannelTransferStatus {
+    ACTIVE = "ACTIVE",
+    RELEASED = "RELEASED"
+}
+export declare const ChannelTransferStatusNames: Record<ChannelTransferStatus, string>;
 export declare enum CreditHistoryType {
     RECALC = "RECALC",
     MANUAL = "MANUAL"

@@ -230,6 +230,52 @@ export const CreditLevelSortOrder: Record<CreditLevel, number> = {
   [CreditLevel.D]: 2,
 };
 
+export enum DroughtStatus {
+  ABUNDANT = 'ABUNDANT',
+  NORMAL = 'NORMAL',
+  TENSE = 'TENSE',
+  SEVERE = 'SEVERE',
+}
+
+export const DroughtStatusNames: Record<DroughtStatus, string> = {
+  [DroughtStatus.ABUNDANT]: '充裕',
+  [DroughtStatus.NORMAL]: '正常',
+  [DroughtStatus.TENSE]: '紧张',
+  [DroughtStatus.SEVERE]: '严重缺水',
+};
+
+export enum EmergencyLevel {
+  LEVEL_1 = 'LEVEL_1',
+  LEVEL_2 = 'LEVEL_2',
+}
+
+export const EmergencyLevelNames: Record<EmergencyLevel, string> = {
+  [EmergencyLevel.LEVEL_1]: '一级响应',
+  [EmergencyLevel.LEVEL_2]: '二级响应',
+};
+
+export enum AllocationDroughtStatus {
+  NORMAL = 'NORMAL',
+  SUSPENDED = 'SUSPENDED',
+  REDUCED = 'REDUCED',
+}
+
+export const AllocationDroughtStatusNames: Record<AllocationDroughtStatus, string> = {
+  [AllocationDroughtStatus.NORMAL]: '正常',
+  [AllocationDroughtStatus.SUSPENDED]: '因旱情暂停',
+  [AllocationDroughtStatus.REDUCED]: '已削减',
+};
+
+export enum ChannelTransferStatus {
+  ACTIVE = 'ACTIVE',
+  RELEASED = 'RELEASED',
+}
+
+export const ChannelTransferStatusNames: Record<ChannelTransferStatus, string> = {
+  [ChannelTransferStatus.ACTIVE]: '借调中',
+  [ChannelTransferStatus.RELEASED]: '已解除',
+};
+
 export enum CreditHistoryType {
   RECALC = 'RECALC',
   MANUAL = 'MANUAL',

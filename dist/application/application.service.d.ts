@@ -95,6 +95,8 @@ export declare class ApplicationService {
             startTime: Date;
             endTime: Date;
             flow: number;
+            droughtStatus: string;
+            originalFlow: number | null;
         })[];
     } & {
         id: string;
@@ -174,6 +176,8 @@ export declare class ApplicationService {
             startTime: Date;
             endTime: Date;
             flow: number;
+            droughtStatus: string;
+            originalFlow: number | null;
         })[];
     } & {
         id: string;
@@ -220,6 +224,8 @@ export declare class ApplicationService {
             startTime: Date;
             endTime: Date;
             flow: number;
+            droughtStatus: string;
+            originalFlow: number | null;
         })[];
     } & {
         id: string;

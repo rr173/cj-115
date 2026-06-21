@@ -21,6 +21,7 @@ const rotational_irrigation_module_1 = require("./rotational-irrigation/rotation
 const water_rights_trading_module_1 = require("./water-rights-trading/water-rights-trading.module");
 const water_level_gate_control_module_1 = require("./water-level-gate-control/water-level-gate-control.module");
 const credit_rating_module_1 = require("./credit-rating/credit-rating.module");
+const drought_monitoring_module_1 = require("./drought-monitoring/drought-monitoring.module");
 const prisma_service_1 = require("./prisma/prisma.service");
 let AppModule = class AppModule {
 };
@@ -41,6 +42,7 @@ exports.AppModule = AppModule = __decorate([
             water_rights_trading_module_1.WaterRightsTradingModule,
             water_level_gate_control_module_1.WaterLevelGateControlModule,
             credit_rating_module_1.CreditRatingModule,
+            drought_monitoring_module_1.DroughtMonitoringModule,
         ],
         providers: [prisma_service_1.PrismaService],
     })
