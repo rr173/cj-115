@@ -182,7 +182,24 @@ export declare class DisputeMediationService {
             count: number;
             avgProcessingDays: number;
         }[];
+        creditPenalty: {
+            totalChecked: number;
+            penalizedCount: number;
+            details: any[];
+        };
     }>;
+    private hasQuarterlyDisputePenalty;
+    private applyPenaltyForFarmerInQuarter;
+    private applyQuarterlyCreditPenalty;
     private checkAndApplyCreditPenalty;
+    triggerQuarterlyCreditPenalty(year: number, quarter: string): Promise<{
+        totalChecked: number;
+        penalizedCount: number;
+        details: any[];
+    }>;
+    triggerAllQuarterlyCreditPenalty(): Promise<{
+        year: number;
+        quarterResults: any[];
+    }>;
     handleAutoArchive(): Promise<void>;
 }

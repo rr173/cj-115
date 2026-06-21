@@ -93,6 +93,11 @@ export declare class DisputeMediationController {
             count: number;
             avgProcessingDays: number;
         }[];
+        creditPenalty: {
+            totalChecked: number;
+            penalizedCount: number;
+            details: any[];
+        };
     }>;
     findOne(id: string): Promise<{
         id: string;
@@ -178,5 +183,14 @@ export declare class DisputeMediationController {
         status: string;
         statusName: string;
         archivedAt: Date;
+    }>;
+    triggerQuarterlyCreditPenalty(year: string, quarter: string): Promise<{
+        totalChecked: number;
+        penalizedCount: number;
+        details: any[];
+    }>;
+    triggerAllQuarterlyCreditPenalty(): Promise<{
+        year: number;
+        quarterResults: any[];
     }>;
 }

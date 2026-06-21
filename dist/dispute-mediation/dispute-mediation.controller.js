@@ -52,6 +52,12 @@ let DisputeMediationController = class DisputeMediationController {
     archive(id) {
         return this.service.archiveDispute(id);
     }
+    triggerQuarterlyCreditPenalty(year, quarter) {
+        return this.service.triggerQuarterlyCreditPenalty(parseInt(year, 10), quarter);
+    }
+    triggerAllQuarterlyCreditPenalty() {
+        return this.service.triggerAllQuarterlyCreditPenalty();
+    }
 };
 exports.DisputeMediationController = DisputeMediationController;
 __decorate([
@@ -153,6 +159,24 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], DisputeMediationController.prototype, "archive", null);
+__decorate([
+    (0, common_1.Post)('credit-penalty/trigger'),
+    (0, swagger_1.ApiOperation)({ summary: '手动触发某季度纠纷信用扣分检查(按季度扫描所有涉及纠纷的用水户,达到阈值则扣分)' }),
+    (0, swagger_1.ApiQuery)({ name: 'year', description: '年份', type: Number }),
+    (0, swagger_1.ApiQuery)({ name: 'quarter', description: '季度(Q1/Q2/Q3/Q4)' }),
+    __param(0, (0, common_1.Query)('year')),
+    __param(1, (0, common_1.Query)('quarter')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], DisputeMediationController.prototype, "triggerQuarterlyCreditPenalty", null);
+__decorate([
+    (0, common_1.Post)('credit-penalty/trigger-all'),
+    (0, swagger_1.ApiOperation)({ summary: '手动触发本年度全部季度纠纷信用扣分检查' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], DisputeMediationController.prototype, "triggerAllQuarterlyCreditPenalty", null);
 exports.DisputeMediationController = DisputeMediationController = __decorate([
     (0, swagger_1.ApiTags)('用水纠纷调解与台账管理'),
     (0, common_1.Controller)('dispute-mediation'),

@@ -91,4 +91,21 @@ export class DisputeMediationController {
   archive(@Param('id') id: string) {
     return this.service.archiveDispute(id);
   }
+
+  @Post('credit-penalty/trigger')
+  @ApiOperation({ summary: '手动触发某季度纠纷信用扣分检查(按季度扫描所有涉及纠纷的用水户,达到阈值则扣分)' })
+  @ApiQuery({ name: 'year', description: '年份', type: Number })
+  @ApiQuery({ name: 'quarter', description: '季度(Q1/Q2/Q3/Q4)' })
+  triggerQuarterlyCreditPenalty(
+    @Query('year') year: string,
+    @Query('quarter') quarter: string,
+  ) {
+    return this.service.triggerQuarterlyCreditPenalty(parseInt(year, 10), quarter);
+  }
+
+  @Post('credit-penalty/trigger-all')
+  @ApiOperation({ summary: '手动触发本年度全部季度纠纷信用扣分检查' })
+  triggerAllQuarterlyCreditPenalty() {
+    return this.service.triggerAllQuarterlyCreditPenalty();
+  }
 }

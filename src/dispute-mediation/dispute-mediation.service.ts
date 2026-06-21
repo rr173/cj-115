@@ -25,6 +25,13 @@ const DISPUTE_CREDIT_PENALTY_SCORE = -3;
 const DISPUTE_CREDIT_THRESHOLD = 3;
 const AUTO_ARCHIVE_DAYS = 30;
 
+const QUARTER_NAME_MAP: Record<string, string> = {
+  [QuotaQuarter.Q1]: '第一季度',
+  [QuotaQuarter.Q2]: '第二季度',
+  [QuotaQuarter.Q3]: '第三季度',
+  [QuotaQuarter.Q4]: '第四季度',
+};
+
 function monthToQuarter(month: number): QuotaQuarter {
   if (month <= 3) return QuotaQuarter.Q1;
   if (month <= 6) return QuotaQuarter.Q2;
@@ -522,13 +529,134 @@ export class DisputeMediationService {
       ? Math.round(allDays.reduce((a, b) => a + b, 0) / allDays.length * 10) / 10
       : null;
 
+    const creditPenaltyResults = await this.applyQuarterlyCreditPenalty(year, quarter);
+
     return {
       year,
       quarter,
-      quarterName: `第${['一', '二', '三', '四'][months[0] / 3 - 1]}季度`,
+      quarterName: QUARTER_NAME_MAP[quarter] || `第${quarter}季度`,
       totalDisputes: disputes.length,
       totalAvgProcessingDays: totalAvgDays,
       typeStats,
+      creditPenalty: creditPenaltyResults,
+    };
+  }
+
+  private async hasQuarterlyDisputePenalty(farmerId: string, year: number, quarter: string): Promise<boolean> {
+    const reasonPrefix = `${year}年${quarter}季度涉及`;
+    const reasonSuffix = `条纠纷,信用分扣${Math.abs(DISPUTE_CREDIT_PENALTY_SCORE)}分`;
+    const count = await this.prisma.creditScoreHistory.count({
+      where: {
+        farmerId,
+        operator: 'dispute-mediation-system',
+        reason: {
+          startsWith: reasonPrefix,
+          contains: reasonSuffix,
+        },
+        createdAt: {
+          gte: dayjs(`${year}-01-01`).startOf('day').toDate(),
+          lt: dayjs(`${year + 1}-01-01`).startOf('day').toDate(),
+        },
+      },
+    });
+    return count > 0;
+  }
+
+  private async applyPenaltyForFarmerInQuarter(
+    farmerId: string,
+    year: number,
+    quarter: string,
+  ): Promise<{ farmerId: string; disputeCount: number; penalized: boolean; reason: string }> {
+    const months = quarterToMonths(quarter);
+    const quarterStart = dayjs(`${year}-${String(months[0]).padStart(2, '0')}-01`).startOf('day');
+    const quarterEnd = quarterStart.add(3, 'month');
+
+    const disputeCount = await this.prisma.disputeFarmerLink.count({
+      where: {
+        farmerId,
+        dispute: {
+          occurredAt: {
+            gte: quarterStart.toDate(),
+            lt: quarterEnd.toDate(),
+          },
+        },
+      },
+    });
+
+    if (disputeCount < DISPUTE_CREDIT_THRESHOLD) {
+      return {
+        farmerId,
+        disputeCount,
+        penalized: false,
+        reason: `当季纠纷${disputeCount}条,未达扣分阈值${DISPUTE_CREDIT_THRESHOLD}条`,
+      };
+    }
+
+    const alreadyPenalized = await this.hasQuarterlyDisputePenalty(farmerId, year, quarter);
+    if (alreadyPenalized) {
+      return {
+        farmerId,
+        disputeCount,
+        penalized: false,
+        reason: `${year}年${quarter}季度已因纠纷扣过信用分,不再重复扣分`,
+      };
+    }
+
+    try {
+      await this.creditRatingService.adjustCreditScore(farmerId, {
+        adjustScore: DISPUTE_CREDIT_PENALTY_SCORE,
+        reason: `${year}年${quarter}季度涉及${disputeCount}条纠纷,信用分扣${Math.abs(DISPUTE_CREDIT_PENALTY_SCORE)}分`,
+        operator: 'dispute-mediation-system',
+      });
+      return {
+        farmerId,
+        disputeCount,
+        penalized: true,
+        reason: `当季纠纷${disputeCount}条,达到阈值,已扣信用分${Math.abs(DISPUTE_CREDIT_PENALTY_SCORE)}分`,
+      };
+    } catch (e) {
+      console.error(`[纠纷信用扣分] 用水户${farmerId}信用扣分失败:`, e.message);
+      return {
+        farmerId,
+        disputeCount,
+        penalized: false,
+        reason: `扣分失败: ${e.message}`,
+      };
+    }
+  }
+
+  private async applyQuarterlyCreditPenalty(
+    year: number,
+    quarter: string,
+  ): Promise<{ totalChecked: number; penalizedCount: number; details: any[] }> {
+    const months = quarterToMonths(quarter);
+    const quarterStart = dayjs(`${year}-${String(months[0]).padStart(2, '0')}-01`).startOf('day');
+    const quarterEnd = quarterStart.add(3, 'month');
+
+    const farmerLinks = await this.prisma.disputeFarmerLink.findMany({
+      where: {
+        dispute: {
+          occurredAt: {
+            gte: quarterStart.toDate(),
+            lt: quarterEnd.toDate(),
+          },
+        },
+      },
+      select: { farmerId: true },
+      distinct: ['farmerId'],
+    });
+
+    const results = [];
+    for (const { farmerId } of farmerLinks) {
+      const result = await this.applyPenaltyForFarmerInQuarter(farmerId, year, quarter);
+      results.push(result);
+    }
+
+    const penalizedCount = results.filter((r) => r.penalized).length;
+    return {
+      totalChecked: farmerLinks.length,
+      penalizedCount,
+      details: results,
     };
   }
 
@@ -537,35 +665,34 @@ export class DisputeMediationService {
     const currentMonth = now.month() + 1;
     const currentYear = now.year();
     const quarter = monthToQuarter(currentMonth);
-    const months = quarterToMonths(quarter);
-    const quarterStart = dayjs(`${currentYear}-${String(months[0]).padStart(2, '0')}-01`).startOf('day');
-    const quarterEnd = quarterStart.add(3, 'month');
 
     for (const farmerId of farmerIds) {
-      const disputeCount = await this.prisma.disputeFarmerLink.count({
-        where: {
-          farmerId,
-          dispute: {
-            occurredAt: {
-              gte: quarterStart.toDate(),
-              lt: quarterEnd.toDate(),
-            },
-          },
-        },
-      });
-
-      if (disputeCount >= DISPUTE_CREDIT_THRESHOLD) {
-        try {
-          await this.creditRatingService.adjustCreditScore(farmerId, {
-            adjustScore: DISPUTE_CREDIT_PENALTY_SCORE,
-            reason: `${currentYear}年${quarter}季度涉及${disputeCount}条纠纷,信用分扣${Math.abs(DISPUTE_CREDIT_PENALTY_SCORE)}分`,
-            operator: 'dispute-mediation-system',
-          });
-        } catch (e) {
-          console.error(`[纠纷信用扣分] 用水户${farmerId}信用扣分失败:`, e.message);
-        }
-      }
+      await this.applyPenaltyForFarmerInQuarter(farmerId, currentYear, quarter);
     }
+  }
+
+  async triggerQuarterlyCreditPenalty(year: number, quarter: string) {
+    const months = quarterToMonths(quarter);
+    if (months.length === 0) {
+      throw new BadRequestException('无效的季度,请使用Q1/Q2/Q3/Q4');
+    }
+    return this.applyQuarterlyCreditPenalty(year, quarter);
+  }
+
+  async triggerAllQuarterlyCreditPenalty() {
+    const now = dayjs();
+    const currentYear = now.year();
+
+    const allResults = [];
+    for (const q of [QuotaQuarter.Q1, QuotaQuarter.Q2, QuotaQuarter.Q3, QuotaQuarter.Q4]) {
+      const result = await this.applyQuarterlyCreditPenalty(currentYear, q);
+      allResults.push({ year: currentYear, quarter: q, ...result });
+    }
+
+    return {
+      year: currentYear,
+      quarterResults: allResults,
+    };
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT, { name: 'dispute_auto_archive' })
