@@ -20,6 +20,7 @@ model Channel {
   propagationDelay Int
   inspectionStatus    String @default("NORMAL")
   inspectionCycleDays Int    @default(30)
+  waterUtilizationCoefficient Float @default(0.95)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @default(now())
 
@@ -35,6 +36,8 @@ model Channel {
   sourceReports WaterSourceReport[]
   transfersFrom ChannelTransfer[] @relation("TransferSource")
   transfersTo   ChannelTransfer[] @relation("TransferTarget")
+  efficiencyRecords IrrigationEfficiencyRecord[]
+  channelAssessments ChannelQuarterlyAssessment[]
 }
 
 model Farmer {
@@ -59,6 +62,8 @@ model Farmer {
   waterRightsSellTrades WaterRightsTradeRecord[] @relation("SellTrades")
   credit         FarmerCredit?
   creditHistories CreditScoreHistory[]
+  efficiencyRecords IrrigationEfficiencyRecord[]
+  farmerAssessments FarmerQuarterlyAssessment[]
 }
 
 model Quota {
@@ -99,6 +104,7 @@ model WaterApplication {
   actualUsage ActualUsage?
   postponeHistories ApplicationPostponeHistory[]
   notifications Notification[]
+  efficiencyRecord IrrigationEfficiencyRecord?
 }
 
 model WaterAllocation {
@@ -589,4 +595,69 @@ model SupplyDemandSnapshot {
 
   @@unique([hour])
   @@index([hour])
+}
+
+model IrrigationEfficiencyRecord {
+  id                            String   @id @default(uuid())
+  applicationId                 String   @unique
+  application                   WaterApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  farmerId                      String
+  farmer                        Farmer   @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  channelId                     String
+  channel                       Channel  @relation(fields: [channelId], references: [id])
+  plannedVolume                 Float
+  theoreticalLossVolume         Float
+  theoreticalFieldVolume        Float
+  actualUsageVolume             Float?
+  efficiencyDeviationRate       Float?
+  compositeUtilizationCoefficient Float
+  createdAt                     DateTime @default(now())
+
+  @@index([farmerId])
+  @@index([channelId])
+  @@index([createdAt])
+}
+
+model QuarterlyAssessmentReport {
+  id        String   @id @default(uuid())
+  year      Int
+  quarter   String
+  createdAt DateTime @default(now())
+
+  channelAssessments ChannelQuarterlyAssessment[]
+  farmerAssessments  FarmerQuarterlyAssessment[]
+
+  @@unique([year, quarter])
+}
+
+model ChannelQuarterlyAssessment {
+  id                     String   @id @default(uuid())
+  reportId               String
+  report                 QuarterlyAssessmentReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  channelId              String
+  channel                Channel  @relation(fields: [channelId], references: [id])
+  configuredCoefficient  Float
+  actualLossRate         Float
+  deviation              Float
+  assessmentStatus       String
+  suggestion             String?
+  createdAt              DateTime @default(now())
+
+  @@index([reportId])
+  @@index([channelId])
+}
+
+model FarmerQuarterlyAssessment {
+  id                   String   @id @default(uuid())
+  reportId             String
+  report               QuarterlyAssessmentReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  farmerId             String
+  farmer               Farmer   @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  averageDeviationRate Float
+  assessmentStatus     String
+  creditScoreDeducted  Boolean  @default(false)
+  createdAt            DateTime @default(now())
+
+  @@index([reportId])
+  @@index([farmerId])
 }

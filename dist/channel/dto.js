@@ -49,6 +49,14 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateChannelDto.prototype, "parentId", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: '渠道水利用系数(0~1),默认0.95', default: 0.95 }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0),
+    (0, class_validator_1.Max)(1),
+    __metadata("design:type", Number)
+], CreateChannelDto.prototype, "waterUtilizationCoefficient", void 0);
 class UpdateChannelDto {
 }
 exports.UpdateChannelDto = UpdateChannelDto;
@@ -72,4 +80,12 @@ __decorate([
     (0, class_validator_1.IsPositive)(),
     __metadata("design:type", Number)
 ], UpdateChannelDto.prototype, "length", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: '渠道水利用系数(0~1)' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0),
+    (0, class_validator_1.Max)(1),
+    __metadata("design:type", Number)
+], UpdateChannelDto.prototype, "waterUtilizationCoefficient", void 0);
 //# sourceMappingURL=dto.js.map

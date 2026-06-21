@@ -129,11 +129,11 @@ let ChannelService = class ChannelService {
         while (currentId) {
             const ch = await this.prisma.channel.findUnique({
                 where: { id: currentId },
-                select: { id: true, code: true, level: true, propagationDelay: true, maxFlow: true, parentId: true },
+                select: { id: true, code: true, level: true, propagationDelay: true, maxFlow: true, waterUtilizationCoefficient: true, parentId: true },
             });
             if (!ch)
                 break;
-            path.push({ id: ch.id, code: ch.code, level: ch.level, propagationDelay: ch.propagationDelay, maxFlow: ch.maxFlow });
+            path.push({ id: ch.id, code: ch.code, level: ch.level, propagationDelay: ch.propagationDelay, maxFlow: ch.maxFlow, waterUtilizationCoefficient: ch.waterUtilizationCoefficient });
             currentId = ch.parentId;
         }
         return path;

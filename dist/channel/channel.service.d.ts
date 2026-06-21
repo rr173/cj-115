@@ -13,6 +13,7 @@ export declare class ChannelService {
         maxFlow: number;
         length: number;
         parentId: string | null;
+        waterUtilizationCoefficient: number;
         id: string;
         propagationDelay: number;
         inspectionStatus: string;
@@ -33,6 +34,7 @@ export declare class ChannelService {
             maxFlow: number;
             length: number;
             parentId: string | null;
+            waterUtilizationCoefficient: number;
             id: string;
             propagationDelay: number;
             inspectionStatus: string;
@@ -47,6 +49,7 @@ export declare class ChannelService {
         maxFlow: number;
         length: number;
         parentId: string | null;
+        waterUtilizationCoefficient: number;
         id: string;
         propagationDelay: number;
         inspectionStatus: string;
@@ -62,6 +65,7 @@ export declare class ChannelService {
             maxFlow: number;
             length: number;
             parentId: string | null;
+            waterUtilizationCoefficient: number;
             id: string;
             propagationDelay: number;
             inspectionStatus: string;
@@ -76,6 +80,7 @@ export declare class ChannelService {
             maxFlow: number;
             length: number;
             parentId: string | null;
+            waterUtilizationCoefficient: number;
             id: string;
             propagationDelay: number;
             inspectionStatus: string;
@@ -99,6 +104,7 @@ export declare class ChannelService {
         maxFlow: number;
         length: number;
         parentId: string | null;
+        waterUtilizationCoefficient: number;
         id: string;
         propagationDelay: number;
         inspectionStatus: string;
@@ -114,6 +120,7 @@ export declare class ChannelService {
             maxFlow: number;
             length: number;
             parentId: string | null;
+            waterUtilizationCoefficient: number;
             id: string;
             propagationDelay: number;
             inspectionStatus: string;
@@ -128,6 +135,7 @@ export declare class ChannelService {
         maxFlow: number;
         length: number;
         parentId: string | null;
+        waterUtilizationCoefficient: number;
         id: string;
         propagationDelay: number;
         inspectionStatus: string;
@@ -142,6 +150,7 @@ export declare class ChannelService {
         maxFlow: number;
         length: number;
         parentId: string | null;
+        waterUtilizationCoefficient: number;
         id: string;
         propagationDelay: number;
         inspectionStatus: string;
@@ -156,6 +165,7 @@ export declare class ChannelService {
         maxFlow: number;
         length: number;
         parentId: string | null;
+        waterUtilizationCoefficient: number;
         id: string;
         propagationDelay: number;
         inspectionStatus: string;
@@ -169,5 +179,6 @@ export declare class ChannelService {
         level: ChannelLevel;
         propagationDelay: number;
         maxFlow: number;
+        waterUtilizationCoefficient: number;
     }>>;
 }

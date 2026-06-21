@@ -125,16 +125,16 @@ export class ChannelService {
     return this.prisma.channel.delete({ where: { id } });
   }
 
-  async getPathToRoot(channelId: string): Promise<Array<{ id: string; code: string; level: ChannelLevel; propagationDelay: number; maxFlow: number }>> {
-    const path: Array<{ id: string; code: string; level: ChannelLevel; propagationDelay: number; maxFlow: number }> = [];
+  async getPathToRoot(channelId: string): Promise<Array<{ id: string; code: string; level: ChannelLevel; propagationDelay: number; maxFlow: number; waterUtilizationCoefficient: number }>> {
+    const path: Array<{ id: string; code: string; level: ChannelLevel; propagationDelay: number; maxFlow: number; waterUtilizationCoefficient: number }> = [];
     let currentId: string | null = channelId;
     while (currentId) {
       const ch = await this.prisma.channel.findUnique({
         where: { id: currentId },
-        select: { id: true, code: true, level: true, propagationDelay: true, maxFlow: true, parentId: true },
+        select: { id: true, code: true, level: true, propagationDelay: true, maxFlow: true, waterUtilizationCoefficient: true, parentId: true },
       });
       if (!ch) break;
-      path.push({ id: ch.id, code: ch.code, level: ch.level as ChannelLevel, propagationDelay: ch.propagationDelay, maxFlow: ch.maxFlow });
+      path.push({ id: ch.id, code: ch.code, level: ch.level as ChannelLevel, propagationDelay: ch.propagationDelay, maxFlow: ch.maxFlow, waterUtilizationCoefficient: ch.waterUtilizationCoefficient });
       currentId = ch.parentId;
     }
     return path;

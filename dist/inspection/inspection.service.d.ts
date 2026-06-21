@@ -284,6 +284,7 @@ export declare class InspectionService {
         maxFlow: number;
         length: number;
         parentId: string | null;
+        waterUtilizationCoefficient: number;
         id: string;
         propagationDelay: number;
         inspectionStatus: string;

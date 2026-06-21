@@ -13,6 +13,7 @@ import { WaterRightsTradingModule } from './water-rights-trading/water-rights-tr
 import { WaterLevelGateControlModule } from './water-level-gate-control/water-level-gate-control.module';
 import { CreditRatingModule } from './credit-rating/credit-rating.module';
 import { DroughtMonitoringModule } from './drought-monitoring/drought-monitoring.module';
+import { IrrigationEfficiencyModule } from './irrigation-efficiency/irrigation-efficiency.module';
 import { PrismaService } from './prisma/prisma.service';
 
 @Module({
@@ -31,6 +32,7 @@ import { PrismaService } from './prisma/prisma.service';
     WaterLevelGateControlModule,
     CreditRatingModule,
     DroughtMonitoringModule,
+    IrrigationEfficiencyModule,
   ],
   providers: [PrismaService],
 })

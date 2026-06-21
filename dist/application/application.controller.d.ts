@@ -15,6 +15,7 @@ export declare class ApplicationController {
                 maxFlow: number;
                 length: number;
                 parentId: string | null;
+                waterUtilizationCoefficient: number;
                 id: string;
                 propagationDelay: number;
                 inspectionStatus: string;
@@ -116,6 +117,7 @@ export declare class ApplicationController {
                 maxFlow: number;
                 length: number;
                 parentId: string | null;
+                waterUtilizationCoefficient: number;
                 id: string;
                 propagationDelay: number;
                 inspectionStatus: string;
@@ -151,6 +153,7 @@ export declare class ApplicationController {
                 maxFlow: number;
                 length: number;
                 parentId: string | null;
+                waterUtilizationCoefficient: number;
                 id: string;
                 propagationDelay: number;
                 inspectionStatus: string;

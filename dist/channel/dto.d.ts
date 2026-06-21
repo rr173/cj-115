@@ -6,9 +6,11 @@ export declare class CreateChannelDto {
     maxFlow: number;
     length: number;
     parentId?: string;
+    waterUtilizationCoefficient?: number;
 }
 export declare class UpdateChannelDto {
     name?: string;
     maxFlow?: number;
     length?: number;
+    waterUtilizationCoefficient?: number;
 }

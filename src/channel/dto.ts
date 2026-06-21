@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsEnum, IsNumber, IsPositive, IsOptional } from 'class-validator';
+import { IsString, IsEnum, IsNumber, IsPositive, IsOptional, Min, Max } from 'class-validator';
 import { ChannelLevel } from '../common/enums';
 
 export class CreateChannelDto {
@@ -29,6 +29,13 @@ export class CreateChannelDto {
   @IsOptional()
   @IsString()
   parentId?: string;
+
+  @ApiPropertyOptional({ description: '渠道水利用系数(0~1),默认0.95', default: 0.95 })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(1)
+  waterUtilizationCoefficient?: number;
 }
 
 export class UpdateChannelDto {
@@ -48,4 +55,11 @@ export class UpdateChannelDto {
   @IsNumber()
   @IsPositive()
   length?: number;
+
+  @ApiPropertyOptional({ description: '渠道水利用系数(0~1)' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(1)
+  waterUtilizationCoefficient?: number;
 }
