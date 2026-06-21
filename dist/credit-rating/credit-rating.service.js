@@ -19,6 +19,7 @@ const schedule_1 = require("@nestjs/schedule");
 const dayjs_1 = __importDefault(require("dayjs"));
 const enums_1 = require("../common/enums");
 const INITIAL_SCORE = 60;
+const BASE_MAX_SCORE = 20;
 const PAYMENT_MAX_SCORE = 30;
 const DEVIATION_MAX_SCORE = 20;
 const OVERUSE_MAX_SCORE = 20;
@@ -58,6 +59,7 @@ let CreditRatingService = class CreditRatingService {
                     farmerId,
                     score: INITIAL_SCORE,
                     level: scoreToLevel(INITIAL_SCORE),
+                    baseScore: BASE_MAX_SCORE,
                     paymentScore: 0,
                     deviationScore: 0,
                     overuseScore: 0,
@@ -83,6 +85,11 @@ let CreditRatingService = class CreditRatingService {
             level: credit.level,
             levelName: enums_1.CreditLevelNames[credit.level],
             factors: {
+                baseCredit: {
+                    score: credit.baseScore,
+                    maxScore: BASE_MAX_SCORE,
+                    description: '基础信用分(系统基准)',
+                },
                 paymentTimeliness: {
                     score: credit.paymentScore,
                     maxScore: PAYMENT_MAX_SCORE,
@@ -158,6 +165,7 @@ let CreditRatingService = class CreditRatingService {
                     newScore,
                     previousLevel,
                     newLevel,
+                    baseScore: credit.baseScore,
                     paymentScore: credit.paymentScore,
                     deviationScore: credit.deviationScore,
                     overuseScore: credit.overuseScore,
@@ -215,6 +223,7 @@ let CreditRatingService = class CreditRatingService {
                 previousLevel: r.previousLevel,
                 newLevel: r.newLevel,
                 factors: {
+                    baseScore: r.baseScore,
                     paymentScore: r.paymentScore,
                     deviationScore: r.deviationScore,
                     overuseScore: r.overuseScore,
@@ -262,13 +271,14 @@ let CreditRatingService = class CreditRatingService {
         const months = quarterMonths[quarter] || [];
         const quarterStart = (0, dayjs_1.default)(`${currentYear}-${String(months[0]).padStart(2, '0')}-01`).startOf('day');
         const quarterEnd = quarterStart.add(3, 'month');
-        const paymentScore = await this.calcPaymentScore(farmerId, currentYear, months, quarterStart, quarterEnd);
+        const baseScore = BASE_MAX_SCORE;
+        const paymentScore = await this.calcPaymentScore(farmerId, currentYear, months);
         const deviationScore = await this.calcDeviationScore(farmerId, currentYear, months);
         const overuseScore = await this.calcOveruseScore(farmerId, currentYear, months);
         const tradingScore = await this.calcTradingScore(farmerId, currentYear, quarter);
         const hasUnpaidDebt = await this.checkUnpaidDebt(farmerId);
         const debtPenalty = hasUnpaidDebt ? DEBT_PENALTY : 0;
-        const rawScore = paymentScore + deviationScore + overuseScore + tradingScore - debtPenalty;
+        const rawScore = baseScore + paymentScore + deviationScore + overuseScore + tradingScore - debtPenalty;
         const newScore = Math.max(0, Math.min(100, rawScore));
         const newLevel = scoreToLevel(newScore);
         await this.prisma.$transaction(async (tx) => {
@@ -277,6 +287,7 @@ let CreditRatingService = class CreditRatingService {
                 data: {
                     score: newScore,
                     level: newLevel,
+                    baseScore,
                     paymentScore,
                     deviationScore,
                     overuseScore,
@@ -295,6 +306,7 @@ let CreditRatingService = class CreditRatingService {
                     newScore,
                     previousLevel,
                     newLevel,
+                    baseScore,
                     paymentScore,
                     deviationScore,
                     overuseScore,
@@ -313,6 +325,7 @@ let CreditRatingService = class CreditRatingService {
             newLevel,
             newLevelName: enums_1.CreditLevelNames[newLevel],
             factors: {
+                baseScore,
                 paymentScore,
                 deviationScore,
                 overuseScore,
@@ -322,26 +335,31 @@ let CreditRatingService = class CreditRatingService {
             debtPenalty,
         };
     }
-    async calcPaymentScore(farmerId, year, months, quarterStart, quarterEnd) {
+    async calcPaymentScore(farmerId, year, months) {
         const bills = await this.prisma.waterBill.findMany({
             where: {
                 farmerId,
                 billingYear: year,
                 billingMonth: { in: months },
             },
+            include: {
+                payments: { orderBy: { paidAt: 'desc' } },
+            },
         });
         if (bills.length === 0)
             return PAYMENT_MAX_SCORE;
-        const paidOnTime = bills.filter((b) => {
-            if (b.status === enums_1.WaterBillStatus.PAID && b.paidAmount >= b.totalAmount) {
-                const lastPayment = b.paidAmount > 0;
-                return lastPayment;
+        let onTimeCount = 0;
+        for (const bill of bills) {
+            if (bill.status === enums_1.WaterBillStatus.PAID && bill.payments.length > 0) {
+                const lastPaymentDate = (0, dayjs_1.default)(bill.payments[0].paidAt);
+                const dueDate = (0, dayjs_1.default)(bill.dueDate);
+                if (lastPaymentDate.isBefore(dueDate) || lastPaymentDate.isSame(dueDate, 'day')) {
+                    onTimeCount++;
+                }
             }
-            return false;
-        }).length;
-        const paidCount = bills.filter((b) => b.status === enums_1.WaterBillStatus.PAID).length;
+        }
         const totalBills = bills.length;
-        const ratio = paidCount / totalBills;
+        const ratio = onTimeCount / totalBills;
         return Math.round(ratio * PAYMENT_MAX_SCORE);
     }
     async calcDeviationScore(farmerId, year, months) {

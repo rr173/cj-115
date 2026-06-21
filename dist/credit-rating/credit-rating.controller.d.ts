@@ -13,6 +13,11 @@ export declare class CreditRatingController {
         level: string;
         levelName: string;
         factors: {
+            baseCredit: {
+                score: number;
+                maxScore: number;
+                description: string;
+            };
             paymentTimeliness: {
                 score: number;
                 maxScore: number;
@@ -72,6 +77,7 @@ export declare class CreditRatingController {
             previousLevel: string;
             newLevel: string;
             factors: {
+                baseScore: number;
                 paymentScore: number;
                 deviationScore: number;
                 overuseScore: number;

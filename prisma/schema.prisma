@@ -490,6 +490,7 @@ model FarmerCredit {
   farmer        Farmer   @relation(fields: [farmerId], references: [id], onDelete: Cascade)
   score         Int      @default(60)
   level         String   @default("C")
+  baseScore     Int      @default(20)
   paymentScore  Int      @default(0)
   deviationScore Int     @default(0)
   overuseScore  Int      @default(0)
@@ -513,6 +514,7 @@ model CreditScoreHistory {
   newScore      Int
   previousLevel String
   newLevel      String
+  baseScore     Int      @default(20)
   paymentScore  Int      @default(0)
   deviationScore Int     @default(0)
   overuseScore  Int      @default(0)

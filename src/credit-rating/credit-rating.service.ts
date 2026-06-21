@@ -13,6 +13,7 @@ import {
 import { AdjustCreditScoreDto, GetCreditHistoryDto } from './dto';
 
 const INITIAL_SCORE = 60;
+const BASE_MAX_SCORE = 20;
 const PAYMENT_MAX_SCORE = 30;
 const DEVIATION_MAX_SCORE = 20;
 const OVERUSE_MAX_SCORE = 20;
@@ -49,6 +50,7 @@ export class CreditRatingService {
           farmerId,
           score: INITIAL_SCORE,
           level: scoreToLevel(INITIAL_SCORE),
+          baseScore: BASE_MAX_SCORE,
           paymentScore: 0,
           deviationScore: 0,
           overuseScore: 0,
@@ -76,6 +78,11 @@ export class CreditRatingService {
       level: credit.level,
       levelName: CreditLevelNames[credit.level as CreditLevel],
       factors: {
+        baseCredit: {
+          score: credit.baseScore,
+          maxScore: BASE_MAX_SCORE,
+          description: '基础信用分(系统基准)',
+        },
         paymentTimeliness: {
           score: credit.paymentScore,
           maxScore: PAYMENT_MAX_SCORE,
@@ -158,6 +165,7 @@ export class CreditRatingService {
           newScore,
           previousLevel,
           newLevel,
+          baseScore: credit.baseScore,
           paymentScore: credit.paymentScore,
           deviationScore: credit.deviationScore,
           overuseScore: credit.overuseScore,
@@ -220,6 +228,7 @@ export class CreditRatingService {
         previousLevel: r.previousLevel,
         newLevel: r.newLevel,
         factors: {
+          baseScore: r.baseScore,
           paymentScore: r.paymentScore,
           deviationScore: r.deviationScore,
           overuseScore: r.overuseScore,
@@ -275,7 +284,8 @@ export class CreditRatingService {
     const quarterStart = dayjs(`${currentYear}-${String(months[0]).padStart(2, '0')}-01`).startOf('day');
     const quarterEnd = quarterStart.add(3, 'month');
 
-    const paymentScore = await this.calcPaymentScore(farmerId, currentYear, months, quarterStart, quarterEnd);
+    const baseScore = BASE_MAX_SCORE;
+    const paymentScore = await this.calcPaymentScore(farmerId, currentYear, months);
     const deviationScore = await this.calcDeviationScore(farmerId, currentYear, months);
     const overuseScore = await this.calcOveruseScore(farmerId, currentYear, months);
     const tradingScore = await this.calcTradingScore(farmerId, currentYear, quarter);
@@ -283,7 +293,7 @@ export class CreditRatingService {
     const hasUnpaidDebt = await this.checkUnpaidDebt(farmerId);
     const debtPenalty = hasUnpaidDebt ? DEBT_PENALTY : 0;
 
-    const rawScore = paymentScore + deviationScore + overuseScore + tradingScore - debtPenalty;
+    const rawScore = baseScore + paymentScore + deviationScore + overuseScore + tradingScore - debtPenalty;
     const newScore = Math.max(0, Math.min(100, rawScore));
     const newLevel = scoreToLevel(newScore);
 
@@ -293,6 +303,7 @@ export class CreditRatingService {
         data: {
           score: newScore,
           level: newLevel,
+          baseScore,
           paymentScore,
           deviationScore,
           overuseScore,
@@ -312,6 +323,7 @@ export class CreditRatingService {
           newScore,
           previousLevel,
           newLevel,
+          baseScore,
           paymentScore,
           deviationScore,
           overuseScore,
@@ -331,6 +343,7 @@ export class CreditRatingService {
       newLevel,
       newLevelName: CreditLevelNames[newLevel],
       factors: {
+        baseScore,
         paymentScore,
         deviationScore,
         overuseScore,
@@ -345,8 +358,6 @@ export class CreditRatingService {
     farmerId: string,
     year: number,
     months: number[],
-    quarterStart: dayjs.Dayjs,
-    quarterEnd: dayjs.Dayjs,
   ): Promise<number> {
     const bills = await this.prisma.waterBill.findMany({
       where: {
@@ -354,21 +365,26 @@ export class CreditRatingService {
         billingYear: year,
         billingMonth: { in: months },
       },
+      include: {
+        payments: { orderBy: { paidAt: 'desc' } },
+      },
     });
 
     if (bills.length === 0) return PAYMENT_MAX_SCORE;
 
-    const paidOnTime = bills.filter((b) => {
-      if (b.status === WaterBillStatus.PAID && b.paidAmount >= b.totalAmount) {
-        const lastPayment = b.paidAmount > 0;
-        return lastPayment;
+    let onTimeCount = 0;
+    for (const bill of bills) {
+      if (bill.status === WaterBillStatus.PAID && bill.payments.length > 0) {
+        const lastPaymentDate = dayjs(bill.payments[0].paidAt);
+        const dueDate = dayjs(bill.dueDate);
+        if (lastPaymentDate.isBefore(dueDate) || lastPaymentDate.isSame(dueDate, 'day')) {
+          onTimeCount++;
+        }
       }
-      return false;
-    }).length;
+    }
 
-    const paidCount = bills.filter((b) => b.status === WaterBillStatus.PAID).length;
     const totalBills = bills.length;
-    const ratio = paidCount / totalBills;
+    const ratio = onTimeCount / totalBills;
 
     return Math.round(ratio * PAYMENT_MAX_SCORE);
   }

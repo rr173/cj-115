@@ -11,6 +11,7 @@ export declare class CreditRatingService {
         updatedAt: Date;
         farmerId: string;
         score: number;
+        baseScore: number;
         paymentScore: number;
         deviationScore: number;
         overuseScore: number;
@@ -29,6 +30,11 @@ export declare class CreditRatingService {
         level: string;
         levelName: string;
         factors: {
+            baseCredit: {
+                score: number;
+                maxScore: number;
+                description: string;
+            };
             paymentTimeliness: {
                 score: number;
                 maxScore: number;
@@ -88,6 +94,7 @@ export declare class CreditRatingService {
             previousLevel: string;
             newLevel: string;
             factors: {
+                baseScore: number;
                 paymentScore: number;
                 deviationScore: number;
                 overuseScore: number;
@@ -112,6 +119,7 @@ export declare class CreditRatingService {
         newLevel: CreditLevel;
         newLevelName: string;
         factors: {
+            baseScore: number;
             paymentScore: number;
             deviationScore: number;
             overuseScore: number;
