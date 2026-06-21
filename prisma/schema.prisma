@@ -432,16 +432,17 @@ model WaterLevelReading {
 }
 
 model Gate {
-  id             String   @id @default(uuid())
-  code           String   @unique
-  channelId      String   @unique
-  channel        Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
-  maxOpening     Float    @default(100)
-  currentOpening Float    @default(0)
-  controlMode    String   @default("AUTO")
-  lastAdjustedAt DateTime?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @default(now())
+  id                  String   @id @default(uuid())
+  code                String   @unique
+  channelId           String   @unique
+  channel             Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  maxOpening          Float    @default(100)
+  currentOpening      Float    @default(0)
+  controlMode         String   @default("AUTO")
+  manualOverrideUntil DateTime?
+  lastAdjustedAt      DateTime?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @default(now())
 
   adjustmentLogs GateAdjustmentLog[]
 }

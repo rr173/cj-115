@@ -57,6 +57,7 @@ export declare class WaterLevelGateControlController {
         maxOpening: number;
         controlMode: string;
         currentOpening: number;
+        manualOverrideUntil: Date | null;
         lastAdjustedAt: Date | null;
     }>;
     getGateStatus(gateId: string): Promise<{
@@ -70,6 +71,7 @@ export declare class WaterLevelGateControlController {
         maxOpening: number;
         currentOpening: number;
         controlMode: string;
+        manualOverrideUntil: Date;
         lastAdjustedAt: Date;
         recentAdjustments: {
             id: string;
@@ -86,6 +88,7 @@ export declare class WaterLevelGateControlController {
         previousOpening: number;
         targetOpening: number;
         mode: string;
+        manualOverrideUntil: Date;
     }>;
     switchGateMode(gateId: string, dto: SwitchGateModeDto): Promise<{
         gateId: string;

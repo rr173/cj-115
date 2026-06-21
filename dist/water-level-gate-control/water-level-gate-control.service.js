@@ -141,6 +141,16 @@ let WaterLevelGateControlService = class WaterLevelGateControlService {
         if (!gate || gate.controlMode !== enums_1.GateControlMode.AUTO)
             return;
         const now = new Date();
+        if (gate.manualOverrideUntil && gate.manualOverrideUntil.getTime() > now.getTime()) {
+            return;
+        }
+        if (gate.manualOverrideUntil && gate.manualOverrideUntil.getTime() <= now.getTime()) {
+            await this.prisma.gate.update({
+                where: { id: gate.id },
+                data: { manualOverrideUntil: null },
+            });
+            gate.manualOverrideUntil = null;
+        }
         const activeAllocation = await this.prisma.waterAllocation.findFirst({
             where: {
                 channelId,
@@ -168,7 +178,10 @@ let WaterLevelGateControlService = class WaterLevelGateControlService {
                 return;
         }
         let adjustment = deviation * ADJUSTMENT_COEFFICIENT;
-        const maxSingleAdjust = gate.currentOpening * 0.2;
+        let maxSingleAdjust = gate.currentOpening * 0.2;
+        if (gate.currentOpening === 0 && deviation < 0) {
+            maxSingleAdjust = Math.max(5, gate.maxOpening * 0.1);
+        }
         adjustment = Math.max(-maxSingleAdjust, Math.min(maxSingleAdjust, adjustment));
         let targetOpening;
         if (deviation > 0) {
@@ -177,12 +190,32 @@ let WaterLevelGateControlService = class WaterLevelGateControlService {
         else {
             targetOpening = Math.min(gate.maxOpening, gate.currentOpening - adjustment);
         }
+        if (targetOpening === gate.currentOpening)
+            return;
         await this.applyGateAdjustment(gate.id, gate.currentOpening, targetOpening, channelId, enums_1.GateAdjustmentReason.AUTO_PLAN);
     }
     async handleOverflow(channelId, monitor, value, threshold) {
         const gate = await this.prisma.gate.findUnique({ where: { channelId } });
         if (gate && gate.controlMode === enums_1.GateControlMode.AUTO) {
-            await this.applyGateAdjustment(gate.id, gate.currentOpening, OVERFLOW_GATE_OPENING, channelId, enums_1.GateAdjustmentReason.AUTO_OVERFLOW);
+            await this.prisma.$transaction([
+                this.prisma.gate.update({
+                    where: { id: gate.id },
+                    data: {
+                        currentOpening: OVERFLOW_GATE_OPENING,
+                        lastAdjustedAt: new Date(),
+                        manualOverrideUntil: null,
+                    },
+                }),
+                this.prisma.gateAdjustmentLog.create({
+                    data: {
+                        gateId: gate.id,
+                        previousOpening: gate.currentOpening,
+                        targetOpening: OVERFLOW_GATE_OPENING,
+                        reason: enums_1.GateAdjustmentReason.AUTO_OVERFLOW,
+                        channelId,
+                    },
+                }),
+            ]);
         }
         const existingUnresolved = await this.prisma.waterLevelAlert.findFirst({
             where: {
@@ -276,6 +309,7 @@ let WaterLevelGateControlService = class WaterLevelGateControlService {
             maxOpening: gate.maxOpening,
             currentOpening: gate.currentOpening,
             controlMode: gate.controlMode,
+            manualOverrideUntil: gate.manualOverrideUntil,
             lastAdjustedAt: gate.lastAdjustedAt,
             recentAdjustments: recentLogs,
         };
@@ -287,17 +321,62 @@ let WaterLevelGateControlService = class WaterLevelGateControlService {
         if (dto.targetOpening < 0 || dto.targetOpening > gate.maxOpening) {
             throw new common_1.BadRequestException(`目标开度必须在 0 ~ ${gate.maxOpening}% 之间`);
         }
+        const now = new Date();
+        const currentAllocation = await this.prisma.waterAllocation.findFirst({
+            where: {
+                channelId: gate.channelId,
+                startTime: { lte: now },
+                endTime: { gt: now },
+            },
+            orderBy: { endTime: 'desc' },
+        });
+        let manualOverrideUntil;
+        if (currentAllocation) {
+            manualOverrideUntil = currentAllocation.endTime;
+        }
+        else {
+            const nextAllocation = await this.prisma.waterAllocation.findFirst({
+                where: {
+                    channelId: gate.channelId,
+                    startTime: { gt: now },
+                },
+                orderBy: { startTime: 'asc' },
+            });
+            manualOverrideUntil = nextAllocation ? nextAllocation.endTime : (0, dayjs_1.default)(now).add(1, 'hour').toDate();
+        }
         const previousOpening = gate.currentOpening;
-        await this.applyGateAdjustment(gateId, previousOpening, dto.targetOpening, gate.channelId, enums_1.GateAdjustmentReason.MANUAL);
-        return { gateId, previousOpening, targetOpening: dto.targetOpening, mode: 'MANUAL_OVERRIDE' };
+        await this.prisma.$transaction([
+            this.prisma.gate.update({
+                where: { id: gateId },
+                data: {
+                    currentOpening: dto.targetOpening,
+                    lastAdjustedAt: now,
+                    manualOverrideUntil,
+                },
+            }),
+            this.prisma.gateAdjustmentLog.create({
+                data: {
+                    gateId,
+                    previousOpening,
+                    targetOpening: dto.targetOpening,
+                    reason: enums_1.GateAdjustmentReason.MANUAL,
+                    channelId: gate.channelId,
+                },
+            }),
+        ]);
+        return { gateId, previousOpening, targetOpening: dto.targetOpening, mode: 'MANUAL_OVERRIDE', manualOverrideUntil };
     }
     async switchGateMode(gateId, dto) {
         const gate = await this.prisma.gate.findUnique({ where: { id: gateId } });
         if (!gate)
             throw new common_1.NotFoundException('闸门不存在');
+        const updateData = { controlMode: dto.controlMode };
+        if (dto.controlMode === enums_1.GateControlMode.MANUAL || gate.manualOverrideUntil) {
+            updateData.manualOverrideUntil = null;
+        }
         await this.prisma.gate.update({
             where: { id: gateId },
-            data: { controlMode: dto.controlMode },
+            data: updateData,
         });
         return { gateId, controlMode: dto.controlMode };
     }
