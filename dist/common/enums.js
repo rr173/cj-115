@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GateAdjustmentReasonNames = exports.GateAdjustmentReason = exports.WaterLevelAlertTypeNames = exports.WaterLevelAlertType = exports.MonitorStatusNames = exports.MonitorStatus = exports.GateControlModeNames = exports.GateControlMode = exports.SellOrderStatusNames = exports.SellOrderStatus = exports.IrrigationRoundStatusNames = exports.IrrigationRoundStatus = exports.PaymentMethodNames = exports.PaymentMethod = exports.WaterBillStatusNames = exports.WaterBillStatus = exports.MaintenanceOrderStatusNames = exports.MaintenanceOrderStatus = exports.ProblemLevelNames = exports.ProblemLevel = exports.InspectionChannelStatusNames = exports.InspectionChannelStatus = exports.QuotaQuarterNames = exports.QuotaQuarter = exports.NotificationTypeNames = exports.NotificationType = exports.ApplicationStatusNames = exports.ApplicationStatus = exports.ChannelLevelNames = exports.ChannelLevel = void 0;
+exports.CreditHistoryTypeNames = exports.CreditHistoryType = exports.CreditLevelSortOrder = exports.CreditQuotaMultiplier = exports.CreditLevelNames = exports.CreditLevel = exports.GateAdjustmentReasonNames = exports.GateAdjustmentReason = exports.WaterLevelAlertTypeNames = exports.WaterLevelAlertType = exports.MonitorStatusNames = exports.MonitorStatus = exports.GateControlModeNames = exports.GateControlMode = exports.SellOrderStatusNames = exports.SellOrderStatus = exports.IrrigationRoundStatusNames = exports.IrrigationRoundStatus = exports.PaymentMethodNames = exports.PaymentMethod = exports.WaterBillStatusNames = exports.WaterBillStatus = exports.MaintenanceOrderStatusNames = exports.MaintenanceOrderStatus = exports.ProblemLevelNames = exports.ProblemLevel = exports.InspectionChannelStatusNames = exports.InspectionChannelStatus = exports.QuotaQuarterNames = exports.QuotaQuarter = exports.NotificationTypeNames = exports.NotificationType = exports.ApplicationStatusNames = exports.ApplicationStatus = exports.ChannelLevelNames = exports.ChannelLevel = void 0;
 var ChannelLevel;
 (function (ChannelLevel) {
     ChannelLevel["MAIN"] = "MAIN";
@@ -189,5 +189,39 @@ exports.GateAdjustmentReasonNames = {
     [GateAdjustmentReason.AUTO_OVERFLOW]: '溢出保护调节',
     [GateAdjustmentReason.AUTO_DRY]: '断流保护调节',
     [GateAdjustmentReason.MANUAL]: '手动调节',
+};
+var CreditLevel;
+(function (CreditLevel) {
+    CreditLevel["A"] = "A";
+    CreditLevel["B"] = "B";
+    CreditLevel["C"] = "C";
+    CreditLevel["D"] = "D";
+})(CreditLevel || (exports.CreditLevel = CreditLevel = {}));
+exports.CreditLevelNames = {
+    [CreditLevel.A]: 'A级(优秀)',
+    [CreditLevel.B]: 'B级(良好)',
+    [CreditLevel.C]: 'C级(一般)',
+    [CreditLevel.D]: 'D级(较差)',
+};
+exports.CreditQuotaMultiplier = {
+    [CreditLevel.A]: 1.1,
+    [CreditLevel.B]: 1.0,
+    [CreditLevel.C]: 0.95,
+    [CreditLevel.D]: 0.85,
+};
+exports.CreditLevelSortOrder = {
+    [CreditLevel.A]: 0,
+    [CreditLevel.B]: 1,
+    [CreditLevel.C]: 2,
+    [CreditLevel.D]: 2,
+};
+var CreditHistoryType;
+(function (CreditHistoryType) {
+    CreditHistoryType["RECALC"] = "RECALC";
+    CreditHistoryType["MANUAL"] = "MANUAL";
+})(CreditHistoryType || (exports.CreditHistoryType = CreditHistoryType = {}));
+exports.CreditHistoryTypeNames = {
+    [CreditHistoryType.RECALC]: '系统重算',
+    [CreditHistoryType.MANUAL]: '手动调整',
 };
 //# sourceMappingURL=enums.js.map

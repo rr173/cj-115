@@ -4,6 +4,7 @@ export declare class ApplicationController {
     private readonly service;
     constructor(service: ApplicationService);
     create(dto: CreateApplicationDto): Promise<{
+        creditMultiplier: number;
         warnings: string[];
         roundName: string;
         farmer: {

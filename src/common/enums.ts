@@ -201,3 +201,41 @@ export const GateAdjustmentReasonNames: Record<GateAdjustmentReason, string> = {
   [GateAdjustmentReason.AUTO_DRY]: '断流保护调节',
   [GateAdjustmentReason.MANUAL]: '手动调节',
 };
+
+export enum CreditLevel {
+  A = 'A',
+  B = 'B',
+  C = 'C',
+  D = 'D',
+}
+
+export const CreditLevelNames: Record<CreditLevel, string> = {
+  [CreditLevel.A]: 'A级(优秀)',
+  [CreditLevel.B]: 'B级(良好)',
+  [CreditLevel.C]: 'C级(一般)',
+  [CreditLevel.D]: 'D级(较差)',
+};
+
+export const CreditQuotaMultiplier: Record<CreditLevel, number> = {
+  [CreditLevel.A]: 1.1,
+  [CreditLevel.B]: 1.0,
+  [CreditLevel.C]: 0.95,
+  [CreditLevel.D]: 0.85,
+};
+
+export const CreditLevelSortOrder: Record<CreditLevel, number> = {
+  [CreditLevel.A]: 0,
+  [CreditLevel.B]: 1,
+  [CreditLevel.C]: 2,
+  [CreditLevel.D]: 2,
+};
+
+export enum CreditHistoryType {
+  RECALC = 'RECALC',
+  MANUAL = 'MANUAL',
+}
+
+export const CreditHistoryTypeNames: Record<CreditHistoryType, string> = {
+  [CreditHistoryType.RECALC]: '系统重算',
+  [CreditHistoryType.MANUAL]: '手动调整',
+};

@@ -6,9 +6,10 @@ import { PrismaService } from '../prisma/prisma.service';
 import { ChannelModule } from '../channel/channel.module';
 import { ApplicationModule } from '../application/application.module';
 import { FarmerModule } from '../farmer/farmer.module';
+import { CreditRatingModule } from '../credit-rating/credit-rating.module';
 
 @Module({
-  imports: [ChannelModule, ApplicationModule, FarmerModule],
+  imports: [ChannelModule, ApplicationModule, FarmerModule, CreditRatingModule],
   controllers: [SchedulingController],
   providers: [SchedulingService, AutoSchedulingService, PrismaService],
   exports: [SchedulingService, AutoSchedulingService],

@@ -16,15 +16,17 @@ exports.SchedulingService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const channel_service_1 = require("../channel/channel.service");
+const credit_rating_service_1 = require("../credit-rating/credit-rating.service");
 const dayjs_1 = __importDefault(require("dayjs"));
 const enums_1 = require("../common/enums");
 const SLOT_MINUTES = 30;
 const MAX_DELAY_HOURS = 4;
 const MAX_DELAY_SLOTS = (MAX_DELAY_HOURS * 60) / SLOT_MINUTES;
 let SchedulingService = class SchedulingService {
-    constructor(prisma, channelService) {
+    constructor(prisma, channelService, creditRatingService) {
         this.prisma = prisma;
         this.channelService = channelService;
+        this.creditRatingService = creditRatingService;
     }
     roundToNextSlot(date) {
         const minutes = date.minute();
@@ -95,8 +97,39 @@ let SchedulingService = class SchedulingService {
             include: { farmer: { include: { channel: true } } },
             orderBy: { submitTime: 'asc' },
         });
+        const farmerIds = [...new Set(pendingApps.map((a) => a.farmerId))];
+        const creditLevelMap = await this.creditRatingService.getFarmerCreditLevelMap(farmerIds);
+        pendingApps.sort((a, b) => {
+            const levelA = creditLevelMap.get(a.farmerId) || enums_1.CreditLevel.C;
+            const levelB = creditLevelMap.get(b.farmerId) || enums_1.CreditLevel.C;
+            const orderA = enums_1.CreditLevelSortOrder[levelA];
+            const orderB = enums_1.CreditLevelSortOrder[levelB];
+            if (orderA !== orderB)
+                return orderA - orderB;
+            return new Date(a.submitTime).getTime() - new Date(b.submitTime).getTime();
+        });
         const results = [];
         for (const app of pendingApps) {
+            const appCreditLevel = creditLevelMap.get(app.farmerId) || enums_1.CreditLevel.C;
+            if (appCreditLevel === enums_1.CreditLevel.D) {
+                const dCheck = await this.creditRatingService.checkDFarmerCanApply(app.farmerId);
+                if (!dCheck.canApply) {
+                    await this.prisma.waterApplication.update({
+                        where: { id: app.id },
+                        data: {
+                            status: enums_1.ApplicationStatus.FAILED_FINAL,
+                            failReason: dCheck.reason,
+                        },
+                    });
+                    results.push({
+                        applicationId: app.id,
+                        farmerCode: app.farmer.code,
+                        status: 'REJECTED',
+                        failReason: dCheck.reason,
+                    });
+                    continue;
+                }
+            }
             const path = await this.channelService.getPathToRoot(app.farmer.channelId);
             const durationSlots = Math.ceil((app.expectedHours * 60) / SLOT_MINUTES);
             let scheduled = false;
@@ -344,6 +377,7 @@ exports.SchedulingService = SchedulingService;
 exports.SchedulingService = SchedulingService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        channel_service_1.ChannelService])
+        channel_service_1.ChannelService,
+        credit_rating_service_1.CreditRatingService])
 ], SchedulingService);
 //# sourceMappingURL=scheduling.service.js.map

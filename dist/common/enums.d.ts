@@ -100,3 +100,17 @@ export declare enum GateAdjustmentReason {
     MANUAL = "MANUAL"
 }
 export declare const GateAdjustmentReasonNames: Record<GateAdjustmentReason, string>;
+export declare enum CreditLevel {
+    A = "A",
+    B = "B",
+    C = "C",
+    D = "D"
+}
+export declare const CreditLevelNames: Record<CreditLevel, string>;
+export declare const CreditQuotaMultiplier: Record<CreditLevel, number>;
+export declare const CreditLevelSortOrder: Record<CreditLevel, number>;
+export declare enum CreditHistoryType {
+    RECALC = "RECALC",
+    MANUAL = "MANUAL"
+}
+export declare const CreditHistoryTypeNames: Record<CreditHistoryType, string>;

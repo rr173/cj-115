@@ -1,9 +1,11 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { ChannelService } from '../channel/channel.service';
+import { CreditRatingService } from '../credit-rating/credit-rating.service';
 export declare class SchedulingService {
     private prisma;
     private channelService;
-    constructor(prisma: PrismaService, channelService: ChannelService);
+    private creditRatingService;
+    constructor(prisma: PrismaService, channelService: ChannelService, creditRatingService: CreditRatingService);
     private roundToNextSlot;
     private timeToSlotIndex;
     private slotIndexToTime;

@@ -22,6 +22,7 @@ const quota_service_1 = require("../quota/quota.service");
 const water_billing_service_1 = require("../water-billing/water-billing.service");
 const rotational_irrigation_service_1 = require("../rotational-irrigation/rotational-irrigation.service");
 const water_rights_trading_service_1 = require("../water-rights-trading/water-rights-trading.service");
+const credit_rating_service_1 = require("../credit-rating/credit-rating.service");
 const dayjs_1 = __importDefault(require("dayjs"));
 const enums_1 = require("../common/enums");
 function monthToQuarter(month) {
@@ -34,12 +35,13 @@ function monthToQuarter(month) {
     return enums_1.QuotaQuarter.Q4;
 }
 let ApplicationService = class ApplicationService {
-    constructor(prisma, quotaService, waterBillingService, rotationalIrrigationService, waterRightsTradingService) {
+    constructor(prisma, quotaService, waterBillingService, rotationalIrrigationService, waterRightsTradingService, creditRatingService) {
         this.prisma = prisma;
         this.quotaService = quotaService;
         this.waterBillingService = waterBillingService;
         this.rotationalIrrigationService = rotationalIrrigationService;
         this.waterRightsTradingService = waterRightsTradingService;
+        this.creditRatingService = creditRatingService;
     }
     async create(dto) {
         const farmer = await this.prisma.farmer.findUnique({ where: { id: dto.farmerId } });
@@ -48,6 +50,10 @@ let ApplicationService = class ApplicationService {
         const checkResult = await this.waterBillingService.checkFarmerCanApply(dto.farmerId);
         if (!checkResult.canApply) {
             throw new common_1.BadRequestException(`提交申请被拒绝: ${checkResult.reason}`);
+        }
+        const dCheck = await this.creditRatingService.checkDFarmerCanApply(dto.farmerId);
+        if (!dCheck.canApply) {
+            throw new common_1.BadRequestException(`提交申请被拒绝: ${dCheck.reason}`);
         }
         const target = (0, dayjs_1.default)(dto.targetDate);
         if (!target.isValid())
@@ -58,10 +64,12 @@ let ApplicationService = class ApplicationService {
         if (!quota) {
             throw new common_1.BadRequestException(`${year}年${quarter}季度定额尚未设置,无法提交申请`);
         }
+        const creditMultiplier = await this.creditRatingService.getQuotaMultiplier(dto.farmerId);
         const requestVolume = dto.expectedFlow * dto.expectedHours * 3600;
         const availableQuota = await this.waterRightsTradingService.getAvailableQuota(farmer.id, year, quarter);
-        if (requestVolume > availableQuota) {
-            throw new common_1.BadRequestException(`申请量(${requestVolume.toFixed(2)}m³)超过当前可用额度(${availableQuota.toFixed(2)}m³),额度不足可前往水权交易市场购买`);
+        const creditAdjustedQuota = +(availableQuota * creditMultiplier).toFixed(4);
+        if (requestVolume > creditAdjustedQuota) {
+            throw new common_1.BadRequestException(`申请量(${requestVolume.toFixed(2)}m³)超过信用调整后可用额度(${creditAdjustedQuota.toFixed(2)}m³,原额度${availableQuota.toFixed(2)}m³×信用系数${creditMultiplier}),额度不足可前往水权交易市场购买`);
         }
         const channel = await this.prisma.channel.findUnique({ where: { id: farmer.channelId } });
         if (dto.expectedFlow > channel.maxFlow) {
@@ -84,6 +92,7 @@ let ApplicationService = class ApplicationService {
         });
         return {
             ...created,
+            creditMultiplier,
             warnings: rotationalCheck.warnings,
             roundName: rotationalCheck.roundName,
         };
@@ -155,10 +164,12 @@ exports.ApplicationService = ApplicationService = __decorate([
     (0, common_1.Injectable)(),
     __param(2, (0, common_1.Inject)((0, common_1.forwardRef)(() => water_billing_service_1.WaterBillingService))),
     __param(4, (0, common_1.Inject)((0, common_1.forwardRef)(() => water_rights_trading_service_1.WaterRightsTradingService))),
+    __param(5, (0, common_1.Inject)((0, common_1.forwardRef)(() => credit_rating_service_1.CreditRatingService))),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         quota_service_1.QuotaService,
         water_billing_service_1.WaterBillingService,
         rotational_irrigation_service_1.RotationalIrrigationService,
-        water_rights_trading_service_1.WaterRightsTradingService])
+        water_rights_trading_service_1.WaterRightsTradingService,
+        credit_rating_service_1.CreditRatingService])
 ], ApplicationService);
 //# sourceMappingURL=application.service.js.map

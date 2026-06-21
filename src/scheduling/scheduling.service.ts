@@ -1,8 +1,9 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ChannelService } from '../channel/channel.service';
+import { CreditRatingService } from '../credit-rating/credit-rating.service';
 import dayjs from 'dayjs';
-import { ApplicationStatus } from '../common/enums';
+import { ApplicationStatus, CreditLevel, CreditLevelSortOrder } from '../common/enums';
 
 const SLOT_MINUTES = 30;
 const MAX_DELAY_HOURS = 4;
@@ -17,6 +18,7 @@ export class SchedulingService {
   constructor(
     private prisma: PrismaService,
     private channelService: ChannelService,
+    private creditRatingService: CreditRatingService,
   ) {}
 
   private roundToNextSlot(date: dayjs.Dayjs): dayjs.Dayjs {
@@ -115,9 +117,42 @@ export class SchedulingService {
       orderBy: { submitTime: 'asc' },
     });
 
+    const farmerIds = [...new Set(pendingApps.map((a) => a.farmerId))];
+    const creditLevelMap = await this.creditRatingService.getFarmerCreditLevelMap(farmerIds);
+
+    pendingApps.sort((a, b) => {
+      const levelA = creditLevelMap.get(a.farmerId) || CreditLevel.C;
+      const levelB = creditLevelMap.get(b.farmerId) || CreditLevel.C;
+      const orderA = CreditLevelSortOrder[levelA];
+      const orderB = CreditLevelSortOrder[levelB];
+      if (orderA !== orderB) return orderA - orderB;
+      return new Date(a.submitTime).getTime() - new Date(b.submitTime).getTime();
+    });
+
     const results: any[] = [];
 
     for (const app of pendingApps) {
+      const appCreditLevel = creditLevelMap.get(app.farmerId) || CreditLevel.C;
+      if (appCreditLevel === CreditLevel.D) {
+        const dCheck = await this.creditRatingService.checkDFarmerCanApply(app.farmerId);
+        if (!dCheck.canApply) {
+          await this.prisma.waterApplication.update({
+            where: { id: app.id },
+            data: {
+              status: ApplicationStatus.FAILED_FINAL,
+              failReason: dCheck.reason,
+            },
+          });
+          results.push({
+            applicationId: app.id,
+            farmerCode: app.farmer.code,
+            status: 'REJECTED',
+            failReason: dCheck.reason,
+          });
+          continue;
+        }
+      }
+
       const path = await this.channelService.getPathToRoot(app.farmer.channelId);
       const durationSlots = Math.ceil((app.expectedHours * 60) / SLOT_MINUTES);
 

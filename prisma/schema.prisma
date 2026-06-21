@@ -54,6 +54,8 @@ model Farmer {
   waterRightsSellOrders WaterRightsSellOrder[]
   waterRightsBuyTrades WaterRightsTradeRecord[] @relation("BuyTrades")
   waterRightsSellTrades WaterRightsTradeRecord[] @relation("SellTrades")
+  credit         FarmerCredit?
+  creditHistories CreditScoreHistory[]
 }
 
 model Quota {
@@ -479,5 +481,48 @@ model WaterLevelAlert {
   @@index([type])
   @@index([channelId])
   @@index([isResolved])
+  @@index([createdAt])
+}
+
+model FarmerCredit {
+  id            String   @id @default(uuid())
+  farmerId      String   @unique
+  farmer        Farmer   @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  score         Int      @default(60)
+  level         String   @default("C")
+  paymentScore  Int      @default(0)
+  deviationScore Int     @default(0)
+  overuseScore  Int      @default(0)
+  tradingScore  Int      @default(5)
+  hasUnpaidDebt Boolean  @default(false)
+  debtPenalty   Int      @default(0)
+  lastCalcAt    DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now())
+
+  @@index([level])
+  @@index([score])
+}
+
+model CreditScoreHistory {
+  id            String   @id @default(uuid())
+  farmerId      String
+  farmer        Farmer   @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  type          String
+  previousScore Int
+  newScore      Int
+  previousLevel String
+  newLevel      String
+  paymentScore  Int      @default(0)
+  deviationScore Int     @default(0)
+  overuseScore  Int      @default(0)
+  tradingScore  Int      @default(0)
+  hasUnpaidDebt Boolean  @default(false)
+  debtPenalty   Int      @default(0)
+  reason        String?
+  operator      String?
+  createdAt     DateTime @default(now())
+
+  @@index([farmerId])
   @@index([createdAt])
 }

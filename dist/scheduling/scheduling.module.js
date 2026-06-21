@@ -15,12 +15,13 @@ const prisma_service_1 = require("../prisma/prisma.service");
 const channel_module_1 = require("../channel/channel.module");
 const application_module_1 = require("../application/application.module");
 const farmer_module_1 = require("../farmer/farmer.module");
+const credit_rating_module_1 = require("../credit-rating/credit-rating.module");
 let SchedulingModule = class SchedulingModule {
 };
 exports.SchedulingModule = SchedulingModule;
 exports.SchedulingModule = SchedulingModule = __decorate([
     (0, common_1.Module)({
-        imports: [channel_module_1.ChannelModule, application_module_1.ApplicationModule, farmer_module_1.FarmerModule],
+        imports: [channel_module_1.ChannelModule, application_module_1.ApplicationModule, farmer_module_1.FarmerModule, credit_rating_module_1.CreditRatingModule],
         controllers: [scheduling_controller_1.SchedulingController],
         providers: [scheduling_service_1.SchedulingService, auto_scheduling_service_1.AutoSchedulingService, prisma_service_1.PrismaService],
         exports: [scheduling_service_1.SchedulingService, auto_scheduling_service_1.AutoSchedulingService],

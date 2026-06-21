@@ -4,6 +4,7 @@ import { QuotaService } from '../quota/quota.service';
 import { WaterBillingService } from '../water-billing/water-billing.service';
 import { RotationalIrrigationService } from '../rotational-irrigation/rotational-irrigation.service';
 import { WaterRightsTradingService } from '../water-rights-trading/water-rights-trading.service';
+import { CreditRatingService } from '../credit-rating/credit-rating.service';
 import { CreateApplicationDto } from './dto';
 import dayjs from 'dayjs';
 import { ApplicationStatus, QuotaQuarter } from '../common/enums';
@@ -25,6 +26,8 @@ export class ApplicationService {
     private rotationalIrrigationService: RotationalIrrigationService,
     @Inject(forwardRef(() => WaterRightsTradingService))
     private waterRightsTradingService: WaterRightsTradingService,
+    @Inject(forwardRef(() => CreditRatingService))
+    private creditRatingService: CreditRatingService,
   ) {}
 
   async create(dto: CreateApplicationDto) {
@@ -34,6 +37,11 @@ export class ApplicationService {
     const checkResult = await this.waterBillingService.checkFarmerCanApply(dto.farmerId);
     if (!checkResult.canApply) {
       throw new BadRequestException(`提交申请被拒绝: ${checkResult.reason}`);
+    }
+
+    const dCheck = await this.creditRatingService.checkDFarmerCanApply(dto.farmerId);
+    if (!dCheck.canApply) {
+      throw new BadRequestException(`提交申请被拒绝: ${dCheck.reason}`);
     }
 
     const target = dayjs(dto.targetDate);
@@ -47,13 +55,17 @@ export class ApplicationService {
       throw new BadRequestException(`${year}年${quarter}季度定额尚未设置,无法提交申请`);
     }
 
+    const creditMultiplier = await this.creditRatingService.getQuotaMultiplier(dto.farmerId);
+
     const requestVolume = dto.expectedFlow * dto.expectedHours * 3600;
 
     const availableQuota = await this.waterRightsTradingService.getAvailableQuota(farmer.id, year, quarter);
 
-    if (requestVolume > availableQuota) {
+    const creditAdjustedQuota = +(availableQuota * creditMultiplier).toFixed(4);
+
+    if (requestVolume > creditAdjustedQuota) {
       throw new BadRequestException(
-        `申请量(${requestVolume.toFixed(2)}m³)超过当前可用额度(${availableQuota.toFixed(2)}m³),额度不足可前往水权交易市场购买`,
+        `申请量(${requestVolume.toFixed(2)}m³)超过信用调整后可用额度(${creditAdjustedQuota.toFixed(2)}m³,原额度${availableQuota.toFixed(2)}m³×信用系数${creditMultiplier}),额度不足可前往水权交易市场购买`,
       );
     }
 
@@ -88,6 +100,7 @@ export class ApplicationService {
 
     return {
       ...created,
+      creditMultiplier,
       warnings: rotationalCheck.warnings,
       roundName: rotationalCheck.roundName,
     };

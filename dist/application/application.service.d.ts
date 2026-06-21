@@ -3,6 +3,7 @@ import { QuotaService } from '../quota/quota.service';
 import { WaterBillingService } from '../water-billing/water-billing.service';
 import { RotationalIrrigationService } from '../rotational-irrigation/rotational-irrigation.service';
 import { WaterRightsTradingService } from '../water-rights-trading/water-rights-trading.service';
+import { CreditRatingService } from '../credit-rating/credit-rating.service';
 import { CreateApplicationDto } from './dto';
 export declare class ApplicationService {
     private prisma;
@@ -10,8 +11,10 @@ export declare class ApplicationService {
     private waterBillingService;
     private rotationalIrrigationService;
     private waterRightsTradingService;
-    constructor(prisma: PrismaService, quotaService: QuotaService, waterBillingService: WaterBillingService, rotationalIrrigationService: RotationalIrrigationService, waterRightsTradingService: WaterRightsTradingService);
+    private creditRatingService;
+    constructor(prisma: PrismaService, quotaService: QuotaService, waterBillingService: WaterBillingService, rotationalIrrigationService: RotationalIrrigationService, waterRightsTradingService: WaterRightsTradingService, creditRatingService: CreditRatingService);
     create(dto: CreateApplicationDto): Promise<{
+        creditMultiplier: number;
         warnings: string[];
         roundName: string;
         farmer: {
