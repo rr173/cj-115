@@ -75,10 +75,12 @@ let DroughtMonitoringService = class DroughtMonitoringService {
             if (newStatus === enums_1.DroughtStatus.TENSE) {
                 emergencyLevel = enums_1.EmergencyLevel.LEVEL_1;
                 message = `供需比${ratio.toFixed(2)}降至紧张区间,启动一级响应:暂停D级用水户配水计划`;
+                this.pendingRecovery = false;
             }
             else if (newStatus === enums_1.DroughtStatus.SEVERE) {
                 emergencyLevel = enums_1.EmergencyLevel.LEVEL_2;
                 message = `供需比${ratio.toFixed(2)}降至严重缺水区间,启动二级响应:按信用等级削减配水流量`;
+                this.pendingRecovery = false;
             }
             else if (newStatus === enums_1.DroughtStatus.NORMAL || newStatus === enums_1.DroughtStatus.ABUNDANT) {
                 message = `供需比${ratio.toFixed(2)}恢复至${enums_1.DroughtStatusNames[newStatus]},将在下一时隙恢复被暂停/削减的配水计划`;
@@ -110,29 +112,15 @@ let DroughtMonitoringService = class DroughtMonitoringService {
         await this.recordSnapshot(actualFlow, demandFlow, ratio, newStatus, evaluatedAt);
     }
     async calcCurrentDemandFlow() {
-        const now = (0, dayjs_1.default)();
-        const dayStart = now.startOf('day').toDate();
-        const dayEnd = now.endOf('day').toDate();
+        const now = new Date();
         const allocations = await this.prisma.waterAllocation.findMany({
             where: {
-                startTime: { gte: dayStart, lte: dayEnd },
-                droughtStatus: enums_1.AllocationDroughtStatus.NORMAL,
+                endTime: { gt: now },
+                droughtStatus: { in: [enums_1.AllocationDroughtStatus.NORMAL, enums_1.AllocationDroughtStatus.REDUCED] },
             },
+            select: { flow: true },
         });
-        const reducedAllocations = await this.prisma.waterAllocation.findMany({
-            where: {
-                startTime: { gte: dayStart, lte: dayEnd },
-                droughtStatus: enums_1.AllocationDroughtStatus.REDUCED,
-            },
-        });
-        let total = 0;
-        for (const a of allocations) {
-            total += a.flow;
-        }
-        for (const a of reducedAllocations) {
-            total += a.flow;
-        }
-        return total;
+        return allocations.reduce((sum, a) => sum + a.flow, 0);
     }
     async recordSnapshot(actualFlow, demandFlow, ratio, status, timestamp) {
         const hour = (0, dayjs_1.default)(timestamp).startOf('hour').toDate();
@@ -154,72 +142,64 @@ let DroughtMonitoringService = class DroughtMonitoringService {
         });
     }
     async executeLevel1Response() {
-        const now = (0, dayjs_1.default)();
-        const dayStart = now.startOf('day').toDate();
-        const dayEnd = now.endOf('day').toDate();
-        const scheduledApps = await this.prisma.waterApplication.findMany({
+        const now = new Date();
+        const normalAllocs = await this.prisma.waterAllocation.findMany({
             where: {
-                status: enums_1.ApplicationStatus.SCHEDULED,
-                targetDate: { gte: dayStart, lte: dayEnd },
+                endTime: { gt: now },
+                droughtStatus: enums_1.AllocationDroughtStatus.NORMAL,
             },
-            include: { allocations: true },
+            include: {
+                application: {
+                    include: { farmer: { select: { id: true } } },
+                },
+            },
         });
-        const farmerIds = [...new Set(scheduledApps.map((a) => a.farmerId))];
+        const farmerIds = [...new Set(normalAllocs.map((a) => a.application.farmerId))];
         const creditMap = await this.creditRatingService.getFarmerCreditLevelMap(farmerIds);
-        for (const app of scheduledApps) {
-            const creditLevel = creditMap.get(app.farmerId) || enums_1.CreditLevel.C;
+        for (const alloc of normalAllocs) {
+            const creditLevel = creditMap.get(alloc.application.farmerId) || enums_1.CreditLevel.C;
             if (creditLevel === enums_1.CreditLevel.D) {
-                for (const alloc of app.allocations) {
-                    if (alloc.droughtStatus === enums_1.AllocationDroughtStatus.NORMAL) {
-                        await this.prisma.waterAllocation.update({
-                            where: { id: alloc.id },
-                            data: { droughtStatus: enums_1.AllocationDroughtStatus.SUSPENDED },
-                        });
-                    }
-                }
+                await this.prisma.waterAllocation.update({
+                    where: { id: alloc.id },
+                    data: { droughtStatus: enums_1.AllocationDroughtStatus.SUSPENDED },
+                });
             }
         }
     }
     async executeLevel2Response() {
-        const now = (0, dayjs_1.default)();
-        const dayStart = now.startOf('day').toDate();
-        const dayEnd = now.endOf('day').toDate();
-        const allScheduledApps = await this.prisma.waterApplication.findMany({
+        const now = new Date();
+        const normalAllocs = await this.prisma.waterAllocation.findMany({
             where: {
-                status: enums_1.ApplicationStatus.SCHEDULED,
-                targetDate: { gte: dayStart, lte: dayEnd },
+                endTime: { gt: now },
+                droughtStatus: enums_1.AllocationDroughtStatus.NORMAL,
             },
-            include: { allocations: true },
+            include: {
+                application: {
+                    include: { farmer: { select: { id: true } } },
+                },
+            },
         });
-        const farmerIds = [...new Set(allScheduledApps.map((a) => a.farmerId))];
+        const farmerIds = [...new Set(normalAllocs.map((a) => a.application.farmerId))];
         const creditMap = await this.creditRatingService.getFarmerCreditLevelMap(farmerIds);
-        for (const app of allScheduledApps) {
-            const creditLevel = creditMap.get(app.farmerId) || enums_1.CreditLevel.C;
+        for (const alloc of normalAllocs) {
+            const creditLevel = creditMap.get(alloc.application.farmerId) || enums_1.CreditLevel.C;
             const reductionRate = CREDIT_REDUCTION_RATES[creditLevel] ?? 0;
-            for (const alloc of app.allocations) {
-                if (alloc.droughtStatus === enums_1.AllocationDroughtStatus.SUSPENDED)
-                    continue;
-                if (reductionRate >= 1.0) {
-                    if (alloc.droughtStatus === enums_1.AllocationDroughtStatus.NORMAL) {
-                        await this.prisma.waterAllocation.update({
-                            where: { id: alloc.id },
-                            data: { droughtStatus: enums_1.AllocationDroughtStatus.SUSPENDED },
-                        });
-                    }
-                }
-                else if (reductionRate > 0) {
-                    if (alloc.droughtStatus === enums_1.AllocationDroughtStatus.NORMAL) {
-                        const reducedFlow = +(alloc.flow * (1 - reductionRate)).toFixed(4);
-                        await this.prisma.waterAllocation.update({
-                            where: { id: alloc.id },
-                            data: {
-                                droughtStatus: enums_1.AllocationDroughtStatus.REDUCED,
-                                originalFlow: alloc.flow,
-                                flow: reducedFlow,
-                            },
-                        });
-                    }
-                }
+            if (reductionRate >= 1.0) {
+                await this.prisma.waterAllocation.update({
+                    where: { id: alloc.id },
+                    data: { droughtStatus: enums_1.AllocationDroughtStatus.SUSPENDED },
+                });
+            }
+            else if (reductionRate > 0) {
+                const reducedFlow = +(alloc.flow * (1 - reductionRate)).toFixed(4);
+                await this.prisma.waterAllocation.update({
+                    where: { id: alloc.id },
+                    data: {
+                        droughtStatus: enums_1.AllocationDroughtStatus.REDUCED,
+                        originalFlow: alloc.flow,
+                        flow: reducedFlow,
+                    },
+                });
             }
         }
     }
@@ -234,12 +214,19 @@ let DroughtMonitoringService = class DroughtMonitoringService {
         this.pendingRecovery = false;
     }
     async restoreAllAllocations() {
+        const now = new Date();
         const suspendedAllocs = await this.prisma.waterAllocation.findMany({
-            where: { droughtStatus: enums_1.AllocationDroughtStatus.SUSPENDED },
+            where: {
+                droughtStatus: enums_1.AllocationDroughtStatus.SUSPENDED,
+                endTime: { gt: now },
+            },
             include: { application: { select: { farmerId: true } } },
         });
         const reducedAllocs = await this.prisma.waterAllocation.findMany({
-            where: { droughtStatus: enums_1.AllocationDroughtStatus.REDUCED },
+            where: {
+                droughtStatus: enums_1.AllocationDroughtStatus.REDUCED,
+                endTime: { gt: now },
+            },
             include: { application: { select: { farmerId: true } } },
         });
         const allFarmerIds = [
@@ -339,8 +326,12 @@ let DroughtMonitoringService = class DroughtMonitoringService {
         }));
     }
     async getAffectedAllocations() {
+        const now = new Date();
         const suspended = await this.prisma.waterAllocation.findMany({
-            where: { droughtStatus: enums_1.AllocationDroughtStatus.SUSPENDED },
+            where: {
+                droughtStatus: enums_1.AllocationDroughtStatus.SUSPENDED,
+                endTime: { gt: now },
+            },
             include: {
                 application: {
                     include: { farmer: { select: { id: true, code: true, name: true } } },
@@ -350,7 +341,10 @@ let DroughtMonitoringService = class DroughtMonitoringService {
             orderBy: { startTime: 'asc' },
         });
         const reduced = await this.prisma.waterAllocation.findMany({
-            where: { droughtStatus: enums_1.AllocationDroughtStatus.REDUCED },
+            where: {
+                droughtStatus: enums_1.AllocationDroughtStatus.REDUCED,
+                endTime: { gt: now },
+            },
             include: {
                 application: {
                     include: { farmer: { select: { id: true, code: true, name: true } } },
@@ -486,13 +480,11 @@ let DroughtMonitoringService = class DroughtMonitoringService {
         if (existingSourceTransfer) {
             throw new common_1.BadRequestException('该渠道已有活跃的借调关系,同一条渠道不能同时借给两个对象');
         }
-        const now = (0, dayjs_1.default)();
-        const dayStart = now.startOf('day').toDate();
-        const dayEnd = now.endOf('day').toDate();
+        const now = new Date();
         const activeAllocs = await this.prisma.waterAllocation.findFirst({
             where: {
                 channelId: dto.sourceChannelId,
-                startTime: { gte: dayStart, lte: dayEnd },
+                endTime: { gt: now },
                 droughtStatus: { not: enums_1.AllocationDroughtStatus.SUSPENDED },
             },
         });
