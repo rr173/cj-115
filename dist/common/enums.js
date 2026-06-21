@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SellOrderStatusNames = exports.SellOrderStatus = exports.IrrigationRoundStatusNames = exports.IrrigationRoundStatus = exports.PaymentMethodNames = exports.PaymentMethod = exports.WaterBillStatusNames = exports.WaterBillStatus = exports.MaintenanceOrderStatusNames = exports.MaintenanceOrderStatus = exports.ProblemLevelNames = exports.ProblemLevel = exports.InspectionChannelStatusNames = exports.InspectionChannelStatus = exports.QuotaQuarterNames = exports.QuotaQuarter = exports.NotificationTypeNames = exports.NotificationType = exports.ApplicationStatusNames = exports.ApplicationStatus = exports.ChannelLevelNames = exports.ChannelLevel = void 0;
+exports.GateAdjustmentReasonNames = exports.GateAdjustmentReason = exports.WaterLevelAlertTypeNames = exports.WaterLevelAlertType = exports.MonitorStatusNames = exports.MonitorStatus = exports.GateControlModeNames = exports.GateControlMode = exports.SellOrderStatusNames = exports.SellOrderStatus = exports.IrrigationRoundStatusNames = exports.IrrigationRoundStatus = exports.PaymentMethodNames = exports.PaymentMethod = exports.WaterBillStatusNames = exports.WaterBillStatus = exports.MaintenanceOrderStatusNames = exports.MaintenanceOrderStatus = exports.ProblemLevelNames = exports.ProblemLevel = exports.InspectionChannelStatusNames = exports.InspectionChannelStatus = exports.QuotaQuarterNames = exports.QuotaQuarter = exports.NotificationTypeNames = exports.NotificationType = exports.ApplicationStatusNames = exports.ApplicationStatus = exports.ChannelLevelNames = exports.ChannelLevel = void 0;
 var ChannelLevel;
 (function (ChannelLevel) {
     ChannelLevel["MAIN"] = "MAIN";
@@ -145,5 +145,49 @@ exports.SellOrderStatusNames = {
     [SellOrderStatus.COMPLETED]: '全部成交',
     [SellOrderStatus.CANCELLED]: '已撤单',
     [SellOrderStatus.EXPIRED]: '已过期',
+};
+var GateControlMode;
+(function (GateControlMode) {
+    GateControlMode["AUTO"] = "AUTO";
+    GateControlMode["MANUAL"] = "MANUAL";
+})(GateControlMode || (exports.GateControlMode = GateControlMode = {}));
+exports.GateControlModeNames = {
+    [GateControlMode.AUTO]: '自动',
+    [GateControlMode.MANUAL]: '手动',
+};
+var MonitorStatus;
+(function (MonitorStatus) {
+    MonitorStatus["ONLINE"] = "ONLINE";
+    MonitorStatus["OFFLINE"] = "OFFLINE";
+})(MonitorStatus || (exports.MonitorStatus = MonitorStatus = {}));
+exports.MonitorStatusNames = {
+    [MonitorStatus.ONLINE]: '在线',
+    [MonitorStatus.OFFLINE]: '离线',
+};
+var WaterLevelAlertType;
+(function (WaterLevelAlertType) {
+    WaterLevelAlertType["OVERFLOW"] = "OVERFLOW";
+    WaterLevelAlertType["DRY"] = "DRY";
+    WaterLevelAlertType["DEVICE_OFFLINE"] = "DEVICE_OFFLINE";
+    WaterLevelAlertType["ALL_OFFLINE"] = "ALL_OFFLINE";
+})(WaterLevelAlertType || (exports.WaterLevelAlertType = WaterLevelAlertType = {}));
+exports.WaterLevelAlertTypeNames = {
+    [WaterLevelAlertType.OVERFLOW]: '溢出告警',
+    [WaterLevelAlertType.DRY]: '断流告警',
+    [WaterLevelAlertType.DEVICE_OFFLINE]: '设备离线告警',
+    [WaterLevelAlertType.ALL_OFFLINE]: '全量离线告警',
+};
+var GateAdjustmentReason;
+(function (GateAdjustmentReason) {
+    GateAdjustmentReason["AUTO_PLAN"] = "AUTO_PLAN";
+    GateAdjustmentReason["AUTO_OVERFLOW"] = "AUTO_OVERFLOW";
+    GateAdjustmentReason["AUTO_DRY"] = "AUTO_DRY";
+    GateAdjustmentReason["MANUAL"] = "MANUAL";
+})(GateAdjustmentReason || (exports.GateAdjustmentReason = GateAdjustmentReason = {}));
+exports.GateAdjustmentReasonNames = {
+    [GateAdjustmentReason.AUTO_PLAN]: '配水计划自动调节',
+    [GateAdjustmentReason.AUTO_OVERFLOW]: '溢出保护调节',
+    [GateAdjustmentReason.AUTO_DRY]: '断流保护调节',
+    [GateAdjustmentReason.MANUAL]: '手动调节',
 };
 //# sourceMappingURL=enums.js.map

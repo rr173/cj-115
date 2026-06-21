@@ -76,3 +76,27 @@ export declare enum SellOrderStatus {
     EXPIRED = "EXPIRED"
 }
 export declare const SellOrderStatusNames: Record<SellOrderStatus, string>;
+export declare enum GateControlMode {
+    AUTO = "AUTO",
+    MANUAL = "MANUAL"
+}
+export declare const GateControlModeNames: Record<GateControlMode, string>;
+export declare enum MonitorStatus {
+    ONLINE = "ONLINE",
+    OFFLINE = "OFFLINE"
+}
+export declare const MonitorStatusNames: Record<MonitorStatus, string>;
+export declare enum WaterLevelAlertType {
+    OVERFLOW = "OVERFLOW",
+    DRY = "DRY",
+    DEVICE_OFFLINE = "DEVICE_OFFLINE",
+    ALL_OFFLINE = "ALL_OFFLINE"
+}
+export declare const WaterLevelAlertTypeNames: Record<WaterLevelAlertType, string>;
+export declare enum GateAdjustmentReason {
+    AUTO_PLAN = "AUTO_PLAN",
+    AUTO_OVERFLOW = "AUTO_OVERFLOW",
+    AUTO_DRY = "AUTO_DRY",
+    MANUAL = "MANUAL"
+}
+export declare const GateAdjustmentReasonNames: Record<GateAdjustmentReason, string>;

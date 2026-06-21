@@ -29,6 +29,9 @@ model Channel {
   maintenanceOrders MaintenanceOrder[]
   priceBinding  ChannelPriceBinding?
   roundChannels IrrigationRoundChannel[]
+  monitors      WaterLevelMonitor[]
+  gate          Gate?
+  alerts        WaterLevelAlert[]
 }
 
 model Farmer {
@@ -392,4 +395,88 @@ model WaterRightsTradeRecord {
   @@index([buyerId])
   @@index([sellerId])
   @@index([sellOrderId])
+}
+
+model WaterLevelMonitor {
+  id              String   @id @default(uuid())
+  code            String   @unique
+  channelId       String
+  channel         Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  installPosition Float
+  normalLower     Float
+  normalUpper     Float
+  alertOverUpper  Float
+  alertBelowLower Float
+  status          String   @default("ONLINE")
+  lastReadingAt   DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @default(now())
+
+  readings WaterLevelReading[]
+  alerts   WaterLevelAlert[]
+
+  @@index([channelId])
+  @@index([status])
+}
+
+model WaterLevelReading {
+  id        String   @id @default(uuid())
+  monitorId String
+  monitor   WaterLevelMonitor @relation(fields: [monitorId], references: [id], onDelete: Cascade)
+  timestamp DateTime
+  value     Float
+  createdAt DateTime @default(now())
+
+  @@index([monitorId, timestamp])
+  @@index([timestamp])
+}
+
+model Gate {
+  id             String   @id @default(uuid())
+  code           String   @unique
+  channelId      String   @unique
+  channel        Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  maxOpening     Float    @default(100)
+  currentOpening Float    @default(0)
+  controlMode    String   @default("AUTO")
+  lastAdjustedAt DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now())
+
+  adjustmentLogs GateAdjustmentLog[]
+}
+
+model GateAdjustmentLog {
+  id              String   @id @default(uuid())
+  gateId          String
+  gate            Gate     @relation(fields: [gateId], references: [id], onDelete: Cascade)
+  previousOpening Float
+  targetOpening   Float
+  reason          String
+  channelId       String
+  createdAt       DateTime @default(now())
+
+  @@index([gateId])
+  @@index([channelId])
+  @@index([createdAt])
+}
+
+model WaterLevelAlert {
+  id         String   @id @default(uuid())
+  type       String
+  channelId  String
+  channel    Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  monitorId  String?
+  monitor    WaterLevelMonitor? @relation(fields: [monitorId], references: [id], onDelete: SetNull)
+  value      Float?
+  threshold  Float?
+  message    String
+  isResolved Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  resolvedAt DateTime?
+
+  @@index([type])
+  @@index([channelId])
+  @@index([isResolved])
+  @@index([createdAt])
 }

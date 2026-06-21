@@ -10,6 +10,7 @@ import { InspectionModule } from './inspection/inspection.module';
 import { WaterBillingModule } from './water-billing/water-billing.module';
 import { RotationalIrrigationModule } from './rotational-irrigation/rotational-irrigation.module';
 import { WaterRightsTradingModule } from './water-rights-trading/water-rights-trading.module';
+import { WaterLevelGateControlModule } from './water-level-gate-control/water-level-gate-control.module';
 import { PrismaService } from './prisma/prisma.service';
 
 @Module({
@@ -25,6 +26,7 @@ import { PrismaService } from './prisma/prisma.service';
     WaterBillingModule,
     RotationalIrrigationModule,
     WaterRightsTradingModule,
+    WaterLevelGateControlModule,
   ],
   providers: [PrismaService],
 })

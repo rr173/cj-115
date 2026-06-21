@@ -153,3 +153,51 @@ export const SellOrderStatusNames: Record<SellOrderStatus, string> = {
   [SellOrderStatus.CANCELLED]: '已撤单',
   [SellOrderStatus.EXPIRED]: '已过期',
 };
+
+export enum GateControlMode {
+  AUTO = 'AUTO',
+  MANUAL = 'MANUAL',
+}
+
+export const GateControlModeNames: Record<GateControlMode, string> = {
+  [GateControlMode.AUTO]: '自动',
+  [GateControlMode.MANUAL]: '手动',
+};
+
+export enum MonitorStatus {
+  ONLINE = 'ONLINE',
+  OFFLINE = 'OFFLINE',
+}
+
+export const MonitorStatusNames: Record<MonitorStatus, string> = {
+  [MonitorStatus.ONLINE]: '在线',
+  [MonitorStatus.OFFLINE]: '离线',
+};
+
+export enum WaterLevelAlertType {
+  OVERFLOW = 'OVERFLOW',
+  DRY = 'DRY',
+  DEVICE_OFFLINE = 'DEVICE_OFFLINE',
+  ALL_OFFLINE = 'ALL_OFFLINE',
+}
+
+export const WaterLevelAlertTypeNames: Record<WaterLevelAlertType, string> = {
+  [WaterLevelAlertType.OVERFLOW]: '溢出告警',
+  [WaterLevelAlertType.DRY]: '断流告警',
+  [WaterLevelAlertType.DEVICE_OFFLINE]: '设备离线告警',
+  [WaterLevelAlertType.ALL_OFFLINE]: '全量离线告警',
+};
+
+export enum GateAdjustmentReason {
+  AUTO_PLAN = 'AUTO_PLAN',
+  AUTO_OVERFLOW = 'AUTO_OVERFLOW',
+  AUTO_DRY = 'AUTO_DRY',
+  MANUAL = 'MANUAL',
+}
+
+export const GateAdjustmentReasonNames: Record<GateAdjustmentReason, string> = {
+  [GateAdjustmentReason.AUTO_PLAN]: '配水计划自动调节',
+  [GateAdjustmentReason.AUTO_OVERFLOW]: '溢出保护调节',
+  [GateAdjustmentReason.AUTO_DRY]: '断流保护调节',
+  [GateAdjustmentReason.MANUAL]: '手动调节',
+};
