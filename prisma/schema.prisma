@@ -64,6 +64,7 @@ model Farmer {
   creditHistories CreditScoreHistory[]
   efficiencyRecords IrrigationEfficiencyRecord[]
   farmerAssessments FarmerQuarterlyAssessment[]
+  disputeLinks DisputeFarmerLink[]
 }
 
 model Quota {
@@ -105,6 +106,7 @@ model WaterApplication {
   postponeHistories ApplicationPostponeHistory[]
   notifications Notification[]
   efficiencyRecord IrrigationEfficiencyRecord?
+  disputeLinks DisputeApplicationLink[]
 }
 
 model WaterAllocation {
@@ -660,4 +662,68 @@ model FarmerQuarterlyAssessment {
 
   @@index([reportId])
   @@index([farmerId])
+}
+
+model DisputeCase {
+  id              String    @id @default(uuid())
+  disputeNo       String    @unique
+  type            String
+  description     String
+  occurredAt      DateTime
+  status          String    @default("PENDING_ACCEPT")
+  mediatorName    String?
+  expectedDays    Int?
+  acceptedAt      DateTime?
+  closedAt        DateTime?
+  archivedAt      DateTime?
+  result          String?
+  resultNote      String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @default(now())
+
+  farmerLinks     DisputeFarmerLink[]
+  applicationLinks DisputeApplicationLink[]
+  mediationRecords DisputeMediationRecord[]
+
+  @@index([status])
+  @@index([type])
+  @@index([occurredAt])
+}
+
+model DisputeFarmerLink {
+  id        String      @id @default(uuid())
+  disputeId String
+  dispute   DisputeCase @relation(fields: [disputeId], references: [id], onDelete: Cascade)
+  farmerId  String
+  farmer    Farmer      @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+
+  @@unique([disputeId, farmerId])
+  @@index([disputeId])
+  @@index([farmerId])
+}
+
+model DisputeApplicationLink {
+  id            String          @id @default(uuid())
+  disputeId     String
+  dispute       DisputeCase     @relation(fields: [disputeId], references: [id], onDelete: Cascade)
+  applicationId String
+  application   WaterApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@unique([disputeId, applicationId])
+  @@index([disputeId])
+  @@index([applicationId])
+}
+
+model DisputeMediationRecord {
+  id                   String      @id @default(uuid())
+  disputeId            String
+  dispute              DisputeCase @relation(fields: [disputeId], references: [id], onDelete: Cascade)
+  recordedAt           DateTime
+  recorderName         String
+  content              String
+  isOnSiteInspection   Boolean     @default(false)
+  createdAt            DateTime    @default(now())
+
+  @@index([disputeId])
+  @@index([recordedAt])
 }

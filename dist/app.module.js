@@ -23,6 +23,7 @@ const water_level_gate_control_module_1 = require("./water-level-gate-control/wa
 const credit_rating_module_1 = require("./credit-rating/credit-rating.module");
 const drought_monitoring_module_1 = require("./drought-monitoring/drought-monitoring.module");
 const irrigation_efficiency_module_1 = require("./irrigation-efficiency/irrigation-efficiency.module");
+const dispute_mediation_module_1 = require("./dispute-mediation/dispute-mediation.module");
 const prisma_service_1 = require("./prisma/prisma.service");
 let AppModule = class AppModule {
 };
@@ -45,6 +46,7 @@ exports.AppModule = AppModule = __decorate([
             credit_rating_module_1.CreditRatingModule,
             drought_monitoring_module_1.DroughtMonitoringModule,
             irrigation_efficiency_module_1.IrrigationEfficiencyModule,
+            dispute_mediation_module_1.DisputeMediationModule,
         ],
         providers: [prisma_service_1.PrismaService],
     })

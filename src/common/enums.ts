@@ -285,3 +285,45 @@ export const CreditHistoryTypeNames: Record<CreditHistoryType, string> = {
   [CreditHistoryType.RECALC]: '系统重算',
   [CreditHistoryType.MANUAL]: '手动调整',
 };
+
+export enum DisputeType {
+  ORDER_DISPUTE = 'ORDER_DISPUTE',
+  VOLUME_UNFAIR = 'VOLUME_UNFAIR',
+  CHANNEL_CONFLICT = 'CHANNEL_CONFLICT',
+  FEE_OBJECTION = 'FEE_OBJECTION',
+  OTHER = 'OTHER',
+}
+
+export const DisputeTypeNames: Record<DisputeType, string> = {
+  [DisputeType.ORDER_DISPUTE]: '配水顺序争议',
+  [DisputeType.VOLUME_UNFAIR]: '水量分配不公',
+  [DisputeType.CHANNEL_CONFLICT]: '渠道占用冲突',
+  [DisputeType.FEE_OBJECTION]: '水费计算异议',
+  [DisputeType.OTHER]: '其他',
+};
+
+export enum DisputeStatus {
+  PENDING_ACCEPT = 'PENDING_ACCEPT',
+  MEDIATING = 'MEDIATING',
+  CLOSED = 'CLOSED',
+  ARCHIVED = 'ARCHIVED',
+}
+
+export const DisputeStatusNames: Record<DisputeStatus, string> = {
+  [DisputeStatus.PENDING_ACCEPT]: '待受理',
+  [DisputeStatus.MEDIATING]: '调解中',
+  [DisputeStatus.CLOSED]: '已结案',
+  [DisputeStatus.ARCHIVED]: '已归档',
+};
+
+export enum MediationResult {
+  SUCCESS = 'SUCCESS',
+  FAIL_ESCALATE = 'FAIL_ESCALATE',
+  WITHDRAW = 'WITHDRAW',
+}
+
+export const MediationResultNames: Record<MediationResult, string> = {
+  [MediationResult.SUCCESS]: '调解成功',
+  [MediationResult.FAIL_ESCALATE]: '调解失败转上级',
+  [MediationResult.WITHDRAW]: '单方撤回',
+};

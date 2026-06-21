@@ -137,3 +137,24 @@ export declare enum CreditHistoryType {
     MANUAL = "MANUAL"
 }
 export declare const CreditHistoryTypeNames: Record<CreditHistoryType, string>;
+export declare enum DisputeType {
+    ORDER_DISPUTE = "ORDER_DISPUTE",
+    VOLUME_UNFAIR = "VOLUME_UNFAIR",
+    CHANNEL_CONFLICT = "CHANNEL_CONFLICT",
+    FEE_OBJECTION = "FEE_OBJECTION",
+    OTHER = "OTHER"
+}
+export declare const DisputeTypeNames: Record<DisputeType, string>;
+export declare enum DisputeStatus {
+    PENDING_ACCEPT = "PENDING_ACCEPT",
+    MEDIATING = "MEDIATING",
+    CLOSED = "CLOSED",
+    ARCHIVED = "ARCHIVED"
+}
+export declare const DisputeStatusNames: Record<DisputeStatus, string>;
+export declare enum MediationResult {
+    SUCCESS = "SUCCESS",
+    FAIL_ESCALATE = "FAIL_ESCALATE",
+    WITHDRAW = "WITHDRAW"
+}
+export declare const MediationResultNames: Record<MediationResult, string>;

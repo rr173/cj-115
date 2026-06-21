@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreditHistoryTypeNames = exports.CreditHistoryType = exports.ChannelTransferStatusNames = exports.ChannelTransferStatus = exports.AllocationDroughtStatusNames = exports.AllocationDroughtStatus = exports.EmergencyLevelNames = exports.EmergencyLevel = exports.DroughtStatusNames = exports.DroughtStatus = exports.CreditLevelSortOrder = exports.CreditQuotaMultiplier = exports.CreditLevelNames = exports.CreditLevel = exports.GateAdjustmentReasonNames = exports.GateAdjustmentReason = exports.WaterLevelAlertTypeNames = exports.WaterLevelAlertType = exports.MonitorStatusNames = exports.MonitorStatus = exports.GateControlModeNames = exports.GateControlMode = exports.SellOrderStatusNames = exports.SellOrderStatus = exports.IrrigationRoundStatusNames = exports.IrrigationRoundStatus = exports.PaymentMethodNames = exports.PaymentMethod = exports.WaterBillStatusNames = exports.WaterBillStatus = exports.MaintenanceOrderStatusNames = exports.MaintenanceOrderStatus = exports.ProblemLevelNames = exports.ProblemLevel = exports.InspectionChannelStatusNames = exports.InspectionChannelStatus = exports.QuotaQuarterNames = exports.QuotaQuarter = exports.NotificationTypeNames = exports.NotificationType = exports.ApplicationStatusNames = exports.ApplicationStatus = exports.ChannelLevelNames = exports.ChannelLevel = void 0;
+exports.MediationResultNames = exports.MediationResult = exports.DisputeStatusNames = exports.DisputeStatus = exports.DisputeTypeNames = exports.DisputeType = exports.CreditHistoryTypeNames = exports.CreditHistoryType = exports.ChannelTransferStatusNames = exports.ChannelTransferStatus = exports.AllocationDroughtStatusNames = exports.AllocationDroughtStatus = exports.EmergencyLevelNames = exports.EmergencyLevel = exports.DroughtStatusNames = exports.DroughtStatus = exports.CreditLevelSortOrder = exports.CreditQuotaMultiplier = exports.CreditLevelNames = exports.CreditLevel = exports.GateAdjustmentReasonNames = exports.GateAdjustmentReason = exports.WaterLevelAlertTypeNames = exports.WaterLevelAlertType = exports.MonitorStatusNames = exports.MonitorStatus = exports.GateControlModeNames = exports.GateControlMode = exports.SellOrderStatusNames = exports.SellOrderStatus = exports.IrrigationRoundStatusNames = exports.IrrigationRoundStatus = exports.PaymentMethodNames = exports.PaymentMethod = exports.WaterBillStatusNames = exports.WaterBillStatus = exports.MaintenanceOrderStatusNames = exports.MaintenanceOrderStatus = exports.ProblemLevelNames = exports.ProblemLevel = exports.InspectionChannelStatusNames = exports.InspectionChannelStatus = exports.QuotaQuarterNames = exports.QuotaQuarter = exports.NotificationTypeNames = exports.NotificationType = exports.ApplicationStatusNames = exports.ApplicationStatus = exports.ChannelLevelNames = exports.ChannelLevel = void 0;
 var ChannelLevel;
 (function (ChannelLevel) {
     ChannelLevel["MAIN"] = "MAIN";
@@ -265,5 +265,44 @@ var CreditHistoryType;
 exports.CreditHistoryTypeNames = {
     [CreditHistoryType.RECALC]: '系统重算',
     [CreditHistoryType.MANUAL]: '手动调整',
+};
+var DisputeType;
+(function (DisputeType) {
+    DisputeType["ORDER_DISPUTE"] = "ORDER_DISPUTE";
+    DisputeType["VOLUME_UNFAIR"] = "VOLUME_UNFAIR";
+    DisputeType["CHANNEL_CONFLICT"] = "CHANNEL_CONFLICT";
+    DisputeType["FEE_OBJECTION"] = "FEE_OBJECTION";
+    DisputeType["OTHER"] = "OTHER";
+})(DisputeType || (exports.DisputeType = DisputeType = {}));
+exports.DisputeTypeNames = {
+    [DisputeType.ORDER_DISPUTE]: '配水顺序争议',
+    [DisputeType.VOLUME_UNFAIR]: '水量分配不公',
+    [DisputeType.CHANNEL_CONFLICT]: '渠道占用冲突',
+    [DisputeType.FEE_OBJECTION]: '水费计算异议',
+    [DisputeType.OTHER]: '其他',
+};
+var DisputeStatus;
+(function (DisputeStatus) {
+    DisputeStatus["PENDING_ACCEPT"] = "PENDING_ACCEPT";
+    DisputeStatus["MEDIATING"] = "MEDIATING";
+    DisputeStatus["CLOSED"] = "CLOSED";
+    DisputeStatus["ARCHIVED"] = "ARCHIVED";
+})(DisputeStatus || (exports.DisputeStatus = DisputeStatus = {}));
+exports.DisputeStatusNames = {
+    [DisputeStatus.PENDING_ACCEPT]: '待受理',
+    [DisputeStatus.MEDIATING]: '调解中',
+    [DisputeStatus.CLOSED]: '已结案',
+    [DisputeStatus.ARCHIVED]: '已归档',
+};
+var MediationResult;
+(function (MediationResult) {
+    MediationResult["SUCCESS"] = "SUCCESS";
+    MediationResult["FAIL_ESCALATE"] = "FAIL_ESCALATE";
+    MediationResult["WITHDRAW"] = "WITHDRAW";
+})(MediationResult || (exports.MediationResult = MediationResult = {}));
+exports.MediationResultNames = {
+    [MediationResult.SUCCESS]: '调解成功',
+    [MediationResult.FAIL_ESCALATE]: '调解失败转上级',
+    [MediationResult.WITHDRAW]: '单方撤回',
 };
 //# sourceMappingURL=enums.js.map
