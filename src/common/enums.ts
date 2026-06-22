@@ -357,3 +357,39 @@ export const MediationResultNames: Record<MediationResult, string> = {
   [MediationResult.FAIL_ESCALATE]: '调解失败转上级',
   [MediationResult.WITHDRAW]: '单方撤回',
 };
+
+export enum GroundwaterAlertType {
+  REDLINE_WARNING = 'REDLINE_WARNING',
+  REDLINE_BLOCKED = 'REDLINE_BLOCKED',
+  DEPTH_WARNING = 'DEPTH_WARNING',
+  DEPTH_EXCEEDED = 'DEPTH_EXCEEDED',
+}
+
+export const GroundwaterAlertTypeNames: Record<GroundwaterAlertType, string> = {
+  [GroundwaterAlertType.REDLINE_WARNING]: '开采红线预警(90%)',
+  [GroundwaterAlertType.REDLINE_BLOCKED]: '开采红线拦截(100%)',
+  [GroundwaterAlertType.DEPTH_WARNING]: '水位埋深接近警戒',
+  [GroundwaterAlertType.DEPTH_EXCEEDED]: '水位埋深超警戒(超采)',
+};
+
+export enum GroundwaterAlertLevel {
+  WARNING = 'WARNING',
+  CRITICAL = 'CRITICAL',
+}
+
+export const GroundwaterAlertLevelNames: Record<GroundwaterAlertLevel, string> = {
+  [GroundwaterAlertLevel.WARNING]: '预警',
+  [GroundwaterAlertLevel.CRITICAL]: '严重',
+};
+
+export enum DepthSource {
+  CALCULATED = 'CALCULATED',
+  MEASURED = 'MEASURED',
+  MANUAL = 'MANUAL',
+}
+
+export const DepthSourceNames: Record<DepthSource, string> = {
+  [DepthSource.CALCULATED]: '系统计算',
+  [DepthSource.MEASURED]: '实测录入',
+  [DepthSource.MANUAL]: '手动调整',
+};

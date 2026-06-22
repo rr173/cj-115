@@ -173,3 +173,21 @@ export declare enum MediationResult {
     WITHDRAW = "WITHDRAW"
 }
 export declare const MediationResultNames: Record<MediationResult, string>;
+export declare enum GroundwaterAlertType {
+    REDLINE_WARNING = "REDLINE_WARNING",
+    REDLINE_BLOCKED = "REDLINE_BLOCKED",
+    DEPTH_WARNING = "DEPTH_WARNING",
+    DEPTH_EXCEEDED = "DEPTH_EXCEEDED"
+}
+export declare const GroundwaterAlertTypeNames: Record<GroundwaterAlertType, string>;
+export declare enum GroundwaterAlertLevel {
+    WARNING = "WARNING",
+    CRITICAL = "CRITICAL"
+}
+export declare const GroundwaterAlertLevelNames: Record<GroundwaterAlertLevel, string>;
+export declare enum DepthSource {
+    CALCULATED = "CALCULATED",
+    MEASURED = "MEASURED",
+    MANUAL = "MANUAL"
+}
+export declare const DepthSourceNames: Record<DepthSource, string>;

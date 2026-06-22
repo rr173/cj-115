@@ -38,6 +38,7 @@ model Channel {
   transfersTo   ChannelTransfer[] @relation("TransferTarget")
   efficiencyRecords IrrigationEfficiencyRecord[]
   channelAssessments ChannelQuarterlyAssessment[]
+  pumpingWells       PumpingWell[]
 }
 
 model Farmer {
@@ -114,6 +115,8 @@ model WaterApplication {
   notifications Notification[]
   efficiencyRecord IrrigationEfficiencyRecord?
   disputeLinks DisputeApplicationLink[]
+  extractionRecords GroundwaterExtractionRecord[]
+  jointSupplyPlan  JointWaterSupplyPlan?
 }
 
 model WaterAllocation {
@@ -735,4 +738,135 @@ model DisputeMediationRecord {
 
   @@index([disputeId])
   @@index([recordedAt])
+}
+
+model IrrigationZone {
+  id                      String   @id @default(uuid())
+  code                    String   @unique
+  name                    String
+  annualExtractionRedline Float
+  currentWaterLevelDepth  Float
+  warningDepth            Float
+  recoverableCoefficient  Float    @default(10000)
+  annualExtractedVolume   Float    @default(0)
+  lastExtractedAt         DateTime?
+  isOverExtracted         Boolean  @default(false)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @default(now())
+
+  wells                   PumpingWell[]
+  extractionRecords       GroundwaterExtractionRecord[]
+  depthHistories          WaterLevelDepthHistory[]
+  alerts                  GroundwaterAlert[]
+  supplyPlans             JointWaterSupplyPlan[]
+
+  @@index([code])
+}
+
+model PumpingWell {
+  id                  String         @id @default(uuid())
+  code                String         @unique
+  zoneId              String
+  zone                IrrigationZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  ratedFlow           Float
+  unitCost            Float
+  associatedChannelId String?
+  associatedChannel   Channel?       @relation(fields: [associatedChannelId], references: [id], onDelete: SetNull)
+  associatedPlot      String?
+  isActive            Boolean        @default(true)
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @default(now())
+
+  extractionRecords   GroundwaterExtractionRecord[]
+  supplyDetails       JointSupplyDetail[]
+
+  @@index([zoneId])
+  @@index([associatedChannelId])
+}
+
+model GroundwaterExtractionRecord {
+  id              String         @id @default(uuid())
+  wellId          String
+  well            PumpingWell    @relation(fields: [wellId], references: [id], onDelete: Cascade)
+  zoneId          String
+  zone            IrrigationZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  applicationId   String?
+  application     WaterApplication? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  planId          String?
+  supplyPlan      JointWaterSupplyPlan? @relation(fields: [planId], references: [id], onDelete: SetNull)
+  volume          Float
+  durationHours   Float
+  cost            Float
+  startTime       DateTime
+  endTime         DateTime
+  recordedAt      DateTime       @default(now())
+
+  @@index([wellId])
+  @@index([zoneId])
+  @@index([applicationId])
+  @@index([recordedAt])
+}
+
+model WaterLevelDepthHistory {
+  id        String         @id @default(uuid())
+  zoneId    String
+  zone      IrrigationZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  depth     Float
+  source    String
+  recordedAt DateTime      @default(now())
+  operator  String?
+  remark    String?
+
+  @@index([zoneId])
+  @@index([recordedAt])
+}
+
+model GroundwaterAlert {
+  id          String         @id @default(uuid())
+  zoneId      String
+  zone        IrrigationZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  type        String
+  level       String
+  message     String
+  triggeredAt DateTime       @default(now())
+  isResolved  Boolean        @default(false)
+  resolvedAt  DateTime?
+
+  @@index([zoneId])
+  @@index([type])
+  @@index([isResolved])
+}
+
+model JointWaterSupplyPlan {
+  id                  String   @id @default(uuid())
+  applicationId       String   @unique
+  application         WaterApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  zoneId              String
+  zone                IrrigationZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  requestedVolume     Float
+  canalSuppliedVolume Float
+  wellSuppliedVolume  Float
+  totalCost           Float    @default(0)
+  createdAt           DateTime @default(now())
+
+  details             JointSupplyDetail[]
+  extractionRecords   GroundwaterExtractionRecord[]
+
+  @@index([zoneId])
+  @@index([createdAt])
+}
+
+model JointSupplyDetail {
+  id              String              @id @default(uuid())
+  planId          String
+  supplyPlan      JointWaterSupplyPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  wellId          String
+  well            PumpingWell         @relation(fields: [wellId], references: [id], onDelete: Cascade)
+  volume          Float
+  durationHours   Float
+  cost            Float
+  createdAt       DateTime            @default(now())
+
+  @@index([planId])
+  @@index([wellId])
 }

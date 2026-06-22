@@ -16,6 +16,7 @@ import { DroughtMonitoringModule } from './drought-monitoring/drought-monitoring
 import { IrrigationEfficiencyModule } from './irrigation-efficiency/irrigation-efficiency.module';
 import { DisputeMediationModule } from './dispute-mediation/dispute-mediation.module';
 import { EmergencyApplicationModule } from './emergency-application/emergency-application.module';
+import { GroundwaterModule } from './groundwater/groundwater.module';
 import { PrismaService } from './prisma/prisma.service';
 
 @Module({
@@ -37,6 +38,7 @@ import { PrismaService } from './prisma/prisma.service';
     IrrigationEfficiencyModule,
     DisputeMediationModule,
     EmergencyApplicationModule,
+    GroundwaterModule,
   ],
   providers: [PrismaService],
 })

@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DisputeTypeNames = exports.DisputeType = exports.CreditHistoryTypeNames = exports.CreditHistoryType = exports.ChannelTransferStatusNames = exports.ChannelTransferStatus = exports.AllocationDroughtStatusNames = exports.AllocationDroughtStatus = exports.EmergencyLevelNames = exports.EmergencyLevel = exports.DroughtStatusNames = exports.DroughtStatus = exports.CreditLevelSortOrder = exports.CreditQuotaMultiplier = exports.CreditLevelNames = exports.CreditLevel = exports.GateAdjustmentReasonNames = exports.GateAdjustmentReason = exports.WaterLevelAlertTypeNames = exports.WaterLevelAlertType = exports.MonitorStatusNames = exports.MonitorStatus = exports.GateControlModeNames = exports.GateControlMode = exports.SellOrderStatusNames = exports.SellOrderStatus = exports.IrrigationRoundStatusNames = exports.IrrigationRoundStatus = exports.PaymentMethodNames = exports.PaymentMethod = exports.WaterBillStatusNames = exports.WaterBillStatus = exports.MaintenanceOrderStatusNames = exports.MaintenanceOrderStatus = exports.ProblemLevelNames = exports.ProblemLevel = exports.InspectionChannelStatusNames = exports.InspectionChannelStatus = exports.QuotaQuarterNames = exports.QuotaQuarter = exports.EmergencyApprovalStatusNames = exports.EmergencyApprovalStatus = exports.EmergencyReasonNames = exports.EmergencyReason = exports.NotificationTypeNames = exports.NotificationType = exports.ApplicationStatusNames = exports.ApplicationStatus = exports.ChannelLevelNames = exports.ChannelLevel = void 0;
-exports.MediationResultNames = exports.MediationResult = exports.DisputeStatusNames = exports.DisputeStatus = void 0;
+exports.DepthSourceNames = exports.DepthSource = exports.GroundwaterAlertLevelNames = exports.GroundwaterAlertLevel = exports.GroundwaterAlertTypeNames = exports.GroundwaterAlertType = exports.MediationResultNames = exports.MediationResult = exports.DisputeStatusNames = exports.DisputeStatus = void 0;
 var ChannelLevel;
 (function (ChannelLevel) {
     ChannelLevel["MAIN"] = "MAIN";
@@ -333,5 +333,38 @@ exports.MediationResultNames = {
     [MediationResult.SUCCESS]: '调解成功',
     [MediationResult.FAIL_ESCALATE]: '调解失败转上级',
     [MediationResult.WITHDRAW]: '单方撤回',
+};
+var GroundwaterAlertType;
+(function (GroundwaterAlertType) {
+    GroundwaterAlertType["REDLINE_WARNING"] = "REDLINE_WARNING";
+    GroundwaterAlertType["REDLINE_BLOCKED"] = "REDLINE_BLOCKED";
+    GroundwaterAlertType["DEPTH_WARNING"] = "DEPTH_WARNING";
+    GroundwaterAlertType["DEPTH_EXCEEDED"] = "DEPTH_EXCEEDED";
+})(GroundwaterAlertType || (exports.GroundwaterAlertType = GroundwaterAlertType = {}));
+exports.GroundwaterAlertTypeNames = {
+    [GroundwaterAlertType.REDLINE_WARNING]: '开采红线预警(90%)',
+    [GroundwaterAlertType.REDLINE_BLOCKED]: '开采红线拦截(100%)',
+    [GroundwaterAlertType.DEPTH_WARNING]: '水位埋深接近警戒',
+    [GroundwaterAlertType.DEPTH_EXCEEDED]: '水位埋深超警戒(超采)',
+};
+var GroundwaterAlertLevel;
+(function (GroundwaterAlertLevel) {
+    GroundwaterAlertLevel["WARNING"] = "WARNING";
+    GroundwaterAlertLevel["CRITICAL"] = "CRITICAL";
+})(GroundwaterAlertLevel || (exports.GroundwaterAlertLevel = GroundwaterAlertLevel = {}));
+exports.GroundwaterAlertLevelNames = {
+    [GroundwaterAlertLevel.WARNING]: '预警',
+    [GroundwaterAlertLevel.CRITICAL]: '严重',
+};
+var DepthSource;
+(function (DepthSource) {
+    DepthSource["CALCULATED"] = "CALCULATED";
+    DepthSource["MEASURED"] = "MEASURED";
+    DepthSource["MANUAL"] = "MANUAL";
+})(DepthSource || (exports.DepthSource = DepthSource = {}));
+exports.DepthSourceNames = {
+    [DepthSource.CALCULATED]: '系统计算',
+    [DepthSource.MEASURED]: '实测录入',
+    [DepthSource.MANUAL]: '手动调整',
 };
 //# sourceMappingURL=enums.js.map
