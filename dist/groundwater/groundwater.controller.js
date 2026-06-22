@@ -30,6 +30,15 @@ let GroundwaterController = class GroundwaterController {
     listZones() {
         return this.service.listIrrigationZones();
     }
+    addZoneChannel(dto) {
+        return this.service.addZoneChannel(dto);
+    }
+    removeZoneChannel(zoneId, channelId) {
+        return this.service.removeZoneChannel(zoneId, channelId);
+    }
+    getZoneChannels(zoneId) {
+        return this.service.getZoneChannels(zoneId);
+    }
     getZoneLedger(zoneId, year) {
         return this.service.getZoneWaterLedger(zoneId, year ? parseInt(year) : undefined);
     }
@@ -91,6 +100,34 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], GroundwaterController.prototype, "listZones", null);
+__decorate([
+    (0, common_1.Post)('zones/channels'),
+    (0, swagger_1.ApiOperation)({ summary: '为分区添加覆盖的农渠(一条农渠只能属于一个分区)' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [dto_1.AddZoneChannelDto]),
+    __metadata("design:returntype", void 0)
+], GroundwaterController.prototype, "addZoneChannel", null);
+__decorate([
+    (0, common_1.Delete)('zones/:zoneId/channels/:channelId'),
+    (0, swagger_1.ApiOperation)({ summary: '移除分区覆盖的农渠' }),
+    (0, swagger_1.ApiParam)({ name: 'zoneId', description: '分区ID' }),
+    (0, swagger_1.ApiParam)({ name: 'channelId', description: '渠道ID' }),
+    __param(0, (0, common_1.Param)('zoneId')),
+    __param(1, (0, common_1.Param)('channelId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], GroundwaterController.prototype, "removeZoneChannel", null);
+__decorate([
+    (0, common_1.Get)('zones/:zoneId/channels'),
+    (0, swagger_1.ApiOperation)({ summary: '查询分区覆盖的农渠列表' }),
+    (0, swagger_1.ApiParam)({ name: 'zoneId', description: '分区ID' }),
+    __param(0, (0, common_1.Param)('zoneId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], GroundwaterController.prototype, "getZoneChannels", null);
 __decorate([
     (0, common_1.Get)('zones/:zoneId/ledger'),
     (0, swagger_1.ApiOperation)({ summary: '查询分区水资源台账(地表水供水量、地下水开采量、红线剩余、当前埋深、超采状态)' }),

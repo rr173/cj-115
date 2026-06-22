@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GenerateJointSupplyPlanDto = exports.UpdatePumpingWellDto = exports.CreatePumpingWellDto = exports.RecordWaterLevelDepthDto = exports.AdjustRedlineDto = exports.UpdateIrrigationZoneDto = exports.CreateIrrigationZoneDto = void 0;
+exports.AddZoneChannelDto = exports.GenerateJointSupplyPlanDto = exports.UpdatePumpingWellDto = exports.CreatePumpingWellDto = exports.RecordWaterLevelDepthDto = exports.AdjustRedlineDto = exports.UpdateIrrigationZoneDto = exports.CreateIrrigationZoneDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 class CreateIrrigationZoneDto {
@@ -218,4 +218,17 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], GenerateJointSupplyPlanDto.prototype, "applicationId", void 0);
+class AddZoneChannelDto {
+}
+exports.AddZoneChannelDto = AddZoneChannelDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '灌溉分区ID' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], AddZoneChannelDto.prototype, "zoneId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '渠道ID(农渠)' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], AddZoneChannelDto.prototype, "channelId", void 0);
 //# sourceMappingURL=dto.js.map

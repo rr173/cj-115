@@ -1,5 +1,5 @@
 import { GroundwaterService } from './groundwater.service';
-import { CreateIrrigationZoneDto, UpdateIrrigationZoneDto, AdjustRedlineDto, RecordWaterLevelDepthDto, CreatePumpingWellDto, UpdatePumpingWellDto, GenerateJointSupplyPlanDto } from './dto';
+import { CreateIrrigationZoneDto, UpdateIrrigationZoneDto, AdjustRedlineDto, RecordWaterLevelDepthDto, CreatePumpingWellDto, UpdatePumpingWellDto, GenerateJointSupplyPlanDto, AddZoneChannelDto } from './dto';
 export declare class GroundwaterController {
     private readonly service;
     constructor(service: GroundwaterService);
@@ -34,6 +34,7 @@ export declare class GroundwaterController {
     listZones(): Promise<({
         _count: {
             wells: number;
+            channelCoverages: number;
         };
     } & {
         name: string;
@@ -48,6 +49,43 @@ export declare class GroundwaterController {
         annualExtractedVolume: number;
         lastExtractedAt: Date | null;
         isOverExtracted: boolean;
+    })[]>;
+    addZoneChannel(dto: AddZoneChannelDto): Promise<{
+        channel: {
+            name: string;
+            code: string;
+            level: string;
+            id: string;
+        };
+        zone: {
+            name: string;
+            code: string;
+            id: string;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        channelId: string;
+        zoneId: string;
+    }>;
+    removeZoneChannel(zoneId: string, channelId: string): Promise<{
+        id: string;
+        createdAt: Date;
+        channelId: string;
+        zoneId: string;
+    }>;
+    getZoneChannels(zoneId: string): Promise<({
+        channel: {
+            name: string;
+            code: string;
+            level: string;
+            id: string;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        channelId: string;
+        zoneId: string;
     })[]>;
     getZoneLedger(zoneId: string, year?: string): Promise<{
         zone: {
@@ -69,6 +107,7 @@ export declare class GroundwaterController {
         isOverExtracted: boolean;
         wellCount: number;
         activeWells: number;
+        coveredChannelCount: number;
         unresolvedAlerts: {
             id: string;
             type: string;

@@ -168,3 +168,13 @@ export class GenerateJointSupplyPlanDto {
   @IsString()
   applicationId: string;
 }
+
+export class AddZoneChannelDto {
+  @ApiProperty({ description: '灌溉分区ID' })
+  @IsString()
+  zoneId: string;
+
+  @ApiProperty({ description: '渠道ID(农渠)' })
+  @IsString()
+  channelId: string;
+}

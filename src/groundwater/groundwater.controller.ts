@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Body, Param, Query, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, Patch } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { GroundwaterService } from './groundwater.service';
 import {
@@ -9,6 +9,7 @@ import {
   CreatePumpingWellDto,
   UpdatePumpingWellDto,
   GenerateJointSupplyPlanDto,
+  AddZoneChannelDto,
 } from './dto';
 
 @ApiTags('机井补源与地下水开采管控')
@@ -33,6 +34,27 @@ export class GroundwaterController {
   @ApiOperation({ summary: '查询所有灌溉分区列表' })
   listZones() {
     return this.service.listIrrigationZones();
+  }
+
+  @Post('zones/channels')
+  @ApiOperation({ summary: '为分区添加覆盖的农渠(一条农渠只能属于一个分区)' })
+  addZoneChannel(@Body() dto: AddZoneChannelDto) {
+    return this.service.addZoneChannel(dto);
+  }
+
+  @Delete('zones/:zoneId/channels/:channelId')
+  @ApiOperation({ summary: '移除分区覆盖的农渠' })
+  @ApiParam({ name: 'zoneId', description: '分区ID' })
+  @ApiParam({ name: 'channelId', description: '渠道ID' })
+  removeZoneChannel(@Param('zoneId') zoneId: string, @Param('channelId') channelId: string) {
+    return this.service.removeZoneChannel(zoneId, channelId);
+  }
+
+  @Get('zones/:zoneId/channels')
+  @ApiOperation({ summary: '查询分区覆盖的农渠列表' })
+  @ApiParam({ name: 'zoneId', description: '分区ID' })
+  getZoneChannels(@Param('zoneId') zoneId: string) {
+    return this.service.getZoneChannels(zoneId);
   }
 
   @Get('zones/:zoneId/ledger')

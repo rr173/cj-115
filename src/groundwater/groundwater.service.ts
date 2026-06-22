@@ -9,11 +9,13 @@ import {
   CreatePumpingWellDto,
   UpdatePumpingWellDto,
   GenerateJointSupplyPlanDto,
+  AddZoneChannelDto,
 } from './dto';
 import {
   GroundwaterAlertType,
   GroundwaterAlertLevel,
   DepthSource,
+  AllocationDroughtStatus,
 } from '../common/enums';
 
 const REDLINE_WARNING_RATIO = 0.9;
@@ -21,6 +23,45 @@ const REDLINE_WARNING_RATIO = 0.9;
 @Injectable()
 export class GroundwaterService {
   constructor(private prisma: PrismaService) {}
+
+  private calcCanalSupplyFromAlloc(
+    alloc: { flow: number; startTime: Date; endTime: Date; droughtStatus: string },
+  ): number {
+    if (alloc.droughtStatus === AllocationDroughtStatus.SUSPENDED) {
+      return 0;
+    }
+    const durationSec = (new Date(alloc.endTime).getTime() - new Date(alloc.startTime).getTime()) / 1000;
+    return alloc.flow * durationSec;
+  }
+
+  private calcAppCanalSupply(
+    app: {
+      requestVolume: number;
+      allocations: Array<{
+        channelId: string;
+        flow: number;
+        startTime: Date;
+        endTime: Date;
+        droughtStatus: string;
+      }>;
+      actualUsage?: { actualVolume: number } | null;
+    },
+    farmerChannelId: string,
+  ): number {
+    if (app.actualUsage) {
+      return app.actualUsage.actualVolume;
+    }
+    const farmerAlloc = app.allocations.find((a) => a.channelId === farmerChannelId);
+    if (!farmerAlloc) {
+      if (app.allocations.length > 0) {
+        return app.allocations
+          .filter((a) => a.droughtStatus !== AllocationDroughtStatus.SUSPENDED)
+          .reduce((sum, a) => sum + this.calcCanalSupplyFromAlloc(a), 0);
+      }
+      return 0;
+    }
+    return this.calcCanalSupplyFromAlloc(farmerAlloc);
+  }
 
   async createIrrigationZone(dto: CreateIrrigationZoneDto) {
     const existing = await this.prisma.irrigationZone.findUnique({
@@ -79,7 +120,7 @@ export class GroundwaterService {
   async listIrrigationZones() {
     return this.prisma.irrigationZone.findMany({
       include: {
-        _count: { select: { wells: true } },
+        _count: { select: { wells: true, channelCoverages: true } },
       },
       orderBy: { code: 'asc' },
     });
@@ -88,7 +129,10 @@ export class GroundwaterService {
   async getZoneWaterLedger(zoneId: string, year?: number) {
     const zone = await this.prisma.irrigationZone.findUnique({
       where: { id: zoneId },
-      include: { wells: true },
+      include: {
+        wells: true,
+        channelCoverages: { select: { channelId: true } },
+      },
     });
     if (!zone) throw new NotFoundException('灌溉分区不存在');
 
@@ -109,19 +153,44 @@ export class GroundwaterService {
       ? annualExtracted / zone.annualExtractionRedline
       : 0;
 
-    const canalSupplyApps = await this.prisma.waterApplication.findMany({
-      where: {
-        targetDate: { gte: yearStart, lte: yearEnd },
-        status: { in: ['SCHEDULED', 'EXECUTED'] },
-      },
-      include: { allocations: true },
-    });
-
+    const zoneChannelIds = new Set(zone.channelCoverages.map((c) => c.channelId));
     let canalSuppliedVolume = 0;
-    for (const app of canalSupplyApps) {
-      for (const alloc of app.allocations) {
-        const durationSec = (new Date(alloc.endTime).getTime() - new Date(alloc.startTime).getTime()) / 1000;
-        canalSuppliedVolume += alloc.flow * durationSec;
+
+    if (zoneChannelIds.size > 0) {
+      const farmersInZone = await this.prisma.farmer.findMany({
+        where: { channelId: { in: [...zoneChannelIds] } },
+        select: { id: true, channelId: true },
+      });
+      const farmerIds = farmersInZone.map((f) => f.id);
+      const farmerChannelMap = new Map(farmersInZone.map((f) => [f.id, f.channelId]));
+
+      if (farmerIds.length > 0) {
+        const appsInZone = await this.prisma.waterApplication.findMany({
+          where: {
+            farmerId: { in: farmerIds },
+            targetDate: { gte: yearStart, lte: yearEnd },
+            status: { in: ['SCHEDULED', 'EXECUTED'] },
+          },
+          include: {
+            allocations: {
+              select: {
+                channelId: true,
+                flow: true,
+                startTime: true,
+                endTime: true,
+                droughtStatus: true,
+              },
+            },
+            actualUsage: { select: { actualVolume: true } },
+          },
+        });
+
+        for (const app of appsInZone) {
+          const farmerChannelId = farmerChannelMap.get(app.farmerId);
+          if (farmerChannelId) {
+            canalSuppliedVolume += this.calcAppCanalSupply(app as any, farmerChannelId);
+          }
+        }
       }
     }
 
@@ -158,6 +227,7 @@ export class GroundwaterService {
       isOverExtracted: zone.isOverExtracted,
       wellCount: zone.wells.length,
       activeWells: zone.wells.filter((w) => w.isActive).length,
+      coveredChannelCount: zoneChannelIds.size,
       unresolvedAlerts: unresolvedAlerts.map((a) => ({
         id: a.id,
         type: a.type,
@@ -242,6 +312,64 @@ export class GroundwaterService {
       operator: dto.operator,
       recordedAt: new Date(),
     };
+  }
+
+  async addZoneChannel(dto: AddZoneChannelDto) {
+    const zone = await this.prisma.irrigationZone.findUnique({
+      where: { id: dto.zoneId },
+    });
+    if (!zone) throw new NotFoundException('灌溉分区不存在');
+
+    const channel = await this.prisma.channel.findUnique({
+      where: { id: dto.channelId },
+    });
+    if (!channel) throw new NotFoundException('渠道不存在');
+
+    const existing = await this.prisma.irrigationZoneChannel.findFirst({
+      where: { channelId: dto.channelId },
+    });
+    if (existing) {
+      throw new BadRequestException(
+        `渠道[${channel.code}]已关联到其他灌溉分区，一条农渠只能属于一个分区`,
+      );
+    }
+
+    return this.prisma.irrigationZoneChannel.create({
+      data: {
+        zoneId: dto.zoneId,
+        channelId: dto.channelId,
+      },
+      include: {
+        zone: { select: { id: true, code: true, name: true } },
+        channel: { select: { id: true, code: true, name: true, level: true } },
+      },
+    });
+  }
+
+  async removeZoneChannel(zoneId: string, channelId: string) {
+    const coverage = await this.prisma.irrigationZoneChannel.findUnique({
+      where: { zoneId_channelId: { zoneId, channelId } },
+    });
+    if (!coverage) throw new NotFoundException('该渠道未关联到此分区');
+
+    return this.prisma.irrigationZoneChannel.delete({
+      where: { id: coverage.id },
+    });
+  }
+
+  async getZoneChannels(zoneId: string) {
+    const zone = await this.prisma.irrigationZone.findUnique({
+      where: { id: zoneId },
+    });
+    if (!zone) throw new NotFoundException('灌溉分区不存在');
+
+    return this.prisma.irrigationZoneChannel.findMany({
+      where: { zoneId },
+      include: {
+        channel: { select: { id: true, code: true, name: true, level: true } },
+      },
+      orderBy: { channel: { code: 'asc' } },
+    });
   }
 
   async createPumpingWell(dto: CreatePumpingWellDto) {
@@ -380,40 +508,40 @@ export class GroundwaterService {
       include: {
         farmer: { include: { channel: true } },
         allocations: true,
+        actualUsage: true,
       },
     });
     if (!application) throw new NotFoundException('用水申请不存在');
 
     const requestedVolume = application.requestVolume;
+    const farmerChannelId = application.farmer.channelId;
 
-    let canalSuppliedVolume = 0;
-    for (const alloc of application.allocations) {
-      const durationSec = (new Date(alloc.endTime).getTime() - new Date(alloc.startTime).getTime()) / 1000;
-      canalSuppliedVolume += alloc.flow * durationSec;
-    }
+    const canalSuppliedVolume = this.calcAppCanalSupply(application, farmerChannelId);
 
     let gapVolume = Math.max(0, requestedVolume - canalSuppliedVolume);
 
-    const farmer = application.farmer;
-    const channelId = farmer.channelId;
-
-    let zone = await this.prisma.irrigationZone.findFirst({
-      where: { wells: { some: { associatedChannelId: channelId, isActive: true } } },
-      include: { wells: { where: { isActive: true }, orderBy: { unitCost: 'asc' } } },
+    const zoneCoverage = await this.prisma.irrigationZoneChannel.findFirst({
+      where: { channelId: farmerChannelId },
+      include: {
+        zone: {
+          include: { wells: { where: { isActive: true }, orderBy: { unitCost: 'asc' } } },
+        },
+      },
     });
 
-    if (!zone) {
-      const zones = await this.prisma.irrigationZone.findMany({
-        include: { wells: { where: { isActive: true }, orderBy: { unitCost: 'asc' } } },
-      });
-      if (zones.length > 0) zone = zones[0];
-    }
+    let zone = zoneCoverage?.zone ?? null;
 
     let wellSuppliedVolume = 0;
     let totalCost = 0;
     const wellDetails: any[] = [];
     const warnings: string[] = [];
     const errors: string[] = [];
+
+    if (!zone && gapVolume > 0) {
+      errors.push(
+        `农户所在农渠[${application.farmer.channel.code}]未纳入任何灌溉分区，无法启动机井补源`,
+      );
+    }
 
     if (gapVolume > 0 && zone) {
       if (zone.currentWaterLevelDepth >= zone.warningDepth) {
@@ -432,34 +560,38 @@ export class GroundwaterService {
             );
           }
 
-          const availableVolume = Math.min(gapVolume, remainingRedline);
+          if (zone.wells.length === 0) {
+            errors.push(`分区[${zone.name}]无可用机井，无法补源`);
+          } else {
+            const availableVolume = Math.min(gapVolume, remainingRedline);
 
-          for (const well of zone.wells) {
-            if (wellSuppliedVolume >= availableVolume) break;
+            for (const well of zone.wells) {
+              if (wellSuppliedVolume >= availableVolume) break;
 
-            const needVolume = availableVolume - wellSuppliedVolume;
-            const durationHours = needVolume / well.ratedFlow;
-            const actualVolume = Math.min(needVolume, well.ratedFlow * durationHours);
-            const cost = actualVolume * well.unitCost;
+              const needVolume = availableVolume - wellSuppliedVolume;
+              const durationHours = needVolume / well.ratedFlow;
+              const actualVolume = needVolume;
+              const cost = actualVolume * well.unitCost;
 
-            wellSuppliedVolume += actualVolume;
-            totalCost += cost;
+              wellSuppliedVolume += actualVolume;
+              totalCost += cost;
 
-            wellDetails.push({
-              wellId: well.id,
-              wellCode: well.code,
-              ratedFlow: well.ratedFlow,
-              unitCost: well.unitCost,
-              suppliedVolume: +actualVolume.toFixed(2),
-              durationHours: +durationHours.toFixed(2),
-              cost: +cost.toFixed(2),
-            });
-          }
+              wellDetails.push({
+                wellId: well.id,
+                wellCode: well.code,
+                ratedFlow: well.ratedFlow,
+                unitCost: well.unitCost,
+                suppliedVolume: +actualVolume.toFixed(2),
+                durationHours: +durationHours.toFixed(2),
+                cost: +cost.toFixed(2),
+              });
+            }
 
-          if (wellSuppliedVolume < gapVolume) {
-            warnings.push(
-              `缺口${gapVolume.toFixed(2)}m³仅补满${wellSuppliedVolume.toFixed(2)}m³，剩余${(gapVolume - wellSuppliedVolume).toFixed(2)}m³无法补足（受开采红线或可用机井限制）`,
-            );
+            if (wellSuppliedVolume < gapVolume) {
+              warnings.push(
+                `缺口${gapVolume.toFixed(2)}m³仅补满${wellSuppliedVolume.toFixed(2)}m³，剩余${(gapVolume - wellSuppliedVolume).toFixed(2)}m³无法补足（受开采红线或可用机井限制）`,
+              );
+            }
           }
         }
       }
@@ -468,8 +600,8 @@ export class GroundwaterService {
     return {
       application: {
         id: application.id,
-        farmerCode: farmer.code,
-        farmerName: farmer.name,
+        farmerCode: application.farmer.code,
+        farmerName: application.farmer.name,
         requestedVolume: +requestedVolume.toFixed(2),
       },
       zone: zone
@@ -675,7 +807,7 @@ export class GroundwaterService {
   async listAlerts(zoneId?: string, resolved?: boolean) {
     const where: any = {};
     if (zoneId) where.zoneId = zoneId;
-    if (resolved !== undefined) where.isResolved = resolved;
+    if (resolved !== undefined) where.isResolved = false;
 
     return this.prisma.groundwaterAlert.findMany({
       where,

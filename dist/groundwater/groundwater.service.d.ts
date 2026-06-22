@@ -1,8 +1,10 @@
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateIrrigationZoneDto, UpdateIrrigationZoneDto, AdjustRedlineDto, RecordWaterLevelDepthDto, CreatePumpingWellDto, UpdatePumpingWellDto, GenerateJointSupplyPlanDto } from './dto';
+import { CreateIrrigationZoneDto, UpdateIrrigationZoneDto, AdjustRedlineDto, RecordWaterLevelDepthDto, CreatePumpingWellDto, UpdatePumpingWellDto, GenerateJointSupplyPlanDto, AddZoneChannelDto } from './dto';
 export declare class GroundwaterService {
     private prisma;
     constructor(prisma: PrismaService);
+    private calcCanalSupplyFromAlloc;
+    private calcAppCanalSupply;
     createIrrigationZone(dto: CreateIrrigationZoneDto): Promise<{
         name: string;
         code: string;
@@ -34,6 +36,7 @@ export declare class GroundwaterService {
     listIrrigationZones(): Promise<({
         _count: {
             wells: number;
+            channelCoverages: number;
         };
     } & {
         name: string;
@@ -69,6 +72,7 @@ export declare class GroundwaterService {
         isOverExtracted: boolean;
         wellCount: number;
         activeWells: number;
+        coveredChannelCount: number;
         unresolvedAlerts: {
             id: string;
             type: string;
@@ -94,6 +98,43 @@ export declare class GroundwaterService {
         operator: string;
         recordedAt: Date;
     }>;
+    addZoneChannel(dto: AddZoneChannelDto): Promise<{
+        channel: {
+            name: string;
+            code: string;
+            level: string;
+            id: string;
+        };
+        zone: {
+            name: string;
+            code: string;
+            id: string;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        channelId: string;
+        zoneId: string;
+    }>;
+    removeZoneChannel(zoneId: string, channelId: string): Promise<{
+        id: string;
+        createdAt: Date;
+        channelId: string;
+        zoneId: string;
+    }>;
+    getZoneChannels(zoneId: string): Promise<({
+        channel: {
+            name: string;
+            code: string;
+            level: string;
+            id: string;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        channelId: string;
+        zoneId: string;
+    })[]>;
     createPumpingWell(dto: CreatePumpingWellDto): Promise<{
         zone: {
             name: string;

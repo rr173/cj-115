@@ -43,3 +43,7 @@ export declare class UpdatePumpingWellDto {
 export declare class GenerateJointSupplyPlanDto {
     applicationId: string;
 }
+export declare class AddZoneChannelDto {
+    zoneId: string;
+    channelId: string;
+}
