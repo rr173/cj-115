@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DisputeTypeNames = exports.DisputeType = exports.CreditHistoryTypeNames = exports.CreditHistoryType = exports.ChannelTransferStatusNames = exports.ChannelTransferStatus = exports.AllocationDroughtStatusNames = exports.AllocationDroughtStatus = exports.EmergencyLevelNames = exports.EmergencyLevel = exports.DroughtStatusNames = exports.DroughtStatus = exports.CreditLevelSortOrder = exports.CreditQuotaMultiplier = exports.CreditLevelNames = exports.CreditLevel = exports.GateAdjustmentReasonNames = exports.GateAdjustmentReason = exports.WaterLevelAlertTypeNames = exports.WaterLevelAlertType = exports.MonitorStatusNames = exports.MonitorStatus = exports.GateControlModeNames = exports.GateControlMode = exports.SellOrderStatusNames = exports.SellOrderStatus = exports.IrrigationRoundStatusNames = exports.IrrigationRoundStatus = exports.PaymentMethodNames = exports.PaymentMethod = exports.WaterBillStatusNames = exports.WaterBillStatus = exports.MaintenanceOrderStatusNames = exports.MaintenanceOrderStatus = exports.ProblemLevelNames = exports.ProblemLevel = exports.InspectionChannelStatusNames = exports.InspectionChannelStatus = exports.QuotaQuarterNames = exports.QuotaQuarter = exports.EmergencyApprovalStatusNames = exports.EmergencyApprovalStatus = exports.EmergencyReasonNames = exports.EmergencyReason = exports.NotificationTypeNames = exports.NotificationType = exports.ApplicationStatusNames = exports.ApplicationStatus = exports.ChannelLevelNames = exports.ChannelLevel = void 0;
-exports.DepthSourceNames = exports.DepthSource = exports.GroundwaterAlertLevelNames = exports.GroundwaterAlertLevel = exports.GroundwaterAlertTypeNames = exports.GroundwaterAlertType = exports.MediationResultNames = exports.MediationResult = exports.DisputeStatusNames = exports.DisputeStatus = void 0;
+exports.ElectricityQuotaStatusNames = exports.ElectricityQuotaStatus = exports.MeterAbnormalTypeNames = exports.MeterAbnormalType = exports.MeterStatusNames = exports.MeterStatus = exports.DepthSourceNames = exports.DepthSource = exports.GroundwaterAlertLevelNames = exports.GroundwaterAlertLevel = exports.GroundwaterAlertTypeNames = exports.GroundwaterAlertType = exports.MediationResultNames = exports.MediationResult = exports.DisputeStatusNames = exports.DisputeStatus = void 0;
 var ChannelLevel;
 (function (ChannelLevel) {
     ChannelLevel["MAIN"] = "MAIN";
@@ -366,5 +366,38 @@ exports.DepthSourceNames = {
     [DepthSource.CALCULATED]: '系统计算',
     [DepthSource.MEASURED]: '实测录入',
     [DepthSource.MANUAL]: '手动调整',
+};
+var MeterStatus;
+(function (MeterStatus) {
+    MeterStatus["NORMAL"] = "NORMAL";
+    MeterStatus["ABNORMAL"] = "ABNORMAL";
+    MeterStatus["SUSPENDED"] = "SUSPENDED";
+})(MeterStatus || (exports.MeterStatus = MeterStatus = {}));
+exports.MeterStatusNames = {
+    [MeterStatus.NORMAL]: '正常',
+    [MeterStatus.ABNORMAL]: '异常待核定',
+    [MeterStatus.SUSPENDED]: '停用',
+};
+var MeterAbnormalType;
+(function (MeterAbnormalType) {
+    MeterAbnormalType["READING_REVERSED"] = "READING_REVERSED";
+    MeterAbnormalType["METER_REPLACED"] = "METER_REPLACED";
+    MeterAbnormalType["DEVICE_FAULT"] = "DEVICE_FAULT";
+})(MeterAbnormalType || (exports.MeterAbnormalType = MeterAbnormalType = {}));
+exports.MeterAbnormalTypeNames = {
+    [MeterAbnormalType.READING_REVERSED]: '读数倒转',
+    [MeterAbnormalType.METER_REPLACED]: '换表',
+    [MeterAbnormalType.DEVICE_FAULT]: '设备故障',
+};
+var ElectricityQuotaStatus;
+(function (ElectricityQuotaStatus) {
+    ElectricityQuotaStatus["NORMAL"] = "NORMAL";
+    ElectricityQuotaStatus["WARNING"] = "WARNING";
+    ElectricityQuotaStatus["EXHAUSTED"] = "EXHAUSTED";
+})(ElectricityQuotaStatus || (exports.ElectricityQuotaStatus = ElectricityQuotaStatus = {}));
+exports.ElectricityQuotaStatusNames = {
+    [ElectricityQuotaStatus.NORMAL]: '正常',
+    [ElectricityQuotaStatus.WARNING]: '预警(85%)',
+    [ElectricityQuotaStatus.EXHAUSTED]: '已用尽(100%)',
 };
 //# sourceMappingURL=enums.js.map

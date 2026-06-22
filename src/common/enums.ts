@@ -393,3 +393,39 @@ export const DepthSourceNames: Record<DepthSource, string> = {
   [DepthSource.MEASURED]: '实测录入',
   [DepthSource.MANUAL]: '手动调整',
 };
+
+export enum MeterStatus {
+  NORMAL = 'NORMAL',
+  ABNORMAL = 'ABNORMAL',
+  SUSPENDED = 'SUSPENDED',
+}
+
+export const MeterStatusNames: Record<MeterStatus, string> = {
+  [MeterStatus.NORMAL]: '正常',
+  [MeterStatus.ABNORMAL]: '异常待核定',
+  [MeterStatus.SUSPENDED]: '停用',
+};
+
+export enum MeterAbnormalType {
+  READING_REVERSED = 'READING_REVERSED',
+  METER_REPLACED = 'METER_REPLACED',
+  DEVICE_FAULT = 'DEVICE_FAULT',
+}
+
+export const MeterAbnormalTypeNames: Record<MeterAbnormalType, string> = {
+  [MeterAbnormalType.READING_REVERSED]: '读数倒转',
+  [MeterAbnormalType.METER_REPLACED]: '换表',
+  [MeterAbnormalType.DEVICE_FAULT]: '设备故障',
+};
+
+export enum ElectricityQuotaStatus {
+  NORMAL = 'NORMAL',
+  WARNING = 'WARNING',
+  EXHAUSTED = 'EXHAUSTED',
+}
+
+export const ElectricityQuotaStatusNames: Record<ElectricityQuotaStatus, string> = {
+  [ElectricityQuotaStatus.NORMAL]: '正常',
+  [ElectricityQuotaStatus.WARNING]: '预警(85%)',
+  [ElectricityQuotaStatus.EXHAUSTED]: '已用尽(100%)',
+};

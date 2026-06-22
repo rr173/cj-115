@@ -178,3 +178,127 @@ export class AddZoneChannelDto {
   @IsString()
   channelId: string;
 }
+
+export class RegisterSmartMeterDto {
+  @ApiProperty({ description: '机井ID' })
+  @IsString()
+  wellId: string;
+
+  @ApiProperty({ description: '智能电表表号' })
+  @IsString()
+  meterNo: string;
+
+  @ApiProperty({ description: '电表初始读数(度)', required: false })
+  @IsOptional()
+  @IsNumber()
+  initialReading?: number;
+
+  @ApiProperty({ description: '备注', required: false })
+  @IsOptional()
+  @IsString()
+  remark?: string;
+}
+
+export class UpdateSmartMeterDto {
+  @ApiProperty({ description: '电表表号', required: false })
+  @IsOptional()
+  @IsString()
+  meterNo?: string;
+
+  @ApiProperty({ description: '电表状态', required: false })
+  @IsOptional()
+  @IsString()
+  status?: string;
+
+  @ApiProperty({ description: '备注', required: false })
+  @IsOptional()
+  @IsString()
+  remark?: string;
+}
+
+export class UpdateCoefficientDto {
+  @ApiProperty({ description: '机井ID' })
+  @IsString()
+  wellId: string;
+
+  @ApiProperty({ description: '以电折水系数(立方米/度)' })
+  @IsNumber()
+  @IsPositive()
+  coefficient: number;
+}
+
+export class ReportMeterReadingDto {
+  @ApiProperty({ description: '电表表号' })
+  @IsString()
+  meterNo: string;
+
+  @ApiProperty({ description: '本次上报读数(度)' })
+  @IsNumber()
+  @IsPositive()
+  reading: number;
+
+  @ApiProperty({ description: '上报时间(默认当前)', required: false })
+  @IsOptional()
+  reportedAt?: string;
+}
+
+export class ResolveMeterAbnormalDto {
+  @ApiProperty({ description: '告警ID' })
+  @IsString()
+  alertId: string;
+
+  @ApiProperty({ description: '新的基准读数(度)' })
+  @IsNumber()
+  @IsPositive()
+  newBaselineReading: number;
+
+  @ApiProperty({ description: '处理人' })
+  @IsString()
+  operator: string;
+}
+
+export class CreateElectricityQuotaDto {
+  @ApiProperty({ description: '灌溉分区ID' })
+  @IsString()
+  zoneId: string;
+
+  @ApiProperty({ description: '灌溉季名称,如"2026年春灌"' })
+  @IsString()
+  seasonName: string;
+
+  @ApiProperty({ description: '灌溉季开始日期 YYYY-MM-DD' })
+  @IsString()
+  startDate: string;
+
+  @ApiProperty({ description: '灌溉季结束日期 YYYY-MM-DD' })
+  @IsString()
+  endDate: string;
+
+  @ApiProperty({ description: '电量配额(总度数)' })
+  @IsNumber()
+  @IsPositive()
+  totalKwh: number;
+
+  @ApiProperty({ description: '操作人', required: false })
+  @IsOptional()
+  @IsString()
+  operator?: string;
+
+  @ApiProperty({ description: '备注', required: false })
+  @IsOptional()
+  @IsString()
+  remark?: string;
+}
+
+export class UpdateElectricityQuotaDto {
+  @ApiProperty({ description: '新的电量配额(总度数)', required: false })
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  totalKwh?: number;
+
+  @ApiProperty({ description: '备注', required: false })
+  @IsOptional()
+  @IsString()
+  remark?: string;
+}

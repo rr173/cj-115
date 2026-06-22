@@ -191,3 +191,21 @@ export declare enum DepthSource {
     MANUAL = "MANUAL"
 }
 export declare const DepthSourceNames: Record<DepthSource, string>;
+export declare enum MeterStatus {
+    NORMAL = "NORMAL",
+    ABNORMAL = "ABNORMAL",
+    SUSPENDED = "SUSPENDED"
+}
+export declare const MeterStatusNames: Record<MeterStatus, string>;
+export declare enum MeterAbnormalType {
+    READING_REVERSED = "READING_REVERSED",
+    METER_REPLACED = "METER_REPLACED",
+    DEVICE_FAULT = "DEVICE_FAULT"
+}
+export declare const MeterAbnormalTypeNames: Record<MeterAbnormalType, string>;
+export declare enum ElectricityQuotaStatus {
+    NORMAL = "NORMAL",
+    WARNING = "WARNING",
+    EXHAUSTED = "EXHAUSTED"
+}
+export declare const ElectricityQuotaStatusNames: Record<ElectricityQuotaStatus, string>;

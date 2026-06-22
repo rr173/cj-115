@@ -761,6 +761,9 @@ model IrrigationZone {
   depthHistories          WaterLevelDepthHistory[]
   alerts                  GroundwaterAlert[]
   supplyPlans             JointWaterSupplyPlan[]
+  electricityQuotas       ElectricityQuota[]
+  meterReadings           MeterReading[]
+  electricityRecords      ElectricityExtractionRecord[]
 
   @@index([code])
 }
@@ -789,14 +792,127 @@ model PumpingWell {
   associatedChannel   Channel?       @relation(fields: [associatedChannelId], references: [id], onDelete: SetNull)
   associatedPlot      String?
   isActive            Boolean        @default(true)
+  electricityToWaterCoefficient Float @default(5.0)
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @default(now())
 
   extractionRecords   GroundwaterExtractionRecord[]
   supplyDetails       JointSupplyDetail[]
+  meter               SmartMeter?
+  meterReadings       MeterReading[]
+  electricityRecords  ElectricityExtractionRecord[]
 
   @@index([zoneId])
   @@index([associatedChannelId])
+}
+
+model SmartMeter {
+  id            String      @id @default(uuid())
+  meterNo       String      @unique
+  wellId        String      @unique
+  well          PumpingWell @relation(fields: [wellId], references: [id], onDelete: Cascade)
+  initialReading Float      @default(0)
+  lastReading   Float       @default(0)
+  status        String      @default("NORMAL")
+  lastReportedAt DateTime?
+  installedAt   DateTime    @default(now())
+  remark        String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @default(now())
+
+  readings      MeterReading[]
+  abnormalAlerts MeterAbnormalAlert[]
+
+  @@index([status])
+}
+
+model MeterReading {
+  id          String     @id @default(uuid())
+  meterId     String
+  meter       SmartMeter @relation(fields: [meterId], references: [id], onDelete: Cascade)
+  wellId      String
+  well        PumpingWell @relation(fields: [wellId], references: [id], onDelete: Cascade)
+  zoneId      String
+  zone        IrrigationZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  previousReading Float
+  currentReading  Float
+  consumption Float
+  isAbnormal  Boolean    @default(false)
+  abnormalReason String?
+  reportedAt  DateTime   @default(now())
+  createdAt   DateTime   @default(now())
+
+  electricityRecord ElectricityExtractionRecord?
+
+  @@index([meterId])
+  @@index([wellId])
+  @@index([zoneId])
+  @@index([reportedAt])
+}
+
+model ElectricityQuota {
+  id            String         @id @default(uuid())
+  zoneId        String
+  zone          IrrigationZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  seasonName    String
+  startDate     DateTime
+  endDate       DateTime
+  totalKwh      Float
+  usedKwh       Float          @default(0)
+  warningSent   Boolean        @default(false)
+  blocked       Boolean        @default(false)
+  operator      String?
+  remark        String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @default(now())
+
+  extractionRecords ElectricityExtractionRecord[]
+
+  @@index([zoneId])
+  @@index([startDate, endDate])
+}
+
+model ElectricityExtractionRecord {
+  id          String         @id @default(uuid())
+  wellId      String
+  well        PumpingWell    @relation(fields: [wellId], references: [id], onDelete: Cascade)
+  zoneId      String
+  zone        IrrigationZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  meterReadingId String      @unique
+  meterReading MeterReading  @relation(fields: [meterReadingId], references: [id], onDelete: Cascade)
+  quotaId     String?
+  quota       ElectricityQuota? @relation(fields: [quotaId], references: [id], onDelete: SetNull)
+  consumptionKwh Float
+  waterVolume   Float
+  coefficient   Float
+  recordedAt    DateTime     @default(now())
+  createdAt     DateTime     @default(now())
+
+  @@index([wellId])
+  @@index([zoneId])
+  @@index([quotaId])
+  @@index([recordedAt])
+}
+
+model MeterAbnormalAlert {
+  id          String     @id @default(uuid())
+  meterId     String
+  meter       SmartMeter @relation(fields: [meterId], references: [id], onDelete: Cascade)
+  wellId      String
+  type        String
+  message     String
+  previousReading Float
+  currentReading  Float
+  isResolved  Boolean    @default(false)
+  resolvedAt  DateTime?
+  resolvedBy  String?
+  newBaselineReading Float?
+  createdAt   DateTime   @default(now())
+
+  @@index([meterId])
+  @@index([wellId])
+  @@index([isResolved])
+  @@index([createdAt])
 }
 
 model GroundwaterExtractionRecord {

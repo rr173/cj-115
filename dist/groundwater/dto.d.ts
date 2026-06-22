@@ -47,3 +47,41 @@ export declare class AddZoneChannelDto {
     zoneId: string;
     channelId: string;
 }
+export declare class RegisterSmartMeterDto {
+    wellId: string;
+    meterNo: string;
+    initialReading?: number;
+    remark?: string;
+}
+export declare class UpdateSmartMeterDto {
+    meterNo?: string;
+    status?: string;
+    remark?: string;
+}
+export declare class UpdateCoefficientDto {
+    wellId: string;
+    coefficient: number;
+}
+export declare class ReportMeterReadingDto {
+    meterNo: string;
+    reading: number;
+    reportedAt?: string;
+}
+export declare class ResolveMeterAbnormalDto {
+    alertId: string;
+    newBaselineReading: number;
+    operator: string;
+}
+export declare class CreateElectricityQuotaDto {
+    zoneId: string;
+    seasonName: string;
+    startDate: string;
+    endDate: string;
+    totalKwh: number;
+    operator?: string;
+    remark?: string;
+}
+export declare class UpdateElectricityQuotaDto {
+    totalKwh?: number;
+    remark?: string;
+}

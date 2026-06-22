@@ -152,6 +152,7 @@ export declare class GroundwaterService {
         unitCost: number;
         associatedChannelId: string | null;
         associatedPlot: string | null;
+        electricityToWaterCoefficient: number;
     }>;
     updatePumpingWell(wellId: string, dto: UpdatePumpingWellDto): Promise<{
         zone: {
@@ -170,6 +171,7 @@ export declare class GroundwaterService {
         unitCost: number;
         associatedChannelId: string | null;
         associatedPlot: string | null;
+        electricityToWaterCoefficient: number;
     }>;
     listPumpingWells(zoneId?: string): Promise<({
         zone: {
@@ -188,6 +190,7 @@ export declare class GroundwaterService {
         unitCost: number;
         associatedChannelId: string | null;
         associatedPlot: string | null;
+        electricityToWaterCoefficient: number;
     })[]>;
     getPumpingWellHistory(wellId: string, dateFrom?: string, dateTo?: string): Promise<{
         well: {
@@ -344,4 +347,378 @@ export declare class GroundwaterService {
     })[]>;
     private createAlert;
     private resolveAlerts;
+    registerSmartMeter(dto: any): Promise<{
+        well: {
+            code: string;
+            id: string;
+            zone: {
+                name: string;
+                code: string;
+                id: string;
+            };
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        status: string;
+        remark: string | null;
+        wellId: string;
+        meterNo: string;
+        initialReading: number;
+        lastReading: number;
+        lastReportedAt: Date | null;
+        installedAt: Date;
+    }>;
+    updateSmartMeter(meterId: string, dto: any): Promise<{
+        well: {
+            code: string;
+            id: string;
+            zone: {
+                name: string;
+                code: string;
+                id: string;
+            };
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        status: string;
+        remark: string | null;
+        wellId: string;
+        meterNo: string;
+        initialReading: number;
+        lastReading: number;
+        lastReportedAt: Date | null;
+        installedAt: Date;
+    }>;
+    listSmartMeters(zoneId?: string): Promise<({
+        well: {
+            code: string;
+            id: string;
+            zone: {
+                name: string;
+                code: string;
+                id: string;
+            };
+            electricityToWaterCoefficient: number;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        status: string;
+        remark: string | null;
+        wellId: string;
+        meterNo: string;
+        initialReading: number;
+        lastReading: number;
+        lastReportedAt: Date | null;
+        installedAt: Date;
+    })[]>;
+    getSmartMeter(meterId: string): Promise<{
+        well: {
+            code: string;
+            id: string;
+            zone: {
+                name: string;
+                code: string;
+                id: string;
+            };
+            electricityToWaterCoefficient: number;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        status: string;
+        remark: string | null;
+        wellId: string;
+        meterNo: string;
+        initialReading: number;
+        lastReading: number;
+        lastReportedAt: Date | null;
+        installedAt: Date;
+    }>;
+    updateCoefficient(dto: any): Promise<{
+        wellId: string;
+        wellCode: string;
+        oldCoefficient: number;
+        newCoefficient: any;
+        zone: {
+            name: string;
+            code: string;
+            id: string;
+        };
+    }>;
+    reportMeterReading(dto: any): Promise<{
+        accepted: boolean;
+        abnormal: boolean;
+        alertId: string;
+        message: string;
+        previousReading: number;
+        currentReading: any;
+        consumption?: undefined;
+        waterVolume?: undefined;
+        coefficient?: undefined;
+        zone?: undefined;
+        well?: undefined;
+        recordedAt?: undefined;
+        quota?: undefined;
+    } | {
+        accepted: boolean;
+        abnormal: boolean;
+        message: string;
+        previousReading: number;
+        currentReading: any;
+        consumption: number;
+        waterVolume: number;
+        alertId?: undefined;
+        coefficient?: undefined;
+        zone?: undefined;
+        well?: undefined;
+        recordedAt?: undefined;
+        quota?: undefined;
+    } | {
+        accepted: boolean;
+        abnormal: boolean;
+        message: string;
+        previousReading: number;
+        currentReading: any;
+        consumption: number;
+        coefficient: number;
+        waterVolume: number;
+        zone: {
+            id: string;
+            code: string;
+            name: string;
+        };
+        well: {
+            id: string;
+            code: string;
+        };
+        recordedAt: Date;
+        quota: {
+            id: string;
+            seasonName: string;
+            totalKwh: number;
+            usedKwh: number;
+            warningTriggered: boolean;
+            blocked: boolean;
+        };
+        alertId?: undefined;
+    }>;
+    listMeterReadings(wellId?: string, meterId?: string, dateFrom?: string, dateTo?: string): Promise<({
+        zone: {
+            name: string;
+            code: string;
+        };
+        well: {
+            code: string;
+        };
+        meter: {
+            meterNo: string;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        zoneId: string;
+        reportedAt: Date;
+        wellId: string;
+        previousReading: number;
+        currentReading: number;
+        meterId: string;
+        consumption: number;
+        isAbnormal: boolean;
+        abnormalReason: string | null;
+    })[]>;
+    listMeterAbnormalAlerts(resolved?: boolean): Promise<({
+        meter: {
+            status: string;
+            meterNo: string;
+        };
+    } & {
+        type: string;
+        id: string;
+        createdAt: Date;
+        message: string;
+        isResolved: boolean;
+        resolvedAt: Date | null;
+        wellId: string;
+        newBaselineReading: number | null;
+        previousReading: number;
+        currentReading: number;
+        resolvedBy: string | null;
+        meterId: string;
+    })[]>;
+    resolveMeterAbnormal(dto: any): Promise<{
+        alertId: string;
+        meterNo: string;
+        oldBaseline: number;
+        newBaseline: any;
+        operator: any;
+        resolvedAt: Date;
+    }>;
+    createElectricityQuota(dto: any): Promise<{
+        zone: {
+            name: string;
+            code: string;
+            id: string;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        remark: string | null;
+        startDate: Date;
+        endDate: Date;
+        zoneId: string;
+        operator: string | null;
+        seasonName: string;
+        totalKwh: number;
+        usedKwh: number;
+        warningSent: boolean;
+        blocked: boolean;
+    }>;
+    updateElectricityQuota(quotaId: string, dto: any): Promise<{
+        zone: {
+            name: string;
+            code: string;
+            id: string;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        remark: string | null;
+        startDate: Date;
+        endDate: Date;
+        zoneId: string;
+        operator: string | null;
+        seasonName: string;
+        totalKwh: number;
+        usedKwh: number;
+        warningSent: boolean;
+        blocked: boolean;
+    }>;
+    listElectricityQuotas(zoneId?: string): Promise<{
+        usageRatio: string;
+        remainingKwh: number;
+        status: string;
+        zone: {
+            name: string;
+            code: string;
+            id: string;
+        };
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        remark: string | null;
+        startDate: Date;
+        endDate: Date;
+        zoneId: string;
+        operator: string | null;
+        seasonName: string;
+        totalKwh: number;
+        usedKwh: number;
+        warningSent: boolean;
+        blocked: boolean;
+    }[]>;
+    getElectricityQuotaUsage(quotaId: string): Promise<{
+        quota: {
+            id: string;
+            seasonName: string;
+            startDate: Date;
+            endDate: Date;
+            totalKwh: number;
+            usedKwh: number;
+            remainingKwh: number;
+            usageRatio: string;
+            status: string;
+            warningSent: boolean;
+            blocked: boolean;
+        };
+        zone: {
+            name: string;
+            code: string;
+            id: string;
+        };
+        recordCount: number;
+        totalWaterVolume: number;
+        wellBreakdown: {
+            wellCode: string;
+            recordCount: number;
+            totalKwh: number;
+            totalWaterVolume: number;
+        }[];
+        recentRecords: {
+            id: string;
+            wellCode: string;
+            consumptionKwh: number;
+            waterVolume: number;
+            recordedAt: Date;
+        }[];
+    }>;
+    getWellReconciliation(wellId: string, dateFrom?: string, dateTo?: string): Promise<{
+        well: {
+            id: string;
+            code: string;
+            ratedFlow: number;
+            electricityToWaterCoefficient: number;
+            zone: {
+                name: string;
+                code: string;
+                id: string;
+            };
+        };
+        period: {
+            dateFrom: Date;
+            dateTo: Date;
+        };
+        estimated: {
+            totalVolume: number;
+            recordCount: number;
+            totalHours: number;
+        };
+        electric: {
+            totalVolume: number;
+            totalKwh: number;
+            recordCount: number;
+        };
+        deviation: {
+            diffVolume: number;
+            deviationRate: string;
+            isAbnormal: boolean;
+            abnormalThreshold: string;
+            suggestion: string;
+        } | {
+            diffVolume: number;
+            deviationRate: any;
+            isAbnormal: boolean;
+            suggestion: string;
+            abnormalThreshold?: undefined;
+        };
+    }>;
+    getZoneReconciliation(zoneId: string, dateFrom?: string, dateTo?: string): Promise<{
+        zone: {
+            id: string;
+            code: string;
+            name: string;
+        };
+        period: {
+            dateFrom: Date;
+            dateTo: Date;
+        };
+        summary: {
+            wellCount: number;
+            abnormalWellCount: number;
+            estimatedTotalVolume: number;
+            electricTotalVolume: number;
+            diffVolume: number;
+            deviationRate: string;
+            isAbnormal: boolean;
+        };
+        wellReports: any[];
+    }>;
 }

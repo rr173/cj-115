@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AddZoneChannelDto = exports.GenerateJointSupplyPlanDto = exports.UpdatePumpingWellDto = exports.CreatePumpingWellDto = exports.RecordWaterLevelDepthDto = exports.AdjustRedlineDto = exports.UpdateIrrigationZoneDto = exports.CreateIrrigationZoneDto = void 0;
+exports.UpdateElectricityQuotaDto = exports.CreateElectricityQuotaDto = exports.ResolveMeterAbnormalDto = exports.ReportMeterReadingDto = exports.UpdateCoefficientDto = exports.UpdateSmartMeterDto = exports.RegisterSmartMeterDto = exports.AddZoneChannelDto = exports.GenerateJointSupplyPlanDto = exports.UpdatePumpingWellDto = exports.CreatePumpingWellDto = exports.RecordWaterLevelDepthDto = exports.AdjustRedlineDto = exports.UpdateIrrigationZoneDto = exports.CreateIrrigationZoneDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 class CreateIrrigationZoneDto {
@@ -231,4 +231,159 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], AddZoneChannelDto.prototype, "channelId", void 0);
+class RegisterSmartMeterDto {
+}
+exports.RegisterSmartMeterDto = RegisterSmartMeterDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '机井ID' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], RegisterSmartMeterDto.prototype, "wellId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '智能电表表号' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], RegisterSmartMeterDto.prototype, "meterNo", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '电表初始读数(度)', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], RegisterSmartMeterDto.prototype, "initialReading", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '备注', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], RegisterSmartMeterDto.prototype, "remark", void 0);
+class UpdateSmartMeterDto {
+}
+exports.UpdateSmartMeterDto = UpdateSmartMeterDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '电表表号', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateSmartMeterDto.prototype, "meterNo", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '电表状态', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateSmartMeterDto.prototype, "status", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '备注', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateSmartMeterDto.prototype, "remark", void 0);
+class UpdateCoefficientDto {
+}
+exports.UpdateCoefficientDto = UpdateCoefficientDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '机井ID' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateCoefficientDto.prototype, "wellId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '以电折水系数(立方米/度)' }),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsPositive)(),
+    __metadata("design:type", Number)
+], UpdateCoefficientDto.prototype, "coefficient", void 0);
+class ReportMeterReadingDto {
+}
+exports.ReportMeterReadingDto = ReportMeterReadingDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '电表表号' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ReportMeterReadingDto.prototype, "meterNo", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '本次上报读数(度)' }),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsPositive)(),
+    __metadata("design:type", Number)
+], ReportMeterReadingDto.prototype, "reading", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '上报时间(默认当前)', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], ReportMeterReadingDto.prototype, "reportedAt", void 0);
+class ResolveMeterAbnormalDto {
+}
+exports.ResolveMeterAbnormalDto = ResolveMeterAbnormalDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '告警ID' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ResolveMeterAbnormalDto.prototype, "alertId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '新的基准读数(度)' }),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsPositive)(),
+    __metadata("design:type", Number)
+], ResolveMeterAbnormalDto.prototype, "newBaselineReading", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '处理人' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ResolveMeterAbnormalDto.prototype, "operator", void 0);
+class CreateElectricityQuotaDto {
+}
+exports.CreateElectricityQuotaDto = CreateElectricityQuotaDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '灌溉分区ID' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateElectricityQuotaDto.prototype, "zoneId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '灌溉季名称,如"2026年春灌"' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateElectricityQuotaDto.prototype, "seasonName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '灌溉季开始日期 YYYY-MM-DD' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateElectricityQuotaDto.prototype, "startDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '灌溉季结束日期 YYYY-MM-DD' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateElectricityQuotaDto.prototype, "endDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '电量配额(总度数)' }),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsPositive)(),
+    __metadata("design:type", Number)
+], CreateElectricityQuotaDto.prototype, "totalKwh", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '操作人', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateElectricityQuotaDto.prototype, "operator", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '备注', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateElectricityQuotaDto.prototype, "remark", void 0);
+class UpdateElectricityQuotaDto {
+}
+exports.UpdateElectricityQuotaDto = UpdateElectricityQuotaDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '新的电量配额(总度数)', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsPositive)(),
+    __metadata("design:type", Number)
+], UpdateElectricityQuotaDto.prototype, "totalKwh", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '备注', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateElectricityQuotaDto.prototype, "remark", void 0);
 //# sourceMappingURL=dto.js.map
