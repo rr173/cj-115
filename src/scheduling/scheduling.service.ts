@@ -298,11 +298,12 @@ export class SchedulingService {
 
             await tx.notification.create({
               data: {
-                farmerId: app.farmerId,
+                farmerId: null,
                 applicationId: app.id,
                 type: NotificationType.EMERGENCY_ALERT,
                 title: '紧急申请编排失败告警',
                 content: `紧急用水申请（申请ID: ${app.id.substring(0, 8)}）因渠道容量不足，无法在${targetDateStr}安排，已标记为失败，请管理员立即人工介入处理。用水户: ${app.farmer.code}(${app.farmer.name}), 原因: ${app.emergencyReason}, 申请水量: ${app.requestVolume.toFixed(2)}m³`,
+                isAdminAlert: true,
               },
             });
           });

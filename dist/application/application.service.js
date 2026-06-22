@@ -90,11 +90,13 @@ let ApplicationService = class ApplicationService {
         }
         const creditMultiplier = isEmergency ? 1.0 : await this.creditRatingService.getQuotaMultiplier(dto.farmerId);
         const requestVolume = dto.expectedFlow * dto.expectedHours * 3600;
-        const availableQuota = await this.waterRightsTradingService.getAvailableQuota(farmer.id, year, quarter);
+        const availableQuota = isEmergency
+            ? quota.amount
+            : await this.waterRightsTradingService.getAvailableQuota(farmer.id, year, quarter);
         const creditAdjustedQuota = +(availableQuota * creditMultiplier).toFixed(4);
         if (requestVolume > creditAdjustedQuota) {
             const msg = isEmergency
-                ? `申请量(${requestVolume.toFixed(2)}m³)超过可用额度(${availableQuota.toFixed(2)}m³),紧急申请不享受信用上浮额度`
+                ? `申请量(${requestVolume.toFixed(2)}m³)超过原始季度定额(${quota.amount.toFixed(2)}m³),紧急申请按原始定额计算上限`
                 : `申请量(${requestVolume.toFixed(2)}m³)超过信用调整后可用额度(${creditAdjustedQuota.toFixed(2)}m³,原额度${availableQuota.toFixed(2)}m³×信用系数${creditMultiplier}),额度不足可前往水权交易市场购买`;
             throw new common_1.BadRequestException(msg);
         }

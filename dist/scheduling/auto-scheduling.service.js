@@ -263,12 +263,28 @@ let AutoSchedulingService = AutoSchedulingService_1 = class AutoSchedulingServic
         }));
     }
     async getFarmerNotifications(farmerId, unreadOnly = false) {
-        const where = { farmerId };
+        const where = { farmerId, isAdminAlert: false };
         if (unreadOnly) {
             where.isRead = false;
         }
         const notifications = await this.prisma.notification.findMany({
             where,
+            orderBy: { createdAt: 'desc' },
+        });
+        return notifications;
+    }
+    async getAdminNotifications(unreadOnly = false) {
+        const where = { isAdminAlert: true };
+        if (unreadOnly) {
+            where.isRead = false;
+        }
+        const notifications = await this.prisma.notification.findMany({
+            where,
+            include: {
+                application: {
+                    include: { farmer: { select: { id: true, code: true, name: true } } },
+                },
+            },
             orderBy: { createdAt: 'desc' },
         });
         return notifications;
@@ -279,6 +295,18 @@ let AutoSchedulingService = AutoSchedulingService_1 = class AutoSchedulingServic
         });
         if (!notification || notification.farmerId !== farmerId) {
             throw new Error('通知不存在或无权访问');
+        }
+        return this.prisma.notification.update({
+            where: { id: notificationId },
+            data: { isRead: true },
+        });
+    }
+    async markAdminNotificationAsRead(notificationId) {
+        const notification = await this.prisma.notification.findUnique({
+            where: { id: notificationId },
+        });
+        if (!notification || !notification.isAdminAlert) {
+            throw new Error('通知不存在或不是管理员通知');
         }
         return this.prisma.notification.update({
             where: { id: notificationId },

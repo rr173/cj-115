@@ -59,6 +59,20 @@ let SchedulingController = class SchedulingController {
             throw new common_1.BadRequestException(e.message);
         }
     }
+    getAdminNotifications(unreadOnly) {
+        return this.autoService.getAdminNotifications(unreadOnly === 'true');
+    }
+    async markAdminNotificationAsRead(notificationId) {
+        try {
+            return await this.autoService.markAdminNotificationAsRead(notificationId);
+        }
+        catch (e) {
+            if (e.message === '通知不存在或不是管理员通知') {
+                throw new common_1.NotFoundException(e.message);
+            }
+            throw new common_1.BadRequestException(e.message);
+        }
+    }
 };
 exports.SchedulingController = SchedulingController;
 __decorate([
@@ -130,6 +144,24 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], SchedulingController.prototype, "markNotificationAsRead", null);
+__decorate([
+    (0, common_1.Get)('admin/notifications'),
+    (0, swagger_1.ApiOperation)({ summary: '查询管理员通知列表(如紧急申请编排失败告警)' }),
+    (0, swagger_1.ApiQuery)({ name: 'unreadOnly', description: '仅显示未读', required: false, type: Boolean }),
+    __param(0, (0, common_1.Query)('unreadOnly')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], SchedulingController.prototype, "getAdminNotifications", null);
+__decorate([
+    (0, common_1.Post)('admin/notifications/:notificationId/read'),
+    (0, swagger_1.ApiOperation)({ summary: '标记管理员通知为已读' }),
+    (0, swagger_1.ApiParam)({ name: 'notificationId', description: '通知ID' }),
+    __param(0, (0, common_1.Param)('notificationId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], SchedulingController.prototype, "markAdminNotificationAsRead", null);
 exports.SchedulingController = SchedulingController = __decorate([
     (0, swagger_1.ApiTags)('配水编排'),
     (0, common_1.Controller)('scheduling'),

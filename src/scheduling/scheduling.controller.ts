@@ -82,4 +82,25 @@ export class SchedulingController {
       throw new BadRequestException(e.message);
     }
   }
+
+  @Get('admin/notifications')
+  @ApiOperation({ summary: '查询管理员通知列表(如紧急申请编排失败告警)' })
+  @ApiQuery({ name: 'unreadOnly', description: '仅显示未读', required: false, type: Boolean })
+  getAdminNotifications(@Query('unreadOnly') unreadOnly?: string) {
+    return this.autoService.getAdminNotifications(unreadOnly === 'true');
+  }
+
+  @Post('admin/notifications/:notificationId/read')
+  @ApiOperation({ summary: '标记管理员通知为已读' })
+  @ApiParam({ name: 'notificationId', description: '通知ID' })
+  async markAdminNotificationAsRead(@Param('notificationId') notificationId: string) {
+    try {
+      return await this.autoService.markAdminNotificationAsRead(notificationId);
+    } catch (e) {
+      if (e.message === '通知不存在或不是管理员通知') {
+        throw new NotFoundException(e.message);
+      }
+      throw new BadRequestException(e.message);
+    }
+  }
 }
