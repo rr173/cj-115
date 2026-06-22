@@ -47,13 +47,37 @@ let ApplicationService = class ApplicationService {
         const farmer = await this.prisma.farmer.findUnique({ where: { id: dto.farmerId } });
         if (!farmer)
             throw new common_1.NotFoundException('用水户不存在');
+        const isEmergency = dto.isEmergency === true;
+        if (isEmergency && !dto.emergencyReason) {
+            throw new common_1.BadRequestException('紧急申请必须填写紧急原因');
+        }
+        if (isEmergency) {
+            const now = (0, dayjs_1.default)();
+            const monthStart = now.startOf('month');
+            const monthEnd = now.endOf('month');
+            const emergencyCount = await this.prisma.waterApplication.count({
+                where: {
+                    farmerId: dto.farmerId,
+                    isEmergency: true,
+                    createdAt: {
+                        gte: monthStart.toDate(),
+                        lte: monthEnd.toDate(),
+                    },
+                },
+            });
+            if (emergencyCount >= 3) {
+                throw new common_1.BadRequestException('本月紧急申请次数已达上限(3次),请使用普通申请通道');
+            }
+        }
         const checkResult = await this.waterBillingService.checkFarmerCanApply(dto.farmerId);
         if (!checkResult.canApply) {
             throw new common_1.BadRequestException(`提交申请被拒绝: ${checkResult.reason}`);
         }
-        const dCheck = await this.creditRatingService.checkDFarmerCanApply(dto.farmerId);
-        if (!dCheck.canApply) {
-            throw new common_1.BadRequestException(`提交申请被拒绝: ${dCheck.reason}`);
+        if (!isEmergency) {
+            const dCheck = await this.creditRatingService.checkDFarmerCanApply(dto.farmerId);
+            if (!dCheck.canApply) {
+                throw new common_1.BadRequestException(`提交申请被拒绝: ${dCheck.reason}`);
+            }
         }
         const target = (0, dayjs_1.default)(dto.targetDate);
         if (!target.isValid())
@@ -64,38 +88,55 @@ let ApplicationService = class ApplicationService {
         if (!quota) {
             throw new common_1.BadRequestException(`${year}年${quarter}季度定额尚未设置,无法提交申请`);
         }
-        const creditMultiplier = await this.creditRatingService.getQuotaMultiplier(dto.farmerId);
+        const creditMultiplier = isEmergency ? 1.0 : await this.creditRatingService.getQuotaMultiplier(dto.farmerId);
         const requestVolume = dto.expectedFlow * dto.expectedHours * 3600;
         const availableQuota = await this.waterRightsTradingService.getAvailableQuota(farmer.id, year, quarter);
         const creditAdjustedQuota = +(availableQuota * creditMultiplier).toFixed(4);
         if (requestVolume > creditAdjustedQuota) {
-            throw new common_1.BadRequestException(`申请量(${requestVolume.toFixed(2)}m³)超过信用调整后可用额度(${creditAdjustedQuota.toFixed(2)}m³,原额度${availableQuota.toFixed(2)}m³×信用系数${creditMultiplier}),额度不足可前往水权交易市场购买`);
+            const msg = isEmergency
+                ? `申请量(${requestVolume.toFixed(2)}m³)超过可用额度(${availableQuota.toFixed(2)}m³),紧急申请不享受信用上浮额度`
+                : `申请量(${requestVolume.toFixed(2)}m³)超过信用调整后可用额度(${creditAdjustedQuota.toFixed(2)}m³,原额度${availableQuota.toFixed(2)}m³×信用系数${creditMultiplier}),额度不足可前往水权交易市场购买`;
+            throw new common_1.BadRequestException(msg);
         }
         const channel = await this.prisma.channel.findUnique({ where: { id: farmer.channelId } });
         if (dto.expectedFlow > channel.maxFlow) {
             throw new common_1.BadRequestException(`申请流量(${dto.expectedFlow}m³/s)超过农渠(${channel.code})最大设计流量(${channel.maxFlow}m³/s)`);
         }
-        const rotationalCheck = await this.rotationalIrrigationService.validateApplication(dto.farmerId, dto.targetDate, dto.expectedHours, requestVolume);
+        let rotationalCheck = { roundId: null, warnings: [], roundName: null };
+        if (!isEmergency) {
+            rotationalCheck = await this.rotationalIrrigationService.validateApplication(dto.farmerId, dto.targetDate, dto.expectedHours, requestVolume);
+        }
+        const createData = {
+            farmerId: dto.farmerId,
+            expectedFlow: dto.expectedFlow,
+            expectedHours: dto.expectedHours,
+            requestVolume,
+            submitTime: new Date(),
+            targetDate: target.startOf('day').toDate(),
+            originalTargetDate: target.startOf('day').toDate(),
+            status: enums_1.ApplicationStatus.PENDING,
+            roundId: rotationalCheck.roundId,
+        };
+        if (isEmergency) {
+            createData.isEmergency = true;
+            createData.emergencyReason = dto.emergencyReason;
+        }
         const created = await this.prisma.waterApplication.create({
-            data: {
-                farmerId: dto.farmerId,
-                expectedFlow: dto.expectedFlow,
-                expectedHours: dto.expectedHours,
-                requestVolume,
-                submitTime: new Date(),
-                targetDate: target.startOf('day').toDate(),
-                originalTargetDate: target.startOf('day').toDate(),
-                status: enums_1.ApplicationStatus.PENDING,
-                roundId: rotationalCheck.roundId,
-            },
+            data: createData,
             include: { farmer: { include: { channel: true } } },
         });
-        return {
+        const result = {
             ...created,
             creditMultiplier,
             warnings: rotationalCheck.warnings,
             roundName: rotationalCheck.roundName,
         };
+        if (isEmergency) {
+            result.isEmergency = true;
+            result.emergencyReason = dto.emergencyReason;
+            result.notice = '紧急申请将优先于普通申请编排,需管理员事后审批';
+        }
+        return result;
     }
     async findAll(farmerId, targetDate, status) {
         const where = {};

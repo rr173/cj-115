@@ -9,6 +9,8 @@ export declare class SchedulingController {
         totalProcessed: number;
         scheduled: number;
         failed: number;
+        emergencyScheduled: number;
+        emergencyFailed: number;
         details: any[];
     }>;
     triggerAutoScheduling(date?: string): Promise<{
@@ -16,6 +18,8 @@ export declare class SchedulingController {
         totalProcessed: number;
         scheduled: number;
         failed: number;
+        emergencyScheduled: number;
+        emergencyFailed: number;
         details: any[];
     }>;
     getDaySchedule(date: string): Promise<{

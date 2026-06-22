@@ -17,6 +17,8 @@ export declare class SchedulingService {
         totalProcessed: number;
         scheduled: number;
         failed: number;
+        emergencyScheduled: number;
+        emergencyFailed: number;
         details: any[];
     }>;
     getChannelSchedule(channelId: string, dateStr: string): Promise<{

@@ -139,6 +139,62 @@ export class CreditRatingService {
     };
   }
 
+  async adjustCreditScoreWithTx(
+    tx: any,
+    farmerId: string,
+    adjustScore: number,
+    reason: string,
+    operator?: string,
+  ) {
+    const credit = await this.ensureFarmerCredit(farmerId);
+
+    const previousScore = credit.score;
+    const previousLevel = credit.level;
+    const newScore = Math.max(0, Math.min(100, previousScore + adjustScore));
+    const newLevel = scoreToLevel(newScore);
+
+    const updatedCredit = await tx.farmerCredit.update({
+      where: { id: credit.id },
+      data: {
+        score: newScore,
+        level: newLevel,
+        updatedAt: new Date(),
+      },
+    });
+
+    await tx.creditScoreHistory.create({
+      data: {
+        farmerId,
+        type: CreditHistoryType.MANUAL,
+        previousScore,
+        newScore,
+        previousLevel,
+        newLevel,
+        baseScore: credit.baseScore,
+        paymentScore: credit.paymentScore,
+        deviationScore: credit.deviationScore,
+        overuseScore: credit.overuseScore,
+        tradingScore: credit.tradingScore,
+        hasUnpaidDebt: credit.hasUnpaidDebt,
+        debtPenalty: credit.debtPenalty,
+        reason,
+        operator: operator || 'admin',
+      },
+    });
+
+    return {
+      farmerId,
+      previousScore,
+      newScore: updatedCredit.score,
+      previousLevel,
+      newLevel: updatedCredit.level,
+      newLevelName: CreditLevelNames[updatedCredit.level as CreditLevel],
+      adjustScore,
+      reason,
+      operator: operator || 'admin',
+    };
+  }
+
   async adjustCreditScore(farmerId: string, dto: AdjustCreditScoreDto) {
     const credit = await this.ensureFarmerCredit(farmerId);
 
@@ -148,49 +204,10 @@ export class CreditRatingService {
     const newLevel = scoreToLevel(newScore);
 
     const updated = await this.prisma.$transaction(async (tx) => {
-      const updatedCredit = await tx.farmerCredit.update({
-        where: { id: credit.id },
-        data: {
-          score: newScore,
-          level: newLevel,
-          updatedAt: new Date(),
-        },
-      });
-
-      await tx.creditScoreHistory.create({
-        data: {
-          farmerId,
-          type: CreditHistoryType.MANUAL,
-          previousScore,
-          newScore,
-          previousLevel,
-          newLevel,
-          baseScore: credit.baseScore,
-          paymentScore: credit.paymentScore,
-          deviationScore: credit.deviationScore,
-          overuseScore: credit.overuseScore,
-          tradingScore: credit.tradingScore,
-          hasUnpaidDebt: credit.hasUnpaidDebt,
-          debtPenalty: credit.debtPenalty,
-          reason: dto.reason,
-          operator: dto.operator || 'admin',
-        },
-      });
-
-      return updatedCredit;
+      return this.adjustCreditScoreWithTx(tx, farmerId, dto.adjustScore, dto.reason, dto.operator);
     });
 
-    return {
-      farmerId,
-      previousScore,
-      newScore: updated.score,
-      previousLevel,
-      newLevel: updated.level,
-      newLevelName: CreditLevelNames[updated.level as CreditLevel],
-      adjustScore: dto.adjustScore,
-      reason: dto.reason,
-      operator: dto.operator || 'admin',
-    };
+    return updated;
   }
 
   async getCreditHistory(dto: GetCreditHistoryDto) {

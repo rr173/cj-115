@@ -98,6 +98,13 @@ model WaterApplication {
   postponeCount   Int @default(0)
   roundId         String?
   round           IrrigationRound? @relation(fields: [roundId], references: [id])
+  isEmergency     Boolean  @default(false)
+  emergencyReason String?
+  emergencyApprovalStatus String?
+  emergencyApprovedAt DateTime?
+  emergencyApprovedBy String?
+  emergencyRejectReason String?
+  emergencyTracedAt DateTime?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @default(now())
 

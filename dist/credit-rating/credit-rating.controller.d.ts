@@ -50,9 +50,9 @@ export declare class CreditRatingController {
     adjustCreditScore(farmerId: string, dto: AdjustCreditScoreDto): Promise<{
         farmerId: string;
         previousScore: number;
-        newScore: number;
+        newScore: any;
         previousLevel: string;
-        newLevel: string;
+        newLevel: any;
         newLevelName: string;
         adjustScore: number;
         reason: string;

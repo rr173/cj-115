@@ -3,53 +3,7 @@ import { CreateApplicationDto } from './dto';
 export declare class ApplicationController {
     private readonly service;
     constructor(service: ApplicationService);
-    create(dto: CreateApplicationDto): Promise<{
-        creditMultiplier: number;
-        warnings: string[];
-        roundName: string;
-        farmer: {
-            channel: {
-                name: string;
-                code: string;
-                level: string;
-                maxFlow: number;
-                length: number;
-                parentId: string | null;
-                waterUtilizationCoefficient: number;
-                id: string;
-                propagationDelay: number;
-                inspectionStatus: string;
-                inspectionCycleDays: number;
-                createdAt: Date;
-                updatedAt: Date;
-            };
-        } & {
-            name: string;
-            code: string;
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            channelId: string;
-            area: number;
-        };
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        submitTime: Date;
-        farmerId: string;
-        expectedFlow: number;
-        expectedHours: number;
-        requestVolume: number;
-        targetDate: Date;
-        originalTargetDate: Date;
-        status: string;
-        failReason: string | null;
-        conflictChannelId: string | null;
-        conflictStartTime: Date | null;
-        conflictEndTime: Date | null;
-        postponeCount: number;
-        roundId: string | null;
-    }>;
+    create(dto: CreateApplicationDto): Promise<any>;
     findAll(farmerId?: string, targetDate?: string, status?: string): Promise<({
         farmer: {
             channel: {
@@ -107,6 +61,13 @@ export declare class ApplicationController {
         conflictEndTime: Date | null;
         postponeCount: number;
         roundId: string | null;
+        isEmergency: boolean;
+        emergencyReason: string | null;
+        emergencyApprovalStatus: string | null;
+        emergencyApprovedAt: Date | null;
+        emergencyApprovedBy: string | null;
+        emergencyRejectReason: string | null;
+        emergencyTracedAt: Date | null;
     })[]>;
     findOne(id: string): Promise<{
         farmer: {
@@ -190,6 +151,13 @@ export declare class ApplicationController {
         conflictEndTime: Date | null;
         postponeCount: number;
         roundId: string | null;
+        isEmergency: boolean;
+        emergencyReason: string | null;
+        emergencyApprovalStatus: string | null;
+        emergencyApprovedAt: Date | null;
+        emergencyApprovedBy: string | null;
+        emergencyRejectReason: string | null;
+        emergencyTracedAt: Date | null;
     }>;
     getFarmerApplications(farmerId: string): Promise<({
         actualUsage: {
@@ -238,6 +206,13 @@ export declare class ApplicationController {
         conflictEndTime: Date | null;
         postponeCount: number;
         roundId: string | null;
+        isEmergency: boolean;
+        emergencyReason: string | null;
+        emergencyApprovalStatus: string | null;
+        emergencyApprovedAt: Date | null;
+        emergencyApprovedBy: string | null;
+        emergencyRejectReason: string | null;
+        emergencyTracedAt: Date | null;
     })[]>;
     cancel(id: string): Promise<{
         id: string;
@@ -257,5 +232,12 @@ export declare class ApplicationController {
         conflictEndTime: Date | null;
         postponeCount: number;
         roundId: string | null;
+        isEmergency: boolean;
+        emergencyReason: string | null;
+        emergencyApprovalStatus: string | null;
+        emergencyApprovedAt: Date | null;
+        emergencyApprovedBy: string | null;
+        emergencyRejectReason: string | null;
+        emergencyTracedAt: Date | null;
     }>;
 }

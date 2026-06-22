@@ -97,6 +97,13 @@ export declare class FarmerService {
             conflictEndTime: Date | null;
             postponeCount: number;
             roundId: string | null;
+            isEmergency: boolean;
+            emergencyReason: string | null;
+            emergencyApprovalStatus: string | null;
+            emergencyApprovedAt: Date | null;
+            emergencyApprovedBy: string | null;
+            emergencyRejectReason: string | null;
+            emergencyTracedAt: Date | null;
         }[];
     } & {
         name: string;

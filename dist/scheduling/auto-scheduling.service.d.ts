@@ -10,6 +10,8 @@ export declare class AutoSchedulingService {
         totalProcessed: number;
         scheduled: number;
         failed: number;
+        emergencyScheduled: number;
+        emergencyFailed: number;
         details: any[];
     }>;
     private processFailedApplications;
@@ -53,11 +55,14 @@ export declare class AutoSchedulingService {
         applicationId: string;
         isRead: boolean;
     }>;
+    checkEmergencyApprovalTimeout(): Promise<void>;
     triggerManualScheduling(dateStr?: string): Promise<{
         targetDate: string;
         totalProcessed: number;
         scheduled: number;
         failed: number;
+        emergencyScheduled: number;
+        emergencyFailed: number;
         details: any[];
     }>;
 }

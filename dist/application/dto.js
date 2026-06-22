@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ListApplicationsDto = exports.CreateApplicationDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
+const enums_1 = require("../common/enums");
 class CreateApplicationDto {
 }
 exports.CreateApplicationDto = CreateApplicationDto;
@@ -37,6 +38,18 @@ __decorate([
     (0, class_validator_1.IsDateString)(),
     __metadata("design:type", String)
 ], CreateApplicationDto.prototype, "targetDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '是否为紧急申请', required: false, default: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], CreateApplicationDto.prototype, "isEmergency", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '紧急原因 DROUGHT-作物旱情 FIRE_PREVENTION-防火需要 EQUIPMENT_FLUSH-设备冲洗 OTHER-其他', required: false, enum: enums_1.EmergencyReason }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(enums_1.EmergencyReason),
+    __metadata("design:type", String)
+], CreateApplicationDto.prototype, "emergencyReason", void 0);
 class ListApplicationsDto {
 }
 exports.ListApplicationsDto = ListApplicationsDto;

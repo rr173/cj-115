@@ -3,7 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { ChannelService } from '../channel/channel.service';
 import { CreditRatingService } from '../credit-rating/credit-rating.service';
 import dayjs from 'dayjs';
-import { ApplicationStatus, CreditLevel, CreditLevelSortOrder } from '../common/enums';
+import { ApplicationStatus, CreditLevel, CreditLevelSortOrder, NotificationType, EmergencyApprovalStatus } from '../common/enums';
 
 const SLOT_MINUTES = 30;
 const MAX_DELAY_HOURS = 4;
@@ -117,10 +117,15 @@ export class SchedulingService {
       orderBy: { submitTime: 'asc' },
     });
 
-    const farmerIds = [...new Set(pendingApps.map((a) => a.farmerId))];
+    const emergencyApps = pendingApps.filter((a) => a.isEmergency);
+    const normalApps = pendingApps.filter((a) => !a.isEmergency);
+
+    emergencyApps.sort((a, b) => new Date(a.submitTime).getTime() - new Date(b.submitTime).getTime());
+
+    const farmerIds = [...new Set(normalApps.map((a) => a.farmerId))];
     const creditLevelMap = await this.creditRatingService.getFarmerCreditLevelMap(farmerIds);
 
-    pendingApps.sort((a, b) => {
+    normalApps.sort((a, b) => {
       const levelA = creditLevelMap.get(a.farmerId) || CreditLevel.C;
       const levelB = creditLevelMap.get(b.farmerId) || CreditLevel.C;
       const orderA = CreditLevelSortOrder[levelA];
@@ -129,27 +134,31 @@ export class SchedulingService {
       return new Date(a.submitTime).getTime() - new Date(b.submitTime).getTime();
     });
 
+    const sortedApps = [...emergencyApps, ...normalApps];
+
     const results: any[] = [];
 
-    for (const app of pendingApps) {
-      const appCreditLevel = creditLevelMap.get(app.farmerId) || CreditLevel.C;
-      if (appCreditLevel === CreditLevel.D) {
-        const dCheck = await this.creditRatingService.checkDFarmerCanApply(app.farmerId);
-        if (!dCheck.canApply) {
-          await this.prisma.waterApplication.update({
-            where: { id: app.id },
-            data: {
-              status: ApplicationStatus.FAILED_FINAL,
+    for (const app of sortedApps) {
+      if (!app.isEmergency) {
+        const appCreditLevel = creditLevelMap.get(app.farmerId) || CreditLevel.C;
+        if (appCreditLevel === CreditLevel.D) {
+          const dCheck = await this.creditRatingService.checkDFarmerCanApply(app.farmerId);
+          if (!dCheck.canApply) {
+            await this.prisma.waterApplication.update({
+              where: { id: app.id },
+              data: {
+                status: ApplicationStatus.FAILED_FINAL,
+                failReason: dCheck.reason,
+              },
+            });
+            results.push({
+              applicationId: app.id,
+              farmerCode: app.farmer.code,
+              status: 'REJECTED',
               failReason: dCheck.reason,
-            },
-          });
-          results.push({
-            applicationId: app.id,
-            farmerCode: app.farmer.code,
-            status: 'REJECTED',
-            failReason: dCheck.reason,
-          });
-          continue;
+            });
+            continue;
+          }
         }
       }
 
@@ -234,9 +243,19 @@ export class SchedulingService {
             for (const alloc of allocations) {
               await tx.waterAllocation.create({ data: alloc });
             }
+            const updateData: any = {
+              status: ApplicationStatus.SCHEDULED,
+              failReason: null,
+              conflictChannelId: null,
+              conflictStartTime: null,
+              conflictEndTime: null,
+            };
+            if (app.isEmergency) {
+              updateData.emergencyApprovalStatus = EmergencyApprovalStatus.PENDING_APPROVAL;
+            }
             await tx.waterApplication.update({
               where: { id: app.id },
-              data: { status: ApplicationStatus.SCHEDULED, failReason: null, conflictChannelId: null, conflictStartTime: null, conflictEndTime: null },
+              data: updateData,
             });
           });
 
@@ -263,34 +282,75 @@ export class SchedulingService {
         if (!failReason) {
           failReason = '本日无法安排,推迟4小时内均无法找到可行时段';
         }
-        await this.prisma.waterApplication.update({
-          where: { id: app.id },
-          data: {
-            status: ApplicationStatus.FAILED,
+
+        if (app.isEmergency) {
+          await this.prisma.$transaction(async (tx) => {
+            await tx.waterApplication.update({
+              where: { id: app.id },
+              data: {
+                status: ApplicationStatus.FAILED_FINAL,
+                failReason: `紧急申请编排失败: ${failReason},请管理员人工介入处理`,
+                conflictChannelId,
+                conflictStartTime: conflictStart,
+                conflictEndTime: conflictEnd,
+              },
+            });
+
+            await tx.notification.create({
+              data: {
+                farmerId: app.farmerId,
+                applicationId: app.id,
+                type: NotificationType.EMERGENCY_ALERT,
+                title: '紧急申请编排失败告警',
+                content: `紧急用水申请（申请ID: ${app.id.substring(0, 8)}）因渠道容量不足，无法在${targetDateStr}安排，已标记为失败，请管理员立即人工介入处理。用水户: ${app.farmer.code}(${app.farmer.name}), 原因: ${app.emergencyReason}, 申请水量: ${app.requestVolume.toFixed(2)}m³`,
+              },
+            });
+          });
+
+          const ch = conflictChannelId ? await this.prisma.channel.findUnique({ where: { id: conflictChannelId } }) : null;
+          results.push({
+            applicationId: app.id,
+            farmerCode: app.farmer.code,
+            status: 'EMERGENCY_FAILED',
+            failReason: `紧急申请编排失败: ${failReason},已通知管理员人工介入`,
+            conflictChannel: ch ? { id: ch.id, code: ch.code, name: ch.name } : null,
+            conflictTime: conflictStart ? dayjs(conflictStart).format('YYYY-MM-DD HH:mm') + ' ~ ' + dayjs(conflictEnd).format('HH:mm') : null,
+            requestedFlow: app.expectedFlow,
+            isEmergency: true,
+            emergencyReason: app.emergencyReason,
+          });
+        } else {
+          await this.prisma.waterApplication.update({
+            where: { id: app.id },
+            data: {
+              status: ApplicationStatus.FAILED,
+              failReason,
+              conflictChannelId,
+              conflictStartTime: conflictStart,
+              conflictEndTime: conflictEnd,
+            },
+          });
+          const ch = conflictChannelId ? await this.prisma.channel.findUnique({ where: { id: conflictChannelId } }) : null;
+          results.push({
+            applicationId: app.id,
+            farmerCode: app.farmer.code,
+            status: 'FAILED',
             failReason,
-            conflictChannelId,
-            conflictStartTime: conflictStart,
-            conflictEndTime: conflictEnd,
-          },
-        });
-        const ch = conflictChannelId ? await this.prisma.channel.findUnique({ where: { id: conflictChannelId } }) : null;
-        results.push({
-          applicationId: app.id,
-          farmerCode: app.farmer.code,
-          status: 'FAILED',
-          failReason,
-          conflictChannel: ch ? { id: ch.id, code: ch.code, name: ch.name } : null,
-          conflictTime: conflictStart ? dayjs(conflictStart).format('YYYY-MM-DD HH:mm') + ' ~ ' + dayjs(conflictEnd).format('HH:mm') : null,
-          requestedFlow: app.expectedFlow,
-        });
+            conflictChannel: ch ? { id: ch.id, code: ch.code, name: ch.name } : null,
+            conflictTime: conflictStart ? dayjs(conflictStart).format('YYYY-MM-DD HH:mm') + ' ~ ' + dayjs(conflictEnd).format('HH:mm') : null,
+            requestedFlow: app.expectedFlow,
+          });
+        }
       }
     }
 
     return {
       targetDate: targetDateStr,
-      totalProcessed: pendingApps.length,
+      totalProcessed: sortedApps.length,
       scheduled: results.filter((r) => r.status === 'SCHEDULED').length,
-      failed: results.filter((r) => r.status === 'FAILED').length,
+      failed: results.filter((r) => r.status === 'FAILED' || r.status === 'EMERGENCY_FAILED').length,
+      emergencyScheduled: results.filter((r) => r.status === 'SCHEDULED' && emergencyApps.find((e) => e.id === r.applicationId)).length,
+      emergencyFailed: results.filter((r) => r.status === 'EMERGENCY_FAILED').length,
       details: results,
     };
   }

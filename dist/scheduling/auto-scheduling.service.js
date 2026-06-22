@@ -74,6 +74,7 @@ let AutoSchedulingService = AutoSchedulingService_1 = class AutoSchedulingServic
             where: {
                 targetDate: { gte: dayStart.toDate(), lt: dayEnd.toDate() },
                 status: enums_1.ApplicationStatus.FAILED,
+                isEmergency: false,
             },
             include: { farmer: { include: { channel: true } } },
         });
@@ -284,6 +285,31 @@ let AutoSchedulingService = AutoSchedulingService_1 = class AutoSchedulingServic
             data: { isRead: true },
         });
     }
+    async checkEmergencyApprovalTimeout() {
+        this.logger.log('开始检查紧急申请审批超时情况');
+        const threeDaysAgo = (0, dayjs_1.default)().subtract(3, 'day').startOf('day');
+        const timeoutApps = await this.prisma.waterApplication.findMany({
+            where: {
+                isEmergency: true,
+                emergencyApprovalStatus: enums_1.EmergencyApprovalStatus.PENDING_APPROVAL,
+                createdAt: {
+                    lt: threeDaysAgo.toDate(),
+                },
+            },
+            include: { farmer: true },
+        });
+        for (const app of timeoutApps) {
+            await this.prisma.waterApplication.update({
+                where: { id: app.id },
+                data: {
+                    emergencyApprovalStatus: enums_1.EmergencyApprovalStatus.TO_BE_TRACED,
+                    emergencyTracedAt: new Date(),
+                },
+            });
+            this.logger.log(`紧急申请 ${app.id} 超过3天未审批，已标记为待追溯，用水户: ${app.farmer.code}`);
+        }
+        this.logger.log(`检查完成，共处理 ${timeoutApps.length} 个超时未审批的紧急申请`);
+    }
     async triggerManualScheduling(dateStr) {
         const targetDate = dateStr || (0, dayjs_1.default)().format('YYYY-MM-DD');
         this.logger.log(`手动触发自动编排: ${targetDate}`);
@@ -303,6 +329,15 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], AutoSchedulingService.prototype, "handleDailyScheduling", null);
+__decorate([
+    (0, schedule_1.Cron)(schedule_1.CronExpression.EVERY_DAY_AT_1AM, {
+        name: 'check-emergency-approval-timeout',
+        timeZone: 'Asia/Shanghai',
+    }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], AutoSchedulingService.prototype, "checkEmergencyApprovalTimeout", null);
 exports.AutoSchedulingService = AutoSchedulingService = AutoSchedulingService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,

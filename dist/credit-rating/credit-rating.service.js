@@ -142,6 +142,51 @@ let CreditRatingService = class CreditRatingService {
             ranking: ranking.map((r, idx) => ({ ...r, rank: idx + 1 })),
         };
     }
+    async adjustCreditScoreWithTx(tx, farmerId, adjustScore, reason, operator) {
+        const credit = await this.ensureFarmerCredit(farmerId);
+        const previousScore = credit.score;
+        const previousLevel = credit.level;
+        const newScore = Math.max(0, Math.min(100, previousScore + adjustScore));
+        const newLevel = scoreToLevel(newScore);
+        const updatedCredit = await tx.farmerCredit.update({
+            where: { id: credit.id },
+            data: {
+                score: newScore,
+                level: newLevel,
+                updatedAt: new Date(),
+            },
+        });
+        await tx.creditScoreHistory.create({
+            data: {
+                farmerId,
+                type: enums_1.CreditHistoryType.MANUAL,
+                previousScore,
+                newScore,
+                previousLevel,
+                newLevel,
+                baseScore: credit.baseScore,
+                paymentScore: credit.paymentScore,
+                deviationScore: credit.deviationScore,
+                overuseScore: credit.overuseScore,
+                tradingScore: credit.tradingScore,
+                hasUnpaidDebt: credit.hasUnpaidDebt,
+                debtPenalty: credit.debtPenalty,
+                reason,
+                operator: operator || 'admin',
+            },
+        });
+        return {
+            farmerId,
+            previousScore,
+            newScore: updatedCredit.score,
+            previousLevel,
+            newLevel: updatedCredit.level,
+            newLevelName: enums_1.CreditLevelNames[updatedCredit.level],
+            adjustScore,
+            reason,
+            operator: operator || 'admin',
+        };
+    }
     async adjustCreditScore(farmerId, dto) {
         const credit = await this.ensureFarmerCredit(farmerId);
         const previousScore = credit.score;
@@ -149,46 +194,9 @@ let CreditRatingService = class CreditRatingService {
         const newScore = Math.max(0, Math.min(100, previousScore + dto.adjustScore));
         const newLevel = scoreToLevel(newScore);
         const updated = await this.prisma.$transaction(async (tx) => {
-            const updatedCredit = await tx.farmerCredit.update({
-                where: { id: credit.id },
-                data: {
-                    score: newScore,
-                    level: newLevel,
-                    updatedAt: new Date(),
-                },
-            });
-            await tx.creditScoreHistory.create({
-                data: {
-                    farmerId,
-                    type: enums_1.CreditHistoryType.MANUAL,
-                    previousScore,
-                    newScore,
-                    previousLevel,
-                    newLevel,
-                    baseScore: credit.baseScore,
-                    paymentScore: credit.paymentScore,
-                    deviationScore: credit.deviationScore,
-                    overuseScore: credit.overuseScore,
-                    tradingScore: credit.tradingScore,
-                    hasUnpaidDebt: credit.hasUnpaidDebt,
-                    debtPenalty: credit.debtPenalty,
-                    reason: dto.reason,
-                    operator: dto.operator || 'admin',
-                },
-            });
-            return updatedCredit;
+            return this.adjustCreditScoreWithTx(tx, farmerId, dto.adjustScore, dto.reason, dto.operator);
         });
-        return {
-            farmerId,
-            previousScore,
-            newScore: updated.score,
-            previousLevel,
-            newLevel: updated.level,
-            newLevelName: enums_1.CreditLevelNames[updated.level],
-            adjustScore: dto.adjustScore,
-            reason: dto.reason,
-            operator: dto.operator || 'admin',
-        };
+        return updated;
     }
     async getCreditHistory(dto) {
         const farmer = await this.prisma.farmer.findUnique({ where: { id: dto.farmerId } });

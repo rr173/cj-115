@@ -15,6 +15,7 @@ import { CreditRatingModule } from './credit-rating/credit-rating.module';
 import { DroughtMonitoringModule } from './drought-monitoring/drought-monitoring.module';
 import { IrrigationEfficiencyModule } from './irrigation-efficiency/irrigation-efficiency.module';
 import { DisputeMediationModule } from './dispute-mediation/dispute-mediation.module';
+import { EmergencyApplicationModule } from './emergency-application/emergency-application.module';
 import { PrismaService } from './prisma/prisma.service';
 
 @Module({
@@ -35,6 +36,7 @@ import { PrismaService } from './prisma/prisma.service';
     DroughtMonitoringModule,
     IrrigationEfficiencyModule,
     DisputeMediationModule,
+    EmergencyApplicationModule,
   ],
   providers: [PrismaService],
 })

@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MediationResultNames = exports.MediationResult = exports.DisputeStatusNames = exports.DisputeStatus = exports.DisputeTypeNames = exports.DisputeType = exports.CreditHistoryTypeNames = exports.CreditHistoryType = exports.ChannelTransferStatusNames = exports.ChannelTransferStatus = exports.AllocationDroughtStatusNames = exports.AllocationDroughtStatus = exports.EmergencyLevelNames = exports.EmergencyLevel = exports.DroughtStatusNames = exports.DroughtStatus = exports.CreditLevelSortOrder = exports.CreditQuotaMultiplier = exports.CreditLevelNames = exports.CreditLevel = exports.GateAdjustmentReasonNames = exports.GateAdjustmentReason = exports.WaterLevelAlertTypeNames = exports.WaterLevelAlertType = exports.MonitorStatusNames = exports.MonitorStatus = exports.GateControlModeNames = exports.GateControlMode = exports.SellOrderStatusNames = exports.SellOrderStatus = exports.IrrigationRoundStatusNames = exports.IrrigationRoundStatus = exports.PaymentMethodNames = exports.PaymentMethod = exports.WaterBillStatusNames = exports.WaterBillStatus = exports.MaintenanceOrderStatusNames = exports.MaintenanceOrderStatus = exports.ProblemLevelNames = exports.ProblemLevel = exports.InspectionChannelStatusNames = exports.InspectionChannelStatus = exports.QuotaQuarterNames = exports.QuotaQuarter = exports.NotificationTypeNames = exports.NotificationType = exports.ApplicationStatusNames = exports.ApplicationStatus = exports.ChannelLevelNames = exports.ChannelLevel = void 0;
+exports.DisputeTypeNames = exports.DisputeType = exports.CreditHistoryTypeNames = exports.CreditHistoryType = exports.ChannelTransferStatusNames = exports.ChannelTransferStatus = exports.AllocationDroughtStatusNames = exports.AllocationDroughtStatus = exports.EmergencyLevelNames = exports.EmergencyLevel = exports.DroughtStatusNames = exports.DroughtStatus = exports.CreditLevelSortOrder = exports.CreditQuotaMultiplier = exports.CreditLevelNames = exports.CreditLevel = exports.GateAdjustmentReasonNames = exports.GateAdjustmentReason = exports.WaterLevelAlertTypeNames = exports.WaterLevelAlertType = exports.MonitorStatusNames = exports.MonitorStatus = exports.GateControlModeNames = exports.GateControlMode = exports.SellOrderStatusNames = exports.SellOrderStatus = exports.IrrigationRoundStatusNames = exports.IrrigationRoundStatus = exports.PaymentMethodNames = exports.PaymentMethod = exports.WaterBillStatusNames = exports.WaterBillStatus = exports.MaintenanceOrderStatusNames = exports.MaintenanceOrderStatus = exports.ProblemLevelNames = exports.ProblemLevel = exports.InspectionChannelStatusNames = exports.InspectionChannelStatus = exports.QuotaQuarterNames = exports.QuotaQuarter = exports.EmergencyApprovalStatusNames = exports.EmergencyApprovalStatus = exports.EmergencyReasonNames = exports.EmergencyReason = exports.NotificationTypeNames = exports.NotificationType = exports.ApplicationStatusNames = exports.ApplicationStatus = exports.ChannelLevelNames = exports.ChannelLevel = void 0;
+exports.MediationResultNames = exports.MediationResult = exports.DisputeStatusNames = exports.DisputeStatus = void 0;
 var ChannelLevel;
 (function (ChannelLevel) {
     ChannelLevel["MAIN"] = "MAIN";
@@ -40,11 +41,39 @@ var NotificationType;
     NotificationType["POSTPONE"] = "POSTPONE";
     NotificationType["FINAL_FAILURE"] = "FINAL_FAILURE";
     NotificationType["MAINTENANCE_CANCEL"] = "MAINTENANCE_CANCEL";
+    NotificationType["EMERGENCY_ALERT"] = "EMERGENCY_ALERT";
 })(NotificationType || (exports.NotificationType = NotificationType = {}));
 exports.NotificationTypeNames = {
     [NotificationType.POSTPONE]: '申请顺延通知',
     [NotificationType.FINAL_FAILURE]: '申请最终失败通知',
     [NotificationType.MAINTENANCE_CANCEL]: '维护取消通知',
+    [NotificationType.EMERGENCY_ALERT]: '紧急申请告警',
+};
+var EmergencyReason;
+(function (EmergencyReason) {
+    EmergencyReason["DROUGHT"] = "DROUGHT";
+    EmergencyReason["FIRE_PREVENTION"] = "FIRE_PREVENTION";
+    EmergencyReason["EQUIPMENT_FLUSH"] = "EQUIPMENT_FLUSH";
+    EmergencyReason["OTHER"] = "OTHER";
+})(EmergencyReason || (exports.EmergencyReason = EmergencyReason = {}));
+exports.EmergencyReasonNames = {
+    [EmergencyReason.DROUGHT]: '作物旱情',
+    [EmergencyReason.FIRE_PREVENTION]: '防火需要',
+    [EmergencyReason.EQUIPMENT_FLUSH]: '设备冲洗',
+    [EmergencyReason.OTHER]: '其他',
+};
+var EmergencyApprovalStatus;
+(function (EmergencyApprovalStatus) {
+    EmergencyApprovalStatus["PENDING_APPROVAL"] = "PENDING_APPROVAL";
+    EmergencyApprovalStatus["APPROVED"] = "APPROVED";
+    EmergencyApprovalStatus["REJECTED"] = "REJECTED";
+    EmergencyApprovalStatus["TO_BE_TRACED"] = "TO_BE_TRACED";
+})(EmergencyApprovalStatus || (exports.EmergencyApprovalStatus = EmergencyApprovalStatus = {}));
+exports.EmergencyApprovalStatusNames = {
+    [EmergencyApprovalStatus.PENDING_APPROVAL]: '待审批',
+    [EmergencyApprovalStatus.APPROVED]: '已批准',
+    [EmergencyApprovalStatus.REJECTED]: '已驳回',
+    [EmergencyApprovalStatus.TO_BE_TRACED]: '待追溯',
 };
 var QuotaQuarter;
 (function (QuotaQuarter) {

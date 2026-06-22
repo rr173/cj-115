@@ -64,12 +64,23 @@ export declare class CreditRatingService {
         total: number;
         ranking: any[];
     }>;
+    adjustCreditScoreWithTx(tx: any, farmerId: string, adjustScore: number, reason: string, operator?: string): Promise<{
+        farmerId: string;
+        previousScore: number;
+        newScore: any;
+        previousLevel: string;
+        newLevel: any;
+        newLevelName: string;
+        adjustScore: number;
+        reason: string;
+        operator: string;
+    }>;
     adjustCreditScore(farmerId: string, dto: AdjustCreditScoreDto): Promise<{
         farmerId: string;
         previousScore: number;
-        newScore: number;
+        newScore: any;
         previousLevel: string;
-        newLevel: string;
+        newLevel: any;
         newLevelName: string;
         adjustScore: number;
         reason: string;

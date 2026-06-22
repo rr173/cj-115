@@ -19,9 +19,24 @@ export declare const ApplicationStatusNames: Record<ApplicationStatus, string>;
 export declare enum NotificationType {
     POSTPONE = "POSTPONE",
     FINAL_FAILURE = "FINAL_FAILURE",
-    MAINTENANCE_CANCEL = "MAINTENANCE_CANCEL"
+    MAINTENANCE_CANCEL = "MAINTENANCE_CANCEL",
+    EMERGENCY_ALERT = "EMERGENCY_ALERT"
 }
 export declare const NotificationTypeNames: Record<NotificationType, string>;
+export declare enum EmergencyReason {
+    DROUGHT = "DROUGHT",
+    FIRE_PREVENTION = "FIRE_PREVENTION",
+    EQUIPMENT_FLUSH = "EQUIPMENT_FLUSH",
+    OTHER = "OTHER"
+}
+export declare const EmergencyReasonNames: Record<EmergencyReason, string>;
+export declare enum EmergencyApprovalStatus {
+    PENDING_APPROVAL = "PENDING_APPROVAL",
+    APPROVED = "APPROVED",
+    REJECTED = "REJECTED",
+    TO_BE_TRACED = "TO_BE_TRACED"
+}
+export declare const EmergencyApprovalStatusNames: Record<EmergencyApprovalStatus, string>;
 export declare enum QuotaQuarter {
     Q1 = "Q1",
     Q2 = "Q2",

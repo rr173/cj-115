@@ -3,7 +3,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
 import { SchedulingService } from './scheduling.service';
 import dayjs from 'dayjs';
-import { ApplicationStatus, MaintenanceOrderStatus, NotificationType } from '../common/enums';
+import { ApplicationStatus, MaintenanceOrderStatus, NotificationType, EmergencyApprovalStatus } from '../common/enums';
 
 const MAX_POSTPONE_DAYS = 3;
 
@@ -79,6 +79,7 @@ export class AutoSchedulingService {
       where: {
         targetDate: { gte: dayStart.toDate(), lt: dayEnd.toDate() },
         status: ApplicationStatus.FAILED,
+        isEmergency: false,
       },
       include: { farmer: { include: { channel: true } } },
     });
@@ -339,6 +340,41 @@ export class AutoSchedulingService {
       where: { id: notificationId },
       data: { isRead: true },
     });
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_1AM, {
+    name: 'check-emergency-approval-timeout',
+    timeZone: 'Asia/Shanghai',
+  })
+  async checkEmergencyApprovalTimeout() {
+    this.logger.log('开始检查紧急申请审批超时情况');
+    const threeDaysAgo = dayjs().subtract(3, 'day').startOf('day');
+
+    const timeoutApps = await this.prisma.waterApplication.findMany({
+      where: {
+        isEmergency: true,
+        emergencyApprovalStatus: EmergencyApprovalStatus.PENDING_APPROVAL,
+        createdAt: {
+          lt: threeDaysAgo.toDate(),
+        },
+      },
+      include: { farmer: true },
+    });
+
+    for (const app of timeoutApps) {
+      await this.prisma.waterApplication.update({
+        where: { id: app.id },
+        data: {
+          emergencyApprovalStatus: EmergencyApprovalStatus.TO_BE_TRACED,
+          emergencyTracedAt: new Date(),
+        },
+      });
+      this.logger.log(
+        `紧急申请 ${app.id} 超过3天未审批，已标记为待追溯，用水户: ${app.farmer.code}`,
+      );
+    }
+
+    this.logger.log(`检查完成，共处理 ${timeoutApps.length} 个超时未审批的紧急申请`);
   }
 
   async triggerManualScheduling(dateStr?: string) {

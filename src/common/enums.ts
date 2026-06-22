@@ -38,12 +38,42 @@ export enum NotificationType {
   POSTPONE = 'POSTPONE',
   FINAL_FAILURE = 'FINAL_FAILURE',
   MAINTENANCE_CANCEL = 'MAINTENANCE_CANCEL',
+  EMERGENCY_ALERT = 'EMERGENCY_ALERT',
 }
 
 export const NotificationTypeNames: Record<NotificationType, string> = {
   [NotificationType.POSTPONE]: '申请顺延通知',
   [NotificationType.FINAL_FAILURE]: '申请最终失败通知',
   [NotificationType.MAINTENANCE_CANCEL]: '维护取消通知',
+  [NotificationType.EMERGENCY_ALERT]: '紧急申请告警',
+};
+
+export enum EmergencyReason {
+  DROUGHT = 'DROUGHT',
+  FIRE_PREVENTION = 'FIRE_PREVENTION',
+  EQUIPMENT_FLUSH = 'EQUIPMENT_FLUSH',
+  OTHER = 'OTHER',
+}
+
+export const EmergencyReasonNames: Record<EmergencyReason, string> = {
+  [EmergencyReason.DROUGHT]: '作物旱情',
+  [EmergencyReason.FIRE_PREVENTION]: '防火需要',
+  [EmergencyReason.EQUIPMENT_FLUSH]: '设备冲洗',
+  [EmergencyReason.OTHER]: '其他',
+};
+
+export enum EmergencyApprovalStatus {
+  PENDING_APPROVAL = 'PENDING_APPROVAL',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+  TO_BE_TRACED = 'TO_BE_TRACED',
+}
+
+export const EmergencyApprovalStatusNames: Record<EmergencyApprovalStatus, string> = {
+  [EmergencyApprovalStatus.PENDING_APPROVAL]: '待审批',
+  [EmergencyApprovalStatus.APPROVED]: '已批准',
+  [EmergencyApprovalStatus.REJECTED]: '已驳回',
+  [EmergencyApprovalStatus.TO_BE_TRACED]: '待追溯',
 };
 
 export enum QuotaQuarter {
